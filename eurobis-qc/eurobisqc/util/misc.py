@@ -1,5 +1,5 @@
 def check_float(value, valid_range=None):
-    result = { "valid": None, "float": None, "in_range": None }
+    result = {"valid": None, "float": None, "in_range": None}
     if value is not None:
         try:
             value_float = float(value)
@@ -33,6 +33,3 @@ def do_xylookup(results):
         for i in range(len(indices)):
             output[indices[i]] = xy[i]
     return output
-
-
-

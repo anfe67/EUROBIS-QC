@@ -7,10 +7,10 @@ class QCFlag(Enum):
         includes class and object utility methods """
 
     REQUIRED_FIELDS = ("Not all the required fields are present", 0)
-    TAXONOMY_1 = ("AphiaID not completed", 1)
-    TAXONOMY_2 = ("Taxon level lower than family", 2)
-    GEO_LAT_LON_1 = ("Lat or Lon missing or both equal to 0", 3)
-    GEO_LAT_LON_2 = ("Lat or Lon missing or not within legal boundaries (-90 to 90 and -180 to 180)", 4)
+    TAXONOMY_APHIAID = ("AphiaID not retrievable", 1)
+    TAXONOMY_NOT_ENOUGH = ("Taxon level lower than family", 2)
+    GEO_LAT_LON_MISSING = ("Lat or Lon missing or both equal to None", 3)
+    GEO_LAT_LON_INVALID = ("Lat or Lon missing or not within legal boundaries (-90 to 90 and -180 to 180)", 4)
     GEO_LAT_LON_3 = ("Lat - Lon not on sea / coastline", 5)
     DATE_TIME = ("Year or Start Year or End Year incomplete or invalid", 6)
 
@@ -73,3 +73,20 @@ class QCFlag(Enum):
             qc_flags.append('INVALID')
 
         return qc_flags
+
+    @classmethod
+    def encode_qc(cls, record, error_mask):
+        """ Record is a Python dictionary, will be augmented with the QC field
+            if not present, error_mask shall be or-red to current value if
+            existing """
+
+        if isinstance(record, dict):
+            if 'QC' not in record.keys():
+                record['QC'] = 0
+
+            record['QC'] |= error_mask
+        else:
+            return None
+
+        return record
+
