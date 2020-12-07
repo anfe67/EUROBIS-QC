@@ -28,17 +28,17 @@ class Test(TestCase):
     ]
 
     def test_check_record(self):
-        self.assertTrue(required_fields.check_record(self.records[0]) == 1)
-        self.assertTrue(required_fields.check_record(self.records[1]) == 0)
-        self.assertTrue(required_fields.check_record(self.records[2]) == 1)
-        self.assertTrue(required_fields.check_record(self.records[3]) == 1)
-        self.assertTrue(required_fields.check_record(self.records[7]) == 0)
+        self.assertTrue(required_fields.check_record_strict(self.records[0]) == 1)
+        self.assertTrue(required_fields.check_record_strict(self.records[1]) == 0)
+        self.assertTrue(required_fields.check_record_strict(self.records[2]) == 1)
+        self.assertTrue(required_fields.check_record_strict(self.records[3]) == 1)
+        self.assertTrue(required_fields.check_record_strict(self.records[7]) == 0)
 
     def test_source_record(self):
         # Source Records
-        self.assertTrue(required_fields.check_source_record(self.records[4]) == 0)
-        self.assertTrue(required_fields.check_source_record(self.records[5]) == 1)
-        self.assertTrue(required_fields.check_source_record(self.records[6]) == 1)
+        self.assertTrue(required_fields.check_record(self.records[4], False) == 0)
+        self.assertTrue(required_fields.check_record(self.records[5], False) == 1)
+        self.assertTrue(required_fields.check_record(self.records[6], False) == 1)
 
     def test_check_source_records(self):
         self.assertTrue(required_fields.check_source_records(self.records[4:]) == [0, 1, 1, 0])

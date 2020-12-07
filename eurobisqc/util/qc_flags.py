@@ -7,12 +7,14 @@ class QCFlag(Enum):
         includes class and object utility methods """
 
     REQUIRED_FIELDS = ("Not all the required fields are present", 0)
-    TAXONOMY_APHIAID = ("AphiaID not retrievable", 1)
-    TAXONOMY_NOT_ENOUGH = ("Taxon level lower than family", 2)
+    TAXONOMY_APHIAID = ("AphiaID not found", 1)
+    TAXONOMY_RANK = ("Taxon level lower than family", 2)
     GEO_LAT_LON_MISSING = ("Lat or Lon missing or both equal to None", 3)
     GEO_LAT_LON_INVALID = ("Lat or Lon missing or not within legal boundaries (-90 to 90 and -180 to 180)", 4)
-    GEO_LAT_LON_3 = ("Lat - Lon not on sea / coastline", 5)
-    DATE_TIME = ("Year or Start Year or End Year incomplete or invalid", 6)
+    GEO_LAT_LON_NOT_SEA = ("Lat - Lon not on sea / coastline", 5)
+    DATE_TIME_COMPLETE = ("Year or Start Year or End Year incomplete or invalid", 6)
+    TAXON_APHIAID = ("Marine Taxon not existing in APHIA", 7)  # VERIFY, TO BE UNDERSTOOD
+    GEO_COORD_AREA = ("Coordinates not in the specified area", 8)
 
     # All the required codes to follow
 
@@ -89,4 +91,3 @@ class QCFlag(Enum):
             return None
 
         return record
-

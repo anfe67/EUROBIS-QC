@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 error_mask = qc_flags.QCFlag.REQUIRED_FIELDS.encode()
 
 
-def check_record(record):
+def check_record_strict(record):
     """Check for presence of required fields."""
 
     result = False
@@ -38,8 +38,11 @@ def check_record(record):
     return 0 if result else error_mask
 
 
-def check_source_record(record):
-    """ To be called for source type records """
+def check_record(record, strict=False):
+    """ To be called for source type records
+    :param record:
+    :param strict:
+    """
 
     vocab = ["PreservedSpecimen", "FossilSpecimen", "LivingSpecimen", "MaterialSample", "Event", "HumanObservation",
              "MachineObservation", "Taxon", "Occurrence"]
@@ -49,12 +52,15 @@ def check_source_record(record):
     else:
         return error_mask
 
+    if strict:
+        return check_record_strict(record)
+
     return 0
 
 
 def check(records):
-    return [check_record(record) for record in records]
+    return [check_record(record, False) for record in records]
 
 
 def check_source_records(records):
-    return [check_source_record(source_record) for source_record in records]
+    return [check_record(source_record, False) for source_record in records]

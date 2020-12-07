@@ -7,9 +7,12 @@ from .util import qc_flags
 
 logger = logging.getLogger(__name__)
 
+insufficient_detail = ['Kingdom', 'Subkingdom', 'Infrakingdom', 'Phylum', 'Subphylum', 'Infraphylum', 'Class', 'Order',
+                       'Family']
+
 # Return value when the quality check fails
 error_mask_1 = qc_flags.QCFlag.TAXONOMY_APHIAID.encode()  # Is the AphiaID Completed
-error_mask_2 = qc_flags.QCFlag.TAXONOMY_NOT_ENOUGH.encode()  # Is the Taxon Level lower than the family
+error_mask_2 = qc_flags.QCFlag.TAXONOMY_RANK.encode()  # Is the Taxon Level lower than the family
 
 """ Idea : Call the obis-qc taxonomy, get the taxa records and parse them to assign the QC field to the input records
     Shall process all the taxonomy QC in this one, shall take one or more records in a list of records.
@@ -26,6 +29,7 @@ error_mask_2 = qc_flags.QCFlag.TAXONOMY_NOT_ENOUGH.encode()  # Is the Taxon Leve
             "unaccepted": taxon["unaccepted"],
             "marine": taxon["marine"],
             "brackish": taxon["brackish"]
+AF ---->    "aphia_info": taxon["aphia_info"]  # This is to verify that the Taxon is at least lower than the family             
         },
         "dropped": taxon["dropped"]
     }
@@ -35,6 +39,9 @@ error_mask_2 = qc_flags.QCFlag.TAXONOMY_NOT_ENOUGH.encode()  # Is the Taxon Leve
 
 
 def check_taxa(records, Cache=None):
+    """ Performs taxonomy verification on a list of record
+        returns a list of qc bitmasks """
+
     taxa_results = taxonomy.check(records, Cache)
     results = []
 
@@ -46,12 +53,33 @@ def check_taxa(records, Cache=None):
         if taxa_check['id'] == record['id']:
 
             # Did we get a match to an AphiaID ?
-            if (flags.Flag.NO_MATCH.value in taxa_check['flags']):
+            if flags.Flag.NO_MATCH.value in taxa_check['flags']:
                 qc_value = error_mask_1
 
-            # TODO: Determine if the Taxon level is lower than the family  (QC 3, bit 2)
+            if taxa_check[0]['annotations']['aphia_info'] is not None:
+                aphia_info = taxa_check[0]['annotations']
+                if aphia_info['record']['rank'] is not None:
+                    if aphia_info['record']['rank'] in insufficient_detail:
+                        qc_value |= error_mask_2
 
-            # Returns an array of QC values
             results.append(qc_value)
 
     return results
+
+
+def check(record):
+    """ Taxonomy check for a single record, returns a bitmask """
+
+    taxa_results = taxonomy.check([record])
+    qc_value = 0
+    # Did we get a match to an AphiaID ?
+    if flags.Flag.NO_MATCH.value in taxa_results[0]['flags']:
+        qc_value |= error_mask_1
+
+    if taxa_results[0]['annotations']['aphia_info'] is not None:
+        aphia_info = taxa_results[0]['annotations']['aphia_info']
+        if aphia_info['record']['rank'] is not None:
+            if aphia_info['record']['rank'] in insufficient_detail:
+                qc_value |= error_mask_2
+        # What do we do if it is None ?
+    return qc_value

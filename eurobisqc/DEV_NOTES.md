@@ -36,5 +36,16 @@ Obistools, in turn checks more fields.  To discuss further.
  Also started looking at location 1 (QC 4 and 5 for the moment easily derived from obis-qc, can do more checks at once) 
  To start the test part as the writing proceeds. 
  
- 
+ ## 07/12/2020
+
+Building a pipeline to start with a real DwCA file, it is based on dwcaprocessor, and calls the 
+quality controls by category. It then creates a QC field for each record with the corresponding 
+error bitmask. For the moment, one record at the time, calling the worms service for taxomony. 
+The first experience looking at a full file is tat this is SLOW, must try with batches.
+
+### TODO: Clean the code, write test cases and write more tests. Also must think at way to optimize.
+
+
+
+
 
