@@ -7,7 +7,7 @@ class TestQCFlag(TestCase):
     def test_encode(self):
         for qc_flag in QCFlag:
             try:
-                print(qc_flag.encode())
+                print(qc_flag.encode(qc_flag.qc_number))
             except:
                 self.fail()
 

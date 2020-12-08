@@ -33,3 +33,11 @@ def do_xylookup(results):
         for i in range(len(indices)):
             output[indices[i]] = xy[i]
     return output
+
+def is_number(s):
+    """ Utility function """
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False

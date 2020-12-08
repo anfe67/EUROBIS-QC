@@ -6,29 +6,42 @@ class QCFlag(Enum):
     """ The error bitmask shall be determined by the bitmask, second element in the tuple
         includes class and object utility methods """
 
-    REQUIRED_FIELDS = ("Not all the required fields are present", 0)
-    TAXONOMY_APHIAID = ("AphiaID not found", 1)
-    TAXONOMY_RANK = ("Taxon level lower than family", 2)
-    GEO_LAT_LON_MISSING = ("Lat or Lon missing or both equal to None", 3)
-    GEO_LAT_LON_INVALID = ("Lat or Lon missing or not within legal boundaries (-90 to 90 and -180 to 180)", 4)
-    GEO_LAT_LON_NOT_SEA = ("Lat - Lon not on sea / coastline", 5)
-    DATE_TIME_COMPLETE = ("Year or Start Year or End Year incomplete or invalid", 6)
-    TAXON_APHIAID = ("Marine Taxon not existing in APHIA", 7)  # VERIFY, TO BE UNDERSTOOD
-    GEO_COORD_AREA = ("Coordinates not in the specified area", 8)
+    REQUIRED_FIELDS_MISS = ("Not all the required fields are present", 1)
+    TAXONOMY_APHIAID_MISS = ("AphiaID not found", 2)
+    TAXONOMY_RANK_LOW = ("Taxon level lower than family", 3)
+    GEO_LAT_LON_MISSING = ("Lat or Lon missing or both equal to None", 4)
+    GEO_LAT_LON_INVALID = ("Lat or Lon missing or not within legal boundaries (-90 to 90 and -180 to 180)", 5)
+    GEO_LAT_LON_NOT_SEA = ("Lat - Lon not on sea / coastline", 6)  # Need time consuming call to xylookup
+    DATE_TIME_NOT_COMPLETE = ("Year or Start Year or End Year incomplete or invalid", 7)
+    TAXON_APHIAID_NOT_EXISTING = ("Marine Taxon not existing in APHIA", 8)  # Need time consuming call to the worms service
+    GEO_COORD_AREA = ("Coordinates not in the specified area", 9)
+    NO_OBIS_DATAFORMAT = ("No valid code found in basisOfRecord", 10)
+    INVALID_DATE_1 = ("Invalid sampling date", 11)
+    INVALID_DATE_2 = ("End sampling date before start date", 12)
+    INVALID_DATE_3 = ("Sampling time invalid or timezone not completed", 13)
+    OBSERVED_COUNT_MISSING = ("Empty or missing observed individual count", 14)
+    OBSERVED_WEIGTH_MISSING = ("Empty or missing observed weigth", 15)
+    SAMPLE_SIZE_MISSING = ("Observed individual count > 0 but sample size missing", 16)
+    SEX_MISSING = ("Sex missing or wrong OBIS code", 17)
+    MIN_MAX_DEPTH_ERROR = ("Minimum depth greater than maximum depth", 18)
+    WRONG_DEPTH_MAP = ("Depth incoherent with depth map", 19)
+    WRONG_DEPTH_SPECIES = ("Depth incoherent with species depth range", 20)
+
 
     # All the required codes to follow
 
-    def __init__(self, message, bitmask):
+    def __init__(self, message, qc_number):
 
         self.text = message
-        self.bitmask = bitmask
+        self.qc_number = qc_number
+        self.bitmask = self.encode(qc_number - 1)
 
-    def encode(self):
+    def encode(self, bit_number):
 
         """ Returns an integer corresponding to the error code.
             This can be combined to other codes using OR """
 
-        return 1 << self.bitmask
+        return 1 << bit_number
 
     @classmethod
     def decode_message(cls, position):

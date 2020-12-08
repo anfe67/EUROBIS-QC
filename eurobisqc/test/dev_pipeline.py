@@ -4,13 +4,18 @@ import os
 from eurobisqc import location
 from eurobisqc import required_fields
 from eurobisqc import taxonomy
+from eurobisqc.util import extract_area
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from dwcaprocessor import DwCAProcessor
 
 filename = "data/dwca-meso_meiofauna_knokke_1969-v1.7.zip"
 archive = DwCAProcessor(filename)
+geo_area = extract_area.find_area(archive.eml)
+
 print(archive)
+
+# Taxonomy needs to call the WORMS service
+check_taxonomy = False
 
 ############### Explore structure
 
@@ -26,7 +31,9 @@ for coreRecord in archive.core_records():
     else:
         full_core["QC"] = qc
 
+    qc = location.check_record_in_area(full_core, geo_area)
     full_core["QC"] = full_core["QC"] | qc
+
 
     print(full_core)
 
@@ -48,9 +55,9 @@ for coreRecord in archive.core_records():
                 full_extension["QC"] = full_extension["QC"] | qc
 
                 # Check taxonomy
-                qc = taxonomy.check(full_extension)
-
-                full_extension["QC"] = full_extension["QC"] | qc
+                if check_taxonomy:
+                    qc = taxonomy.check(full_extension)
+                    full_extension["QC"] = full_extension["QC"] | qc
 
                 print(full_extension)
 

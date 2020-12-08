@@ -1,16 +1,19 @@
-from .util import qc_flags
+import qc_flags
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Return value when the quality check fails
-error_mask = qc_flags.QCFlag.REQUIRED_FIELDS.encode()
+# Return values for when the quality check fails
+error_mask_1 = qc_flags.QCFlag.REQUIRED_FIELDS_MISS.bitmask
+error_mask_10 = qc_flags.QCFlag.NO_OBIS_DATAFORMAT.bitmask
 
 
-def check_record_strict(record):
-    """Check for presence of required fields."""
+def check_record_required(record):
+    """ Check for presence of required fields, as per reference. This corresponds to QC1.
+        :param record:
+    """
 
-    result = False
+    qc = False
 
     required_fields = ["eventDate", "decimalLongitude", "decimalLatitude", "scientificName", "scientificNameID",
                        "occurrenceStatus", "basisOfRecord"]
@@ -33,34 +36,35 @@ def check_record_strict(record):
                 break  # No need to proceed
 
         if count == len(required_fields):
-            result = True
+            qc = True
 
-    return 0 if result else error_mask
+    return 0 if qc else error_mask_1
 
 
-def check_record(record, strict=False):
+def check_record(record):
     """ To be called for source type records
-    :param record:
-    :param strict:
+        :param record:
     """
+    qc = 0
 
+    # QC 10
     vocab = ["PreservedSpecimen", "FossilSpecimen", "LivingSpecimen", "MaterialSample", "Event", "HumanObservation",
              "MachineObservation", "Taxon", "Occurrence"]
     if "basisOfRecord" in record and record["basisOfRecord"] is not None:
         if not record["basisOfRecord"].lower() in [value.lower() for value in vocab]:
-            return error_mask
+            qc |= error_mask_10
     else:
-        return error_mask
+         qc |= error_mask_10
 
-    if strict:
-        return check_record_strict(record)
+    # QC 1
+    qc |= check_record_required(record)
 
-    return 0
+    return qc
 
 
 def check(records):
-    return [check_record(record, False) for record in records]
+    """ To be called for a batch of records (list)
+        :param records:
+    """
+    return [check_record(record) for record in records]
 
-
-def check_source_records(records):
-    return [check_record(source_record, False) for source_record in records]

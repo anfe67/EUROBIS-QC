@@ -1,6 +1,6 @@
 # Development Notes 
 
-## Initial notes 
+## Initial remarks 
  
 Each individual QC take a record (dictionary) of the correct type (or flat) and produce an integer result,
 either 0 or the integer bitmask of the error code. The QC does not determine the type of record that it gets, 
@@ -43,7 +43,24 @@ quality controls by category. It then creates a QC field for each record with th
 error bitmask. For the moment, one record at the time, calling the worms service for taxomony. 
 The first experience looking at a full file is tat this is SLOW, must try with batches.
 
+## Note: 
+
+Changed taxonomy.py in obis-qc. This is to make use of the aphia-info eventually retrieved by 
+pyworms and be able to set bitmask 4 (bit position 2) if the taxonomy is lower than the family. 
+This information can be retrieved by the rank field aphia-info record. If this approach would 
+not be accepted (pull request to obisqc) then the taxonomy would have to be rewritten in eurobisqc. 
+
+
 ### TODO: Clean the code, write test cases and write more tests. Also must think at way to optimize.
+
+# 08/12/2020 
+Better read the specifications, clarified a few QC questions, completed the masks, modified the 
+required fields. The QC_1 and QC_9 relate to missing fields, this still need to be fully 
+understood and evaluated. 
+
+Looked at the extracton of the geographical area from the package, always using dwca-processor, 
+as the eml.xml file is stored in the archive.eml field. Processed with xmltodict, area extracted 
+but tested with a single file only. The dev_pipeline can now 
 
 
 

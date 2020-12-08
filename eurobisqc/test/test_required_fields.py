@@ -1,7 +1,7 @@
 from unittest import TestCase
-from .. import required_fields
+import required_fields
 
-
+# TODO - Re-allign to the class being tested
 class Test(TestCase):
     records = [
         {"id": 0},  # No fields
@@ -28,11 +28,11 @@ class Test(TestCase):
     ]
 
     def test_check_record(self):
-        self.assertTrue(required_fields.check_record_strict(self.records[0]) == 1)
-        self.assertTrue(required_fields.check_record_strict(self.records[1]) == 0)
-        self.assertTrue(required_fields.check_record_strict(self.records[2]) == 1)
-        self.assertTrue(required_fields.check_record_strict(self.records[3]) == 1)
-        self.assertTrue(required_fields.check_record_strict(self.records[7]) == 0)
+        self.assertTrue(required_fields.check_record_required(self.records[0]) == 1)
+        self.assertTrue(required_fields.check_record_required(self.records[1]) == 0)
+        self.assertTrue(required_fields.check_record_required(self.records[2]) == 1)
+        self.assertTrue(required_fields.check_record_required(self.records[3]) == 1)
+        self.assertTrue(required_fields.check_record_required(self.records[7]) == 0)
 
     def test_source_record(self):
         # Source Records
@@ -40,9 +40,8 @@ class Test(TestCase):
         self.assertTrue(required_fields.check_record(self.records[5], False) == 1)
         self.assertTrue(required_fields.check_record(self.records[6], False) == 1)
 
-    def test_check_source_records(self):
-        self.assertTrue(required_fields.check_source_records(self.records[4:]) == [0, 1, 1, 0])
-
     def test_check(self):
         # Comparison is OK as we want to see element by element
-        self.assertTrue(required_fields.check(self.records[0:4]) == [1, 0, 1, 1])
+        self.assertTrue(required_fields.check(self.records[0:4], True) == [1, 0, 1, 1])
+        self.assertTrue(required_fields.check(self.records[0:4], False) == [1, 0, 0, 1])
+

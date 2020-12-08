@@ -11,8 +11,8 @@ insufficient_detail = ['Kingdom', 'Subkingdom', 'Infrakingdom', 'Phylum', 'Subph
                        'Family']
 
 # Return value when the quality check fails
-error_mask_1 = qc_flags.QCFlag.TAXONOMY_APHIAID.encode()  # Is the AphiaID Completed
-error_mask_2 = qc_flags.QCFlag.TAXONOMY_RANK.encode()  # Is the Taxon Level lower than the family
+error_mask_1 = qc_flags.QCFlag.TAXONOMY_APHIAID_MISS.bitmask  # Is the AphiaID Completed
+error_mask_2 = qc_flags.QCFlag.TAXONOMY_RANK_LOW.bitmask  # Is the Taxon Level lower than the family
 
 """ Idea : Call the obis-qc taxonomy, get the taxa records and parse them to assign the QC field to the input records
     Shall process all the taxonomy QC in this one, shall take one or more records in a list of records.
@@ -37,10 +37,12 @@ AF ---->    "aphia_info": taxon["aphia_info"]  # This is to verify that the Taxo
 
 """
 
+# Taxonomy depends on the worms service and it is a huge time eater. Cache should be used.
 
 def check_taxa(records, Cache=None):
     """ Performs taxonomy verification on a list of record
-        returns a list of qc bitmasks """
+        returns a list of qc bitmasks
+        """
 
     taxa_results = taxonomy.check(records, Cache)
     results = []
@@ -49,7 +51,7 @@ def check_taxa(records, Cache=None):
     for record, taxa_check in zip(records, taxa_results):
         qc_value = 0
 
-        # Sanity check, I may be dead wrong in assuming they run in parallel
+        # Sanity check, I may be wrong in assuming they run in parallel
         if taxa_check['id'] == record['id']:
 
             # Did we get a match to an AphiaID ?
