@@ -4,6 +4,9 @@ import os
 from eurobisqc import location
 from eurobisqc import required_fields
 from eurobisqc import taxonomy
+from eurobisqc import taxonomy_db
+from wormsdb import db_functions
+
 from eurobisqc.util import extract_area
 
 from dwcaprocessor import DwCAProcessor
@@ -14,8 +17,9 @@ geo_area = extract_area.find_area(archive.eml)
 
 print(archive)
 
-# Taxonomy needs to call the WORMS service
+# Taxonomy needs to call the worms-db service
 check_taxonomy = False
+check_taxonomy_db = True
 
 ############### Explore structure
 
@@ -59,9 +63,19 @@ for coreRecord in archive.core_records():
                     qc = taxonomy.check(full_extension)
                     full_extension["QC"] = full_extension["QC"] | qc
 
-                print(full_extension)
+                if check_taxonomy_db:
+                    if db_functions.con is None:
+                        db_functions.open_db()
+                    qc = taxonomy_db.check_record(full_extension)
+                    full_extension["QC"] = full_extension["QC"] | qc
 
+
+                print(full_extension)
             else:  # Other record type, just print the full version of the record
                 print(extensionRecord["full"])
+
+    if db_functions.con is not None:
+        db_functions.close_db(db_functions.con)
+        db_functions.con = None
 
 sys.exit()

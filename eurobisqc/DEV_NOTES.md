@@ -51,7 +51,6 @@ This information can be retrieved by the rank field aphia-info record. If this a
 not be accepted (pull request to obisqc) then the taxonomy would have to be rewritten in eurobisqc. 
 
 
-### TODO: Clean the code, write test cases and write more tests. Also must think at way to optimize.
 
 # 08/12/2020 
 Better read the specifications, clarified a few QC questions, completed the masks, modified the 
@@ -62,7 +61,27 @@ Looked at the extracton of the geographical area from the package, always using 
 as the eml.xml file is stored in the archive.eml field. Processed with xmltodict, area extracted 
 but tested with a single file only. The dev_pipeline can now 
 
+# 09/12/2020 
+This day shall not be accounted for the project, I worked on it only a couple of hours. Imported 
+the WORMS db in SQLLite, to design a set of queries to speed up all taxonomy verifications. 
+In practice, the new strategy for taxonomy QC shall diverge from OBIS-QC, relying only 
+minimally on the pyworms (only for the necessary sanity checks) that shall be reproduced in EUROBIS-QC.  
+
+# 10/12/2020 
+Rewrote taxonomy checks based on DB queries on local copy of WORMS DB (file taxonomy_db.py), 
+helper functions shall go to package wormsdb, module db_functions 
+
+## Notes / questions for Bart: 
+1) Is this sort of speed acceptable for taxonomy QC?
+2) QC 8 needs clarifications. Is the taxon a marine taxon that does not exist in APHIA? If I know what 
+to ask to the DB then we will have this one too, and with this taxonomy will be OK 
+3) xylookup and bathymetry data. I have not yet looked at this aspect.      
+   
 
 
+
+
+### TODO: Clean the code, write test cases and write more tests. Also must think at way to improve the 
+project structure and rationalise imports (create proper requirement.txt).
 
 
