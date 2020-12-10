@@ -75,7 +75,8 @@ def check_record_in_area(record, area):
         :param record: The event record
         :param area: The geographical area - 2 segments east west and north south
         as [(east,west), (north,south)]
-        This QC makes sense AFTER Lon and Lat decimal have been verified present and valid """
+        This QC makes sense AFTER Lon and Lat decimal have been verified present and valid
+        Assumption: Area is rectangular """
 
     qc = 0
 

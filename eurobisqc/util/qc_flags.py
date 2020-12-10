@@ -9,7 +9,7 @@ class QCFlag(Enum):
     REQUIRED_FIELDS_MISS = ("Not all the required fields are present", 1)
     TAXONOMY_APHIAID_MISS = ("AphiaID not found", 2)
     TAXONOMY_RANK_LOW = ("Taxon level lower than family", 3)
-    GEO_LAT_LON_MISSING = ("Lat or Lon missing or both equal to None", 4)
+    GEO_LAT_LON_MISSING = ("Lat or Lon missing or either equal to None", 4)
     GEO_LAT_LON_INVALID = ("Lat or Lon missing or not within legal boundaries (-90 to 90 and -180 to 180)", 5)
     GEO_LAT_LON_NOT_SEA = ("Lat - Lon not on sea / coastline", 6)  # Need time consuming call to xylookup
     DATE_TIME_NOT_COMPLETE = ("Year or Start Year or End Year incomplete or invalid", 7)

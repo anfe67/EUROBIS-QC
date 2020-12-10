@@ -36,9 +36,9 @@ class Test(TestCase):
 
     def test_source_record(self):
         # Source Records
-        self.assertTrue(required_fields.check_record(self.records[4], False) == 0)
-        self.assertTrue(required_fields.check_record(self.records[5], False) == 1)
-        self.assertTrue(required_fields.check_record(self.records[6], False) == 1)
+        self.assertTrue(required_fields.check_record_obis_format(self.records[4], False) == 0)
+        self.assertTrue(required_fields.check_record_obis_format(self.records[5], False) == 1)
+        self.assertTrue(required_fields.check_record_obis_format(self.records[6], False) == 1)
 
     def test_check(self):
         # Comparison is OK as we want to see element by element

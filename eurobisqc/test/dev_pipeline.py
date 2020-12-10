@@ -48,7 +48,7 @@ for coreRecord in archive.core_records():
                 full_extension = extensionRecord["full"]
 
                 # Check required fields
-                qc = required_fields.check_record(full_extension)
+                qc = required_fields.check_record_obis_format(full_extension)
                 if "QC" in full_extension:
                     full_extension["QC"] = full_extension["QC"] | qc
                 else:
