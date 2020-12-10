@@ -5,6 +5,7 @@ from eurobisqc import location
 from eurobisqc import required_fields
 from eurobisqc import taxonomy
 from eurobisqc import taxonomy_db
+from eurobisqc import time
 from wormsdb import db_functions
 
 from eurobisqc.util import extract_area
@@ -29,15 +30,20 @@ for coreRecord in archive.core_records():
     full_core = coreRecord["full"]
 
     # Core Record
+    # Check location
     qc = location.check_record(full_core)
     if "QC" in full_core:
         full_core["QC"] = full_core["QC"] | qc
     else:
         full_core["QC"] = qc
 
+    # Check location in area
     qc = location.check_record_in_area(full_core, geo_area)
     full_core["QC"] = full_core["QC"] | qc
 
+    # Check dates (This is a repeat)
+    qc = time.check_record(full_core, 0)
+    full_core["QC"] = full_core["QC"] | qc
 
     print(full_core)
 
@@ -68,6 +74,11 @@ for coreRecord in archive.core_records():
                         db_functions.open_db()
                     qc = taxonomy_db.check_record(full_extension)
                     full_extension["QC"] = full_extension["QC"] | qc
+
+                # Check dates (This is a repeat)
+                qc = time.check_record(full_extension, 0)
+                full_extension["QC"] = full_extension["QC"] | qc
+
 
 
                 print(full_extension)

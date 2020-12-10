@@ -1,3 +1,5 @@
+import datetime
+
 def check_float(value, valid_range=None):
     result = {"valid": None, "float": None, "in_range": None}
     if value is not None:
@@ -41,3 +43,7 @@ def is_number(s):
         return True
     except ValueError:
         return False
+
+def date_to_millis(d):
+    """Convert a date to milliseconds."""
+    return int((d - datetime.date(1970, 1, 1)).total_seconds() * 1000)

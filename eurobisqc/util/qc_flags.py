@@ -13,7 +13,7 @@ class QCFlag(Enum):
     GEO_LAT_LON_INVALID = ("Lat or Lon missing or not within legal boundaries (-90 to 90 and -180 to 180)", 5)
     GEO_LAT_LON_NOT_SEA = ("Lat - Lon not on sea / coastline", 6)  # Need time consuming call to xylookup
     DATE_TIME_NOT_COMPLETE = ("Year or Start Year or End Year incomplete or invalid", 7)
-    TAXON_APHIAID_NOT_EXISTING = ("Marine Taxon not existing in APHIA", 8)  # Need time consuming call to the worms service
+    TAXON_APHIAID_NOT_EXISTING = ("Marine Taxon not existing in APHIA", 8)  # Replaced costly call to worms with DB query
     GEO_COORD_AREA = ("Coordinates not in the specified area", 9)
     NO_OBIS_DATAFORMAT = ("No valid code found in basisOfRecord", 10)
     INVALID_DATE_1 = ("Invalid sampling date", 11)

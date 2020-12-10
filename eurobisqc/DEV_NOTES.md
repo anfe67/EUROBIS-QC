@@ -19,7 +19,7 @@ has a QC value of 0.
 
 - **Occurrence**: https://rs.gbif.org/core/dwc_occurrence_2020-07-15.xml   
 - **Event**: https://rs.gbif.org/core/dwc_event_2016_06_21.xml
-- **eMoF**: https://rs.gbif.org/core/dwc_event_2016_06_21.xml
+- **eMoF**: https://rs.gbif.org/extension/obis/extended_measurement_or_fact.xml
  
  
 In these three documents the only required field for the three record types is BasisOfRecord in 
