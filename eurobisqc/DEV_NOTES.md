@@ -75,10 +75,9 @@ helper functions shall go to package wormsdb, module db_functions
 1) Is this sort of speed acceptable for taxonomy QC?
 2) QC 8 needs clarifications. Is the taxon a marine taxon that does not exist in APHIA? If I know what 
 to ask to the DB then we will have this one too, and with this taxonomy will be OK 
-3) xylookup and bathymetry data. I have not yet looked at this aspect.      
-   
-
-
+3) xylookup and bathymetry data for checks 6 and 18 . I have not yet looked at this aspect. 
+4) In what field is Observed weight (QC # 15)
+ 
 
 
 ### TODO: Clean the code, write test cases and write more tests. Also must think at way to improve the 

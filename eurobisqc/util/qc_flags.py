@@ -25,8 +25,7 @@ class QCFlag(Enum):
     SEX_MISSING = ("Sex missing or wrong OBIS code", 17)
     MIN_MAX_DEPTH_ERROR = ("Minimum depth greater than maximum depth", 18)
     WRONG_DEPTH_MAP = ("Depth incoherent with depth map", 19)
-    WRONG_DEPTH_SPECIES = ("Depth incoherent with species depth range", 20)
-
+    WRONG_DEPTH_SPECIES = ("Depth incoherent with species depth range", 20)  # How to implement this one? Not in WORMS
 
     # All the required codes to follow
 
