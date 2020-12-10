@@ -69,15 +69,19 @@ minimally on the pyworms (only for the necessary sanity checks) that shall be re
 
 # 10/12/2020 
 Rewrote taxonomy checks based on DB queries on local copy of WORMS DB (file taxonomy_db.py), 
-helper functions shall go to package wormsdb, module db_functions 
+helper functions shall go to package wormsdb, module db_functions. 
+Started also two new modules, one for measurement checks and the other for depth 
+checks. They are not yet used in the sample pipeline. 
 
 ## Notes / questions for Bart: 
 1) Is this sort of speed acceptable for taxonomy QC?
 2) QC 8 needs clarifications. Is the taxon a marine taxon that does not exist in APHIA? If I know what 
 to ask to the DB then we will have this one too, and with this taxonomy will be OK 
-3) xylookup and bathymetry data for checks 6 and 18 . I have not yet looked at this aspect. 
-4) In what field is Observed weight (QC # 15)
- 
+3) xylookup and bathymetry data for checks 6 and 18 (to see if a point is on land 
+   and if the bathymetries are compatible with the event area. 
+   I have not yet looked at this aspect. # TODO, look at obis-qc  
+   
+4) In what field should I dig to find Observed weight (QC # 15) - emailed to Bart 
 
 
 ### TODO: Clean the code, write test cases and write more tests. Also must think at way to improve the 
