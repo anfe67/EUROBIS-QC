@@ -84,7 +84,18 @@ to ask to the DB then we will have this one too, and with this taxonomy will be 
 4) In what field should I dig to find Observed weight (QC # 15) - emailed to Bart 
 
 
-### TODO: Clean the code, write test cases and write more tests. Also must think at way to improve the 
-project structure and rationalise imports (create proper requirement.txt).
+### TODO: Clean the code, write test cases and write more tests. Also must think at way to improve the project structure and rationalise imports (create proper requirement.txt).
 
 
+## 11/12/2020 
+Starting with a code cleanup, then reading Bart response to QC 15 above. References: 
+
+- **measurementType** Wet weight biomass
+- **MeasurementtypeID** in  http://vocab.nerc.ac.uk/collection/S06/current/S0600088/
+- **Refs:** http://vocab.nerc.ac.uk/collection/P01/current/SDBIOL05, http://vocab.nerc.ac.uk/
+
+Other things :
+- Guessed that a similar approach can be taken with the observed count, and sample size.
+- Emailed Bart with questions 
+- refactored db_functions. 
+- TODO: look at pyxylookup verifications, evaluate speed and different ways to call. 

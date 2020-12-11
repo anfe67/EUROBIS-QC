@@ -1,16 +1,15 @@
 import sys
-import os
-
-from eurobisqc import location
-from eurobisqc import required_fields
-from eurobisqc import taxonomy
-from eurobisqc import taxonomy_db
-from eurobisqc import time
-from wormsdb import db_functions
-
-from eurobisqc.util import extract_area
 
 from dwcaprocessor import DwCAProcessor
+from eurobisqc import location
+from eurobisqc import required_fields
+from eurobisqc import old_taxonomy
+from eurobisqc import taxonomy_db
+from eurobisqc import time
+from eurobisqc import measurements
+
+from eurobisqc.util import extract_area
+from wormsdb import db_functions
 
 filename = "data/dwca-meso_meiofauna_knokke_1969-v1.7.zip"
 archive = DwCAProcessor(filename)
@@ -22,7 +21,6 @@ print(archive)
 check_taxonomy = False
 check_taxonomy_db = True
 
-############### Explore structure
 
 for coreRecord in archive.core_records():
     print("+++ core: " + archive.core.type)
@@ -64,13 +62,13 @@ for coreRecord in archive.core_records():
                 qc = location.check_record(full_extension)
                 full_extension["QC"] = full_extension["QC"] | qc
 
-                # Check taxonomy
+                # Check taxonomy (This shall be removed)
                 if check_taxonomy:
-                    qc = taxonomy.check(full_extension)
+                    qc = old_taxonomy.check(full_extension)
                     full_extension["QC"] = full_extension["QC"] | qc
 
                 if check_taxonomy_db:
-                    if db_functions.con is None:
+                    if db_functions.conn is None:
                         db_functions.open_db()
                     qc = taxonomy_db.check_record(full_extension)
                     full_extension["QC"] = full_extension["QC"] | qc
@@ -79,14 +77,19 @@ for coreRecord in archive.core_records():
                 qc = time.check_record(full_extension, 0)
                 full_extension["QC"] = full_extension["QC"] | qc
 
-
-
                 print(full_extension)
-            else:  # Other record type, just print the full version of the record
-                print(extensionRecord["full"])
 
-    if db_functions.con is not None:
-        db_functions.close_db(db_functions.con)
-        db_functions.con = None
+            if e.type == "ExtendedMeasurementOrFact":
+                full_extension = extensionRecord["full"]
+                # Check measurements
+                qc = measurements.check_record(full_extension)
+                if "QC" in full_extension:
+                    full_extension["QC"] = full_extension["QC"] | qc
+                else:
+                    full_extension["QC"] = qc
+                print(full_extension)
+
+if db_functions.conn is not None:
+    db_functions.close_db()
 
 sys.exit()

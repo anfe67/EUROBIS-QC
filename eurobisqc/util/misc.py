@@ -1,4 +1,8 @@
 import datetime
+import re
+
+from pyxylookup.pyxylookup import lookup
+
 
 def check_float(value, valid_range=None):
     result = {"valid": None, "float": None, "in_range": None}
@@ -21,7 +25,6 @@ def check_float(value, valid_range=None):
 
 
 def do_xylookup(results):
-    import pyxylookup
     output = [None] * len(results)
     indices = []
     coordinates = []
@@ -31,10 +34,11 @@ def do_xylookup(results):
             indices.append(i)
             coordinates.append([result["annotations"]["decimalLongitude"], result["annotations"]["decimalLatitude"]])
     if len(coordinates) > 0:
-        xy = pyxylookup.lookup(coordinates, shoredistance=True, grids=True, areas=True)
+        xy = lookup(coordinates, shoredistance=True, grids=True, areas=True)
         for i in range(len(indices)):
             output[indices[i]] = xy[i]
     return output
+
 
 def is_number(s):
     """ Utility function """
@@ -44,6 +48,16 @@ def is_number(s):
     except ValueError:
         return False
 
+
 def date_to_millis(d):
     """Convert a date to milliseconds."""
     return int((d - datetime.date(1970, 1, 1)).total_seconds() * 1000)
+
+
+# Move to utils - misc
+def parse_lsid(s):
+    m = re.search("^urn:lsid:marinespecies.org:taxname:([0-9]+)$", s)
+    if m:
+        return m.group(1)
+    else:
+        return None

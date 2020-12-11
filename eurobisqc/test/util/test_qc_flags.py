@@ -8,7 +8,7 @@ class TestQCFlag(TestCase):
         for qc_flag in QCFlag:
             try:
                 print(qc_flag.encode(qc_flag.qc_number))
-            except:
+            except ValueError:
                 self.fail()
 
     def test_decode_message(self):
@@ -17,7 +17,7 @@ class TestQCFlag(TestCase):
             try:
                 print(qc_flag.decode_message(i))
                 i += 1
-            except:
+            except TypeError:
                 self.fail()
 
     def test_decode_name(self):
@@ -26,7 +26,7 @@ class TestQCFlag(TestCase):
             try:
                 print(qc_flag.decode_name(i))
                 i += 1
-            except:
+            except TypeError:
                 self.fail()
 
     def test_decode_mask(self):
@@ -34,7 +34,7 @@ class TestQCFlag(TestCase):
         try:
             flags = QCFlag.decode_mask(test_mask)
             print(flags)
-        except:
+        except (ValueError, TypeError):
             self.fail()
 
         self.assertTrue(flags[0] != 'INVALID')

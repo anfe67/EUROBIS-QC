@@ -10,14 +10,17 @@ error_mask_10 = qc_flags.QCFlag.NO_OBIS_DATAFORMAT.bitmask
 required_fields = ["eventDate", "decimalLongitude", "decimalLatitude", "scientificName", "scientificNameID",
                    "occurrenceStatus", "basisOfRecord"]
 
-# recommended_fields = ["minimumDepthInMeters", "maximumDepthInMeters"] # Decide whether to do something with these
+recommended_fields = ["minimumDepthInMeters", "maximumDepthInMeters"]  # Decide whether to do something with these
 
 # When Using lowercase for field names
 fields_to_compare = [value.lower() for value in required_fields]
 
-def check_record_required(record):
+
+def check_record_required(record, option=False):
     """ Check for presence of required fields, as per reference. This corresponds to QC1.
-        :param record:
+        Optionally look at a set of recommended fields
+        :param record: The record to QC
+        :param option: Recommended fields are verified or not
     """
 
     qc = 0
@@ -29,7 +32,7 @@ def check_record_required(record):
     present_required_fields = set(present_fields).intersection(set(required_fields))
 
     if len(present_required_fields) == len(required_fields):
-        # Looking at the checks from obis-qc, I assume we need to verify if the fields are present but also that they are not None
+        # Looking at the checks from obis-qc, verify that fields are present but also that they are not None
         count = 0
         for required_field in required_fields:
             count += 1
@@ -38,6 +41,19 @@ def check_record_required(record):
 
         if count != len(required_fields):
             qc |= error_mask_1
+
+    # An option to be pedantic and require presence of the optional fields
+    if option:
+        present_optional_fields = set(present_fields).intersection(set(recommended_fields))
+        if len(present_optional_fields) == len(recommended_fields):
+            count = 0
+            for optional_field in recommended_fields:
+                count += 1
+                if record[optional_field] is None:
+                    break  # No need to proceed
+
+            if count != len(recommended_fields):
+                qc |= error_mask_1
 
     return qc
 
@@ -55,7 +71,7 @@ def check_record_obis_format(record):
         if not record["basisOfRecord"].lower() in [value.lower() for value in vocab]:
             qc |= error_mask_10
     else:
-         qc |= error_mask_10
+        qc |= error_mask_10
 
     # QC 1
     qc |= check_record_required(record)
@@ -68,4 +84,3 @@ def check(records):
         :param records:
     """
     return [check_record_obis_format(record) for record in records]
-

@@ -37,14 +37,15 @@ AF ---->    "aphia_info": taxon["aphia_info"]  # This is to verify that the Taxo
 
 """
 
+
 # Taxonomy depends on the worms service and it is a huge time eater. Cache should be used.
 
-def check_taxa(records, Cache=None):
+def check_taxa(records, cache=None):
     """ Performs taxonomy verification on a list of record
         returns a list of qc bitmasks
         """
 
-    taxa_results = taxonomy.check(records, Cache)
+    taxa_results = taxonomy.check(records, cache)
     results = []
 
     # This could be wrong...

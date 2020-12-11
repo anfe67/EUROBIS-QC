@@ -42,17 +42,15 @@ def check_record(record):
 
     # Depths: Use results from obisqc if possible 
 
-
     return qc_mask
 
 
 def check(records, xylookup=False):
-
     """ following the footstep of obis-qc, with rewrite for the xylookups portion """
 
     results = [location.check_record(record) for record in records]
 
-    ## TODO XY LOOKUP TO BE DONE, using the same footprint of obis-qc
+    # TODO XY LOOKUP TO BE DONE, using the same footprint of obis-qc
     """
     if xylookup:
         xy = util.misc.do_xylookup(results)
@@ -66,11 +64,10 @@ def check(records, xylookup=False):
                 logger.warning("No xylookup result for %s" % results[i]["id"])
     """
 
-
     return results
 
-def check_record_in_area(record, area):
 
+def check_record_in_area(record, area):
     """ verifies that a geographical point is in a the rectangle area
         :param record: The event record
         :param area: The geographical area - 2 segments east west and north south
@@ -84,7 +81,7 @@ def check_record_in_area(record, area):
     east = area[0][0]
     west = area[0][1]
     north = area[1][0]
-    south= area[1][1]
+    south = area[1][1]
 
     # extracting from record
     if 'decimalLongitude' in record and 'decimalLatitude' in record:
@@ -93,14 +90,7 @@ def check_record_in_area(record, area):
             point_x = float(record['decimalLongitude'])
             point_y = float(record['decimalLatitude'])
 
-            if  not (west <= point_x <= east)  or not(south <= point_y <= north):
+            if not (west <= point_x <= east) or not (south <= point_y <= north):
                 qc |= error_mask_9
 
     return qc
-
-
-
-
-
-
-
