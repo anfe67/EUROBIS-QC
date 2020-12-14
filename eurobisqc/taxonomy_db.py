@@ -1,7 +1,7 @@
 """ Replacing the taxonomy checks with verifications performed directly on
     the worms-db database (in SQLLite format in a first attempt)
     """
-from wormsdb import db_functions
+from lookupdb import db_functions
 from .util import qc_flags, misc
 
 # Masks used to build the return value when the quality check fails

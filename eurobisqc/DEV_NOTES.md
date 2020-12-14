@@ -98,4 +98,15 @@ Other things :
 - Guessed that a similar approach can be taken with the observed count, and sample size.
 - Emailed Bart with questions 
 - refactored db_functions. 
-- TODO: look at pyxylookup verifications, evaluate speed and different ways to call. 
+  
+# 14/12/2020 
+Questions to Bart, then looking at the whole process (following qc-component). 
+These are the obis-qc checks by type of record:
+- Event: location and time 
+- Occurrence: taxonomy, location, time, fields, absence 
+- eMoF: mof_fields (very basic) 
+- TODO: Implement lookup of field values as per discussion with Bart 
+- TODO: look at pyxylookup verifications, evaluate speed and different ways to call 
+
+
+

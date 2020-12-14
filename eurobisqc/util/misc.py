@@ -61,3 +61,34 @@ def parse_lsid(s):
         return m.group(1)
     else:
         return None
+
+def string_to_dict(s):
+    """ Very simplistic helper function
+        :param: s - String of keys:values
+        can take the form of a JSON,
+        can have : or = as key-value separator
+        and _ , ; as pair separator
+        returns a dictionary of key:values
+        or {'conversion_fail':True} """
+
+    s = s.strip()
+    if '{' in s:
+        s = s.replace('{', '')
+    if '}' in s:
+        s = s.replace('}', '')
+    if '"' in s:
+        s = s.replace('"', '')
+    if '=' in s:
+        s=s.replace('=',':')
+    if ';' in s:
+        s=s.replace(';', ':')
+    if ',' in s:
+        s=s.replace(',', ':')
+    if '_' in s:
+        s=s.replace('_', ':')
+
+    s_l = s.split(':')
+    if len(s_l) % 2 == 0:
+        return {s_l[i]: s_l[i + 1] for i in range(0, len(s_l), 2)}
+    else:
+        return {'conversion_fail':True}

@@ -4,6 +4,8 @@
 from .util import qc_flags
 from .util import misc
 
+# TODO : Rewrite in accordance with email 12/12/2020
+
 error_mask_14 = qc_flags.QCFlag.OBSERVED_COUNT_MISSING.bitmask
 error_mask_15 = qc_flags.QCFlag.OBSERVED_WEIGTH_MISSING.bitmask
 error_mask_16 = qc_flags.QCFlag.SAMPLE_SIZE_MISSING.bitmask
@@ -22,7 +24,6 @@ count_measure_type_id = "http://vocab.nerc.ac.uk/collection/P01/current/OCOUNT01
 
 # For sample size
 sample_measure_type = "abundance"
-
 
 # Same question for sex / gender
 

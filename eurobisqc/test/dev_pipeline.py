@@ -5,11 +5,11 @@ from eurobisqc import location
 from eurobisqc import required_fields
 from eurobisqc import old_taxonomy
 from eurobisqc import taxonomy_db
-from eurobisqc import time
+from eurobisqc import time_qc
 from eurobisqc import measurements
 
 from eurobisqc.util import extract_area
-from wormsdb import db_functions
+from lookupdb import db_functions
 
 filename = "data/dwca-meso_meiofauna_knokke_1969-v1.7.zip"
 archive = DwCAProcessor(filename)
@@ -40,7 +40,7 @@ for coreRecord in archive.core_records():
     full_core["QC"] = full_core["QC"] | qc
 
     # Check dates (This is a repeat)
-    qc = time.check_record(full_core, 0)
+    qc = time_qc.check_record(full_core, 0)
     full_core["QC"] = full_core["QC"] | qc
 
     print(full_core)
@@ -74,7 +74,7 @@ for coreRecord in archive.core_records():
                     full_extension["QC"] = full_extension["QC"] | qc
 
                 # Check dates (This is a repeat)
-                qc = time.check_record(full_extension, 0)
+                qc = time_qc.check_record(full_extension, 0)
                 full_extension["QC"] = full_extension["QC"] | qc
 
                 print(full_extension)

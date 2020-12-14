@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import sys
 import os
-import time
+import time_qc
 import extract_area
 from dwcaprocessor import DwCAProcessor
 
@@ -17,11 +17,11 @@ class Test(TestCase):
 
         xml_input = archive.eml
         area = None
-        start = time.time()
+        start = time_qc.time()
 
         for i in range(100):
             area = extract_area.find_area(xml_input)
-        end = time.time()
+        end = time_qc.time()
 
         print(f"Duration with xmltodict: {end - start}")
         # Not complete, should verify area content
