@@ -1,6 +1,6 @@
 import datetime
 import re
-
+from . import qc_flags
 from pyxylookup.pyxylookup import lookup
 
 
@@ -24,24 +24,9 @@ def check_float(value, valid_range=None):
     return result
 
 
-def do_xylookup(results):
-    output = [None] * len(results)
-    indices = []
-    coordinates = []
-    for i in range(len(results)):
-        result = results[i]
-        if "decimalLongitude" in result["annotations"] and "decimalLatitude" in result["annotations"]:
-            indices.append(i)
-            coordinates.append([result["annotations"]["decimalLongitude"], result["annotations"]["decimalLatitude"]])
-    if len(coordinates) > 0:
-        xy = lookup(coordinates, shoredistance=True, grids=True, areas=True)
-        for i in range(len(indices)):
-            output[indices[i]] = xy[i]
-    return output
-
-
 def is_number(s):
     """ Utility function """
+
     try:
         float(s)
         return True
@@ -51,18 +36,21 @@ def is_number(s):
 
 def date_to_millis(d):
     """Convert a date to milliseconds."""
+
     return int((d - datetime.date(1970, 1, 1)).total_seconds() * 1000)
 
 
-# Move to utils - misc
 def parse_lsid(s):
+    """ verify correctness of lsid - from obis-qc"""
+
     m = re.search("^urn:lsid:marinespecies.org:taxname:([0-9]+)$", s)
     if m:
         return m.group(1)
     else:
         return None
 
-def string_to_dict(s):
+
+def string_to_dict(dyn_prop_string):
     """ Very simplistic helper function
         :param: s - String of keys:values
         can take the form of a JSON,
@@ -71,24 +59,60 @@ def string_to_dict(s):
         returns a dictionary of key:values
         or {'conversion_fail':True} """
 
-    s = s.strip()
-    if '{' in s:
-        s = s.replace('{', '')
-    if '}' in s:
-        s = s.replace('}', '')
-    if '"' in s:
-        s = s.replace('"', '')
-    if '=' in s:
-        s=s.replace('=',':')
-    if ';' in s:
-        s=s.replace(';', ':')
-    if ',' in s:
-        s=s.replace(',', ':')
-    if '_' in s:
-        s=s.replace('_', ':')
+    if len(dyn_prop_string) > 0:
+        dyn_prop_string = dyn_prop_string.strip()
+        # dyn_prop_string = dyn_prop_string.lower()  # Is this really necessary?
 
-    s_l = s.split(':')
-    if len(s_l) % 2 == 0:
-        return {s_l[i]: s_l[i + 1] for i in range(0, len(s_l), 2)}
+        if '{' in dyn_prop_string:
+            dyn_prop_string = dyn_prop_string.replace('{', '')
+        if '}' in dyn_prop_string:
+            dyn_prop_string = dyn_prop_string.replace('}', '')
+        if '"' in dyn_prop_string:
+            dyn_prop_string = dyn_prop_string.replace('"', '')
+        if "'" in dyn_prop_string:
+            dyn_prop_string = dyn_prop_string.replace("'", '')
+        if '=' in dyn_prop_string:
+            dyn_prop_string = dyn_prop_string.replace('=', ':')
+        if ';' in dyn_prop_string:
+            dyn_prop_string = dyn_prop_string.replace(';', ':')
+        if ',' in dyn_prop_string:
+            dyn_prop_string = dyn_prop_string.replace(',', ':')
+        if '_' in dyn_prop_string:
+            dyn_prop_string = dyn_prop_string.replace('_', ':')
+
+        string_list = dyn_prop_string.split(':')
+        if len(string_list) > 0 and len(string_list) % 2 == 0:
+            return {string_list[i].strip(): string_list[i + 1].strip() for i in range(0, len(string_list), 2)}
+        else:
+            return {'conversion_fail': True}
     else:
-        return {'conversion_fail':True}
+        return {'conversion_fail': True}
+
+
+def do_xylookup(records):
+    """ derived from equivalent in obis-qc - takes a list of records already QCd
+        for LAT - LON presence and validity - QC field must
+        be present """
+
+    output = [None] * len(records)
+    indices = []
+    coordinates = []
+    for i in range(len(records)):
+        record = records[i]
+        # The record has been already checked for LAT LON validity, but verify anyway...
+        if "decimalLongitude" in record and \
+                "decimalLatitude" in record and \
+                "QC" in record and \
+                not ((record["QC"] & qc_flags.QCFlag.GEO_LAT_LON_INVALID.bitmask) |
+                     (record["QC"] & qc_flags.QCFlag.GEO_LAT_LON_MISSING.bitmask)):
+            indices.append(i)
+            lon = check_float(record["decimalLongitude"])["float"]
+            lat = check_float(record["decimalLatitude"])["float"]
+
+            coordinates.append([lon, lat])
+
+    if len(coordinates) > 0:
+        xy = lookup(coordinates, shoredistance=True, grids=True, areas=True)
+        for i in range(len(indices)):
+            output[indices[i]] = xy[i]
+    return output

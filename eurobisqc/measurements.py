@@ -1,31 +1,127 @@
-""" To check for missing fields in eMoF records as per error masks
-    The
-    """
+""" To check for missing fields in eMoF records as per error masks  """
+
+import sys
 from .util import qc_flags
 from .util import misc
-
-# TODO : Rewrite in accordance with email 12/12/2020
+from lookupdb import db_functions
 
 error_mask_14 = qc_flags.QCFlag.OBSERVED_COUNT_MISSING.bitmask
 error_mask_15 = qc_flags.QCFlag.OBSERVED_WEIGTH_MISSING.bitmask
 error_mask_16 = qc_flags.QCFlag.SAMPLE_SIZE_MISSING.bitmask
 error_mask_17 = qc_flags.QCFlag.SEX_MISSING.bitmask
 
-# For measurement:
-# The measurement type must contain for weight verification (lowercase check)
-weight_measure_type = "wet weight biomass"
-# And the measurement type ID must be :
-weight_measure_type_id = "http://vocab.nerc.ac.uk/collection/P01/current/SDBIOL05".lower()
+this = sys.modules[__name__]
 
-# For count :
-# The measurement type must contain for weight verification (lowercase check)
-count_measure_type = "count"
-count_measure_type_id = "http://vocab.nerc.ac.uk/collection/P01/current/OCOUNT01".lower()
+# For measurement:The measurement type must contain for weight verification (lowercase check)
+this.weight_measure_types = []
+# And the measurement type ID must be :
+this.weight_measure_type_ids = []
+
+# For count :The measurement type must contain for weight verification (lowercase check)
+this.count_measure_types = []
+# And the measurement type ID must match one of
+this.count_measure_type_ids = []
 
 # For sample size
-sample_measure_type = "abundance"
+this.sample_size_measure_types = []
+this.sample_size_measure_type_ids = []
 
-# Same question for sex / gender
+# Same question for sex / gender (vocabulary) - no need for database lookup for this
+sex_field = "sex"
+sex_field_vocab = ["female", "male", "hermaphrodite"]
+
+this.lookups_loaded = False
+
+
+def initialize_lookups():
+    """ Only needed at the first call to initialize the lookup tables """
+
+    if this.lookups_loaded:
+        return
+
+    # Read all lookups : Define lambda
+    if db_functions.conn is None:
+        db_functions.open_db()
+
+    # row factory
+    db_functions.conn.row_factory = lambda cursor, row: row[0]
+    # Fill the lookups:
+    # COUNT
+    c = db_functions.conn.cursor()
+    this.count_measure_type_ids = c.execute('SELECT Value FROM countMeasurementTypeID').fetchall()
+    c = db_functions.conn.cursor()
+    this.count_measure_types = c.execute('SELECT Value FROM countMeasurementType').fetchall()
+    # SAMPLE
+    c = db_functions.conn.cursor()
+    this.sample_size_measure_type_ids = c.execute('SELECT Value FROM sampleSizeMeasurementTypeID').fetchall()
+    c = db_functions.conn.cursor()
+    this.sample_size_measure_types = c.execute('SELECT Value FROM sampleSizeMeasurementType').fetchall()
+    # WEIGHT
+    c = db_functions.conn.cursor()
+    this.weight_measure_type_ids = c.execute('SELECT Value FROM weightMeasurementTypeID').fetchall()
+    c = db_functions.conn.cursor()
+    this.weight_measure_types = c.execute('SELECT Value FROM weightMeasurementType').fetchall()
+
+    this.lookups_loaded = True
+
+
+def check_mtid(measurement_type_id, measurement_value):
+    """ verifies that if one of the sought measurement
+        types IDs is present, then the measurementValue is also
+        present and not None
+        :param measurement_type_id - as in the record
+        :param measurement_value - as in the record
+        purpose: attempt optimization """
+
+    qc = 0
+    # Is the measurement type id of a biomass weight
+    for wmtid in this.weight_measure_type_ids:
+        if wmtid in measurement_type_id:
+            if measurement_value is None:
+                qc |= error_mask_15
+
+    # Is it the measurement of a sample size
+    for smtid in this.sample_size_measure_type_ids:
+        if smtid in measurement_type_id:
+            if measurement_value is None:
+                qc |= error_mask_16
+
+    # Is it a head count
+    for cmtid in this.count_measure_type_ids:
+        if cmtid in measurement_type_id:
+            if measurement_value is None:
+                qc |= error_mask_14
+    return qc
+
+
+def check_mt(measurement_type, measurement_value):
+    """ verifies that if one of the sought measurement
+        types is present, then the measurementValue is also
+        present and not None
+        :param measurement_type - as in the record
+        :param measurement_value - as in the record
+        purpose: attempt optimization """
+
+    qc = 0
+    # Is the measurement type id of a biomass weight
+    for wmt in this.weight_measure_types:
+        if wmt in measurement_type:
+            if measurement_value is None:
+                qc |= error_mask_15
+
+    # Is it the measurement of a sample size
+    for smt in this.sample_size_measure_types:
+        if smt in measurement_type:
+            if measurement_value is None:
+                qc |= error_mask_16
+
+    # Is it a head count
+    for cmt in this.count_measure_types:
+        if cmt in measurement_type:
+            if measurement_value is None:
+                qc |= error_mask_14
+    return qc
+
 
 def check_record(record):
     """ Applies the sampling verifications, input should be a
@@ -33,53 +129,87 @@ def check_record(record):
 
     qc = 0
 
-    if "measurementType" in record and record["measurementType"] is not None:
-        # We are looking at a wet biomass weight
-        if weight_measure_type in record["measurementType"].lower():
-            if "measurementValue" in record and record["measurementValue"] is not None:
-                if not misc.is_number(record["measurementValue"]):
-                    qc |= error_mask_15
-            else:
-                qc |= error_mask_15
+    # It shall be done only once on the first entry
+    if not this.lookups_loaded:
+        initialize_lookups()
 
-        # We are looking at a count
-        if count_measure_type in record["measurementType"].lower():
-            if "measurementValue" in record and record["measurementValue"] is not None:
-                if not misc.is_number(record["measurementValue"]):
-                    qc |= error_mask_14
-            else:
-                qc |= error_mask_14
+    # Starting with IDs - weight
+    if "measurementTypeID" in record and record["measurementTypeID"] is not None:
 
-        # Looking at sample size
-        if sample_measure_type in record["measurementType"].lower():
-            if "measurementValue" in record and record["measurementValue"] is not None:
-                if not misc.is_number(record["measurementValue"]):
-                    qc |= error_mask_16
-            else:
-                qc |= error_mask_16
+        measurement_value = None if "measurementValue" not in record else record["measurementValue"]
+        if isinstance(measurement_value,str) :
+            if  not measurement_value.strip():
+                qc |= check_mtid(record["measurementTypeID"].lower(), None)
+        else:
+            qc |= check_mtid(record["measurementTypeID"].lower(), measurement_value)
+
+
+    # We do not have a ID measurement but we have a measurement type
+    elif "measurementType" in record and record["measurementType"] is not None:
+        measurement_value = None if "measurementValue" not in record else record["measurementValue"]
+        if isinstance(measurement_value,str) :
+            if  not measurement_value.strip():
+                qc |= check_mt(record["measurementType"].lower(), None)
+        else:
+            qc |= check_mt(record["measurementType"].lower(), measurement_value)
 
     else:
-        if "measurementTypeID" in record and record["measurementTypeID"] is not None:
-            # Is the measurement type id of a biomass weight
-            if weight_measure_type_id in record["measurementTypeID"].lower():
-                if "measurementValue" in record and record["measurementValue"] is not None:
-                    if not misc.is_number(record["measurementValue"]):
-                        qc |= error_mask_15
-                else:
-                    qc |= error_mask_15
+        # Nothing else to verify
+        pass
 
-            # Is the measurement type id of a count...
-            if count_measure_type_id in record["measurementTypeID"].lower():
-                if "measurementValue" in record and record["measurementValue"] is not None:
-                    if not misc.is_number(record["measurementValue"]):
-                        qc |= error_mask_14
-                else:
-                    qc |= error_mask_14
-
-            # Looking at sample size: Do not know which measurementTypeIDs to verify, there are too many
+    # We still have to look at sex
+    if "sex" in record:
+        if record["sex"] is not None:
+            if record["sex"] not in sex_field_vocab:
+                qc |= error_mask_17
+        else:
+            qc |= error_mask_17
 
     return qc
 
+def check_dyn_prop_record(record):
+    """ runs the checks for dynamic property on the occurrence records """
+    # This is a check on the properties field - to be done on the occurrence records
+
+    qc = 0
+
+    # It shall be done only once on the first entry
+    if not this.lookups_loaded:
+        initialize_lookups()
+
+    if "dynamicProperties" in record and record["dynamicProperties"] is not None:
+
+        # split up the value and make a dict
+        properties = misc.string_to_dict(record["dynamicProperties"].strip())
+        # If malformed, then skip
+        if "conversion_fail" not in properties:
+
+            for k in properties.keys():
+                key = k.lower()
+                for cmt in this.count_measure_types:
+                    if cmt in key:
+                        if properties[k] is None or (
+                                isinstance(properties[k], str) and not properties[k].strip()):
+                            qc |= error_mask_14
+
+
+                for wmt in this.weight_measure_types:
+                    if wmt in key:
+                        if properties[k] is None or (
+                                isinstance(properties[k], str) and not properties[k].strip()):
+                            qc |= error_mask_15
+
+                for smt in this.sample_size_measure_types:
+                    if smt in key:
+                        if properties[k] is None or (
+                                isinstance(properties[k], str) and not properties[k].strip()):
+                            qc |= error_mask_16
+    return qc
+
+
+def check_dyn_prop(records):
+    """ runs the checks for dynamic property on the occurrence records """
+    return [check_dyn_prop_record(record) for record in records]
 
 def check(records):
     """ runs the checks for multiple records """

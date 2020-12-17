@@ -1,5 +1,5 @@
 """ Replacing the taxonomy checks with verifications performed directly on
-    the worms-db database (in SQLLite format in a first attempt)
+    the lookup-db database (in SQLLite format in a first attempt)
     """
 from lookupdb import db_functions
 from .util import qc_flags, misc
@@ -13,7 +13,7 @@ taxon_fields = []
 speciesprofile_fields = []
 
 
-# Retrieve fields from worms-db, call it only once, open the DB in advance
+# Retrieve fields from lookup-db, call it only once, open the DB in advance
 def populate_fields():
     """ Populate the taxon_fields and speciesprofile_fields - only once
         from the worms database assumes con is an active connection to

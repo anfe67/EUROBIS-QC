@@ -4,8 +4,8 @@ import datetime
 import logging
 
 from isodateparser import ISODateParser
-from .util import qc_flags
-from .util import misc
+from eurobisqc.util import qc_flags
+from eurobisqc.util import misc
 
 logger = logging.getLogger(__name__)
 

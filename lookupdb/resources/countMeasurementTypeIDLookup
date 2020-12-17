@@ -1,0 +1,7 @@
+# This is an example, the file needs to be extended
+# OCOUNT01 and values, with and without headers
+
+http://vocab.nerc.ac.uk/collection/P01/current/OCOUNT01
+http://vocab.nerc.ac.uk/collection/P09/current/OCNT/
+
+# Note: to verify

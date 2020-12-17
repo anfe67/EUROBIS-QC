@@ -13,11 +13,17 @@ def find_area(xml_input):
     north = south = east = west = 0
 
     geo_area_dict = None
+    # Notice that we have a problem if we have a list of areas... ...to be adjusted.
+    # If there are multiple areas, we have to decide how to proceed,
     if 'coverage' in dict_input['eml:eml']['dataset']:
         if 'geographicCoverage' in dict_input['eml:eml']['dataset']['coverage']:
-            if 'boundingCoordinates' in dict_input['eml:eml']['dataset']['coverage']['geographicCoverage']:
-                geo_area_dict = dict_input['eml:eml']['dataset']['coverage']['geographicCoverage'][
-                    'boundingCoordinates']
+            if isinstance(dict_input['eml:eml']['dataset']['coverage']['geographicCoverage'], list):
+                if 'boundingCoordinates' in dict_input['eml:eml']['dataset']['coverage']['geographicCoverage'][0]:
+                    geo_area_dict = \
+                        dict_input['eml:eml']['dataset']['coverage']['geographicCoverage'][0]['boundingCoordinates']
+            else:
+                geo_area_dict = \
+                    dict_input['eml:eml']['dataset']['coverage']['geographicCoverage']['boundingCoordinates']
 
     # Is it well formed
     valid = True
@@ -43,6 +49,10 @@ def find_area(xml_input):
             valid = False
 
         if valid:
+            # If the area is valid but it represents the whole globe, there is no point
+            if east == 180 and west == -180 and south == -90 and north == 90:
+                return None
+
             return [(east, west), (north, south)]
         else:
             return None
