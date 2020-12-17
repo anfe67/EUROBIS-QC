@@ -13,7 +13,7 @@ class Test(TestCase):
 
     def test_get_fields(self):
         # Open db connection
-        con = db_functions.open_db()
+        con = db_functions.conn
         self.assertIsNotNone(con)
 
         sample_taxon = 'urn:lsid:marinespecies.org:taxname:519212'
@@ -26,14 +26,12 @@ class Test(TestCase):
         self.speciesprofile_fields = [description[0] for description in cur.description]
 
         self.assertTrue("isMarine" in self.speciesprofile_fields)
-        db_functions.close_db()
+
 
     def test_verify_querying(self):
 
         """ Verification of speed gain and querying / reconstructing the record structure
             of lookup-db """
-
-        db_functions.open_db()
 
         # Querying for scientificNameID
         start = time.time()
@@ -87,10 +85,7 @@ class Test(TestCase):
                 record = dict(zip(fields, speciesprofile))
             print(record)
 
-        db_functions.close_db()
-
     def test_get_record(self):
-        db_functions.open_db()
 
         sample_taxon = 'urn:lsid:marinespecies.org:taxname:519212'
         cur = db_functions.conn.execute(f"SELECT * from taxon where scientificNameID='{sample_taxon}'")
@@ -107,4 +102,3 @@ class Test(TestCase):
         self.assertTrue(taxon['scientificNameID'] == sn_id)
         species_profile = db_functions.get_record('speciesprofile', 'taxonID', sn_id, self.speciesprofile_fields)
         self.assertTrue(species_profile['taxonID'] == sn_id)
-        db_functions.close_db()

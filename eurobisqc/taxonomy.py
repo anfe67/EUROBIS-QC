@@ -1,16 +1,21 @@
 """ Replacing the taxonomy checks with verifications performed directly on
     the lookup-db database (in SQLLite format in a first attempt)
     """
+import sys
 from lookupdb import db_functions
-from .util import qc_flags, misc
+
+from eurobisqc.util import qc_flags, misc
+
+this = this = sys.modules[__name__]
 
 # Masks used to build the return value when the quality check fails
-error_mask_1 = qc_flags.QCFlag.TAXONOMY_APHIAID_MISS.bitmask  # Is the AphiaID Completed
-error_mask_2 = qc_flags.QCFlag.TAXONOMY_RANK_LOW.bitmask  # Is the Taxon Level lower than the family
+error_mask_2 = qc_flags.QCFlag.TAXONOMY_APHIAID_MISS.bitmask  # Is the AphiaID Completed
+error_mask_3 = qc_flags.QCFlag.TAXONOMY_RANK_LOW.bitmask  # Is the Taxon Level lower than the family
+
 # error_mask_8 = qc_flags.QCFlag.TAXON_APHIAID_NOT_EXISTING. bitmask # Unclear how to do this one
 
-taxon_fields = []
-speciesprofile_fields = []
+this.taxon_fields = []
+this.speciesprofile_fields = []
 
 
 # Retrieve fields from lookup-db, call it only once, open the DB in advance
@@ -26,10 +31,10 @@ def populate_fields():
     sample_taxon = 'urn:lsid:marinespecies.org:taxname:519212'
     cur = db_functions.conn.execute(f"SELECT * from taxon where scientificNameID='{sample_taxon}'")
     taxons = [description[0] for description in cur.description]
-    taxon_fields.extend(taxons)
+    this.taxon_fields.extend(taxons)
     cur = db_functions.conn.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
     speciesprofiles = [description[0] for description in cur.description]
-    speciesprofile_fields.extend(speciesprofiles)
+    this.speciesprofile_fields.extend(speciesprofiles)
 
 
 # Rework
@@ -42,29 +47,26 @@ def check_record(record):
     if "scientificNameID" in record and record["scientificNameID"] is not None:
 
         # Have something to query
-        if db_functions.conn is None:
-            db_functions.open_db()
-
-        if len(taxon_fields) == 0:
+        if len(this.taxon_fields) == 0:
             populate_fields()
 
         # Can query DB with sientificNameID
         aphiaid = misc.parse_lsid(record["scientificNameID"])
 
         if aphiaid is not None:  # Verify that the aphiaid retrieved is valid
-            worms_record = db_functions.get_record('taxon', 'scientificNameID',
-                                                   record['scientificNameID'], taxon_fields)
+            taxon_record = db_functions.get_record('taxon', 'scientificNameID',
+                                                   record['scientificNameID'], this.taxon_fields)
 
             # Have we got a record
-            if worms_record is not None:
-                if worms_record['genus'] is None:
-                    qc |= error_mask_2
+            if taxon_record is not None:
+                if taxon_record['genus'] is None:
+                    qc |= error_mask_3
             else:
-                sn_id |= error_mask_1  # Got some info but not found in DB. so scientificNameID is not OK
+                sn_id |= error_mask_2  # Got some info but not found in DB. so scientificNameID is not OK
         else:
-            sn_id |= error_mask_1
+            sn_id |= error_mask_2
     else:
-        sn_id |= error_mask_1
+        sn_id |= error_mask_2
 
     if sn_id:  # We still have a chance to verify by scientificName
 
@@ -72,27 +74,31 @@ def check_record(record):
         if "scientificName" in record and record["scientificName"] is not None:
 
             # Have something to query upon
-            if db_functions.conn is None:
-                db_functions.open_db()
-
-            worms_record = db_functions.get_record('taxon', 'scientificName',
-                                                   record['scientificName'], taxon_fields)
+            taxon_record = db_functions.get_record('taxon', 'scientificName',
+                                                   record['scientificName'], this.taxon_fields)
             # Have we got a record
-            if worms_record is not None:
-                if worms_record['genus'] is None:
-                    qc |= error_mask_2
+            if taxon_record is not None:
+                if taxon_record['genus'] is None:
+                    # We would not be here if scientificNameID was able to resolve
+                    qc |= error_mask_3
             else:
-                qc |= error_mask_1  # both fields are wrong...
+                qc |= error_mask_2  # both fields are wrong...
         else:
-            qc |= error_mask_1  # None of the scientificName fields are filled or valid
+            qc |= error_mask_2  # None of the scientificName fields are filled or valid
+
+    else:
+        pass # We have already an aphiaid from the scientificNameId
 
     return qc
 
 
 def check(records):
     """ Checks a list of records for taxonomy """
+
+    # Ensure DB is available
     if db_functions.conn is None:
-        db_functions.open_db()
+        db_functions.open_db() # It shall be closed on exit
+
     results = [check_record(record) for record in records]
-    db_functions.close_db()
     return results
+

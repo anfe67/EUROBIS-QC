@@ -4,7 +4,7 @@ from dwcaprocessor import DwCAProcessor
 from eurobisqc import location
 from eurobisqc import required_fields
 from eurobisqc import old_taxonomy
-from eurobisqc import taxonomy_db
+from eurobisqc import taxonomy
 from eurobisqc import time_qc
 from eurobisqc import measurements
 
@@ -82,7 +82,7 @@ for coreRecord in archive.core_records():
             full_core["QC"] = full_core["QC"] | qc
 
         if check_taxonomy_db:
-            qc = taxonomy_db.check_record(full_core)
+            qc = taxonomy.check_record(full_core)
             full_core["QC"] = full_core["QC"] | qc
 
         # Check dates (This is a repeat)
@@ -128,9 +128,7 @@ for coreRecord in archive.core_records():
                     full_extension["QC"] = full_extension["QC"] | qc
 
                 if check_taxonomy_db:
-                    if db_functions.conn is None:
-                        db_functions.open_db()
-                    qc = taxonomy_db.check_record(full_extension)
+                    qc = taxonomy.check_record(full_extension)
                     full_extension["QC"] = full_extension["QC"] | qc
 
                 # Check dates (This is a repeat)
@@ -152,8 +150,5 @@ for coreRecord in archive.core_records():
 
 print(f"Record count: {record_count}")
 print(f"Total time: {time.time() - time_start}")
-
-if db_functions.conn is not None:
-    db_functions.close_db()
 
 sys.exit()

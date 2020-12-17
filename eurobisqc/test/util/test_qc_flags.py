@@ -1,5 +1,5 @@
 from unittest import TestCase
-from qc_flags import QCFlag
+from eurobisqc.util.qc_flags import QCFlag
 
 
 class TestQCFlag(TestCase):

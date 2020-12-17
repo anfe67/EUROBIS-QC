@@ -1,19 +1,27 @@
-import qc_flags
+import sys
 import logging
 
+from eurobisqc.util import qc_flags
+
 logger = logging.getLogger(__name__)
+this = sys.modules[__name__]
 
 # Return values for when the quality check fails
 error_mask_1 = qc_flags.QCFlag.REQUIRED_FIELDS_MISS.bitmask
 error_mask_10 = qc_flags.QCFlag.NO_OBIS_DATAFORMAT.bitmask
 
-required_fields = ["eventDate", "decimalLongitude", "decimalLatitude", "scientificName", "scientificNameID",
+this.required_fields = ["eventDate", "decimalLongitude", "decimalLatitude", "scientificName", "scientificNameID",
                    "occurrenceStatus", "basisOfRecord"]
 
-recommended_fields = ["minimumDepthInMeters", "maximumDepthInMeters"]  # Decide whether to do something with these
+this.recommended_fields = ["minimumDepthInMeters", "maximumDepthInMeters"]  # Decide whether to do something with these
+
+this.values = ["PreservedSpecimen", "FossilSpecimen", "LivingSpecimen", "MaterialSample", "Event", "HumanObservation",
+             "MachineObservation", "Taxon", "Occurrence"]
+
+this.vocab = [value.lower() for value in this.values]
 
 # When Using lowercase for field names
-fields_to_compare = [value.lower() for value in required_fields]
+fields_to_compare = [value.lower() for value in this.required_fields]
 
 
 def check_record_required(record, option=False):
@@ -29,30 +37,31 @@ def check_record_required(record, option=False):
     present_fields = list(record.keys())
 
     # May be it can be done differently (faster)
-    present_required_fields = set(present_fields).intersection(set(required_fields))
+    present_required_fields = set(present_fields).intersection(set(this.required_fields))
 
-    if len(present_required_fields) == len(required_fields):
+    if len(present_required_fields) == len(this.required_fields):
         # Looking at the checks from obis-qc, verify that fields are present but also that they are not None
         count = 0
-        for required_field in required_fields:
+        for required_field in this.required_fields:
             count += 1
             if record[required_field] is None:
                 break  # No need to proceed
 
-        if count != len(required_fields):
+        if count != len(this.required_fields):
             qc |= error_mask_1
-
+    else :
+        qc |= error_mask_1
     # An option to be pedantic and require presence of the optional fields
     if option:
-        present_optional_fields = set(present_fields).intersection(set(recommended_fields))
-        if len(present_optional_fields) == len(recommended_fields):
+        present_optional_fields = set(present_fields).intersection(set(this.recommended_fields))
+        if len(present_optional_fields) == len(this.recommended_fields):
             count = 0
-            for optional_field in recommended_fields:
+            for optional_field in this.recommended_fields:
                 count += 1
                 if record[optional_field] is None:
                     break  # No need to proceed
 
-            if count != len(recommended_fields):
+            if count != len(this.recommended_fields):
                 qc |= error_mask_1
 
     return qc
@@ -65,22 +74,35 @@ def check_record_obis_format(record):
     qc = 0
 
     # QC 10
-    vocab = ["PreservedSpecimen", "FossilSpecimen", "LivingSpecimen", "MaterialSample", "Event", "HumanObservation",
-             "MachineObservation", "Taxon", "Occurrence"]
     if "basisOfRecord" in record and record["basisOfRecord"] is not None:
-        if not record["basisOfRecord"].lower() in [value.lower() for value in vocab]:
+        if not record["basisOfRecord"].lower() in  this.vocab:
             qc |= error_mask_10
     else:
         qc |= error_mask_10
 
-    # QC 1
-    qc |= check_record_required(record)
-
     return qc
 
+
+def check_obis(records):
+    """ To be called for a batch of records (list)
+        :param records:
+        it shall return the results of QC 10
+    """
+
+    return [check_record_obis_format(record) for record in records]
+
+def check_required(records):
+    """ To be called for a batch of records (list)
+        :param records:
+        it shall return the results of QC 1
+        """
+
+    return [check_record_required(record) for record in records]
 
 def check(records):
     """ To be called for a batch of records (list)
         :param records:
-    """
-    return [check_record_obis_format(record) for record in records]
+        it shall return the results of QC 1 combined with QC 10 (saves some looping)
+        """
+
+    return [check_record_required(record) | check_record_obis_format(record) for record in records]

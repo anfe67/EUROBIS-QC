@@ -144,9 +144,10 @@ VC with Bart and agreed to proceed as proposed: pyxylookup, speed, tests/coverag
 dynamic properties are in occurrence records). 
 -- because of this, review the dev pipeline and start thinking about how to group the calls to the QCs, keeping in 
 ming that calls to pyxylookup work much better if grouped in chunks. 
+-- Verified nosetests from pycharm, need to verify all imports to make it clean from terminal
 
----
-- **NOTE: Attempt to optimize with Numba broke Measurements check - CORRECT** 
-- **TODO: Speed/Concept improvements (sooner rather than later)**
-- **TODO: Complete tests and coverage**
+- **Review pipeline to check the records in order and in chunks when possible** 
+- **NOTE: Measurements check should be OK, DB was broken due to lambda - FIXED** 
+- **TODO: Speed/Concept improvements (possible parallelism?)**
+- **ONGOING: Complete tests and coverage**
 - **TODO: Produce Installable library**

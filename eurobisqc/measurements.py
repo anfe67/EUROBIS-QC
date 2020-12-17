@@ -39,29 +39,33 @@ def initialize_lookups():
     if this.lookups_loaded:
         return
 
-    # Read all lookups : Define lambda
-    if db_functions.conn is None:
-        db_functions.open_db()
-
     # row factory
-    db_functions.conn.row_factory = lambda cursor, row: row[0]
+    # db_functions.conn.row_factory = lambda cursor, row: row[0] # important, this has side effects
     # Fill the lookups:
+    c = db_functions.conn.cursor()
     # COUNT
+    data = c.execute('SELECT Value FROM countMeasurementTypeID').fetchall()
+    this.count_measure_type_ids = [val[0] for val in data]
     c = db_functions.conn.cursor()
-    this.count_measure_type_ids = c.execute('SELECT Value FROM countMeasurementTypeID').fetchall()
-    c = db_functions.conn.cursor()
-    this.count_measure_types = c.execute('SELECT Value FROM countMeasurementType').fetchall()
+    data = c.execute('SELECT Value FROM countMeasurementType').fetchall()
+    this.count_measure_types = [val[0] for val in data]
     # SAMPLE
     c = db_functions.conn.cursor()
-    this.sample_size_measure_type_ids = c.execute('SELECT Value FROM sampleSizeMeasurementTypeID').fetchall()
+
+    data = c.execute('SELECT Value FROM sampleSizeMeasurementTypeID').fetchall()
+    this.sample_size_measure_type_ids =  [val[0] for val in data]
     c = db_functions.conn.cursor()
-    this.sample_size_measure_types = c.execute('SELECT Value FROM sampleSizeMeasurementType').fetchall()
+    data= c.execute('SELECT Value FROM sampleSizeMeasurementType').fetchall()
+    this.sample_size_measure_types =  [val[0] for val in data]
     # WEIGHT
     c = db_functions.conn.cursor()
-    this.weight_measure_type_ids = c.execute('SELECT Value FROM weightMeasurementTypeID').fetchall()
-    c = db_functions.conn.cursor()
-    this.weight_measure_types = c.execute('SELECT Value FROM weightMeasurementType').fetchall()
 
+    data = c.execute('SELECT Value FROM weightMeasurementTypeID').fetchall()
+    this.weight_measure_type_ids = [val[0] for val in data]
+    c = db_functions.conn.cursor()
+
+    data = c.execute('SELECT Value FROM weightMeasurementType').fetchall()
+    this.weight_measure_types = [val[0] for val in data]
     this.lookups_loaded = True
 
 

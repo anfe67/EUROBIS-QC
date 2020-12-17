@@ -23,9 +23,7 @@ def import_files():
         else:
             continue
 
-        # Get connection to the DB
-        if db_functions.conn is None:
-            db_functions.open_db()
+        # Connection to the DB is obtained upon importing the module
 
         # If table exists in the DB, drop it
         db_functions.conn.execute(f"drop table if exists {table_name};")
@@ -45,8 +43,5 @@ def import_files():
                     db_functions.conn.execute(q_str)
 
     db_functions.conn.commit()
-
-    if db_functions.conn is not None:
-        db_functions.close_db()
 
 # import_files()

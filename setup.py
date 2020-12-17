@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-setup(name="euroobisqc",
+setup(name="eurobisqc",
       version="0.0.5",
       python_requires='>=3.6',
       url="https://github.com/anfe67/eurobis-qc",
