@@ -1,7 +1,7 @@
 import xmltodict
 from eurobisqc.util import misc
 
-
+# TODO - improve max area
 def find_area(xml_input):
     """ This may be not generic enough, must verify within the eml.xml specs
         if the geographical area is always in the same element structure then it should work

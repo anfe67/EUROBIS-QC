@@ -23,7 +23,7 @@ error_mask_9 = qc_flags.QCFlag.GEO_COORD_AREA.bitmask
 error_mask_18 = qc_flags.QCFlag.MIN_MAX_DEPTH_ERROR.bitmask
 
 # Need external call to xylookup or bathymetry service
-error_mask_19 = qc_flags.QCFlag.WRONG_DEPTH_MAP.bitmask  # TODO
+error_mask_19 = qc_flags.QCFlag.WRONG_DEPTH_MAP.bitmask
 
 # Possible to retrieve this info in aphia ? So this may be moved to taxonomy
 error_mask_20 = qc_flags.QCFlag.WRONG_DEPTH_SPECIES.bitmask  # TODO
