@@ -20,8 +20,8 @@ class Test(TestCase):
         {"id": 10, "measurementTypeID": "http://vocab.nerc.ac.uk/collection/P01/current/OCOUNT01/",
          "measurementValue": "a lot!"},  # Non numeric - OK following Bart's recommendations
         {"id": 11, "dynamicProperties": "{'tragusLengthInMeters': '0.014', ' weightInGrams': '120'}"},  # dyn prop OK
-        {"id": 12, "dynamicProperties": "Net type: Bogorov-Rass; Net mouth opening: 0.8 m; Mesh size: 300 mkm" }, # OK
-        {"id": 13, "dynamicProperties": "ObservedWeightInGrams=0.00052"}, # OK
+        {"id": 12, "dynamicProperties": "Net type: Bogorov-Rass; Net mouth opening: 0.8 m; Mesh size: 300 mkm"},  # OK
+        {"id": 13, "dynamicProperties": "ObservedWeightInGrams=0.00052"},  # OK
         {"id": 14, "dynamicProperties": "ObservedWeightInGrams=' '"},  # NOT OK
     ]
 
@@ -41,8 +41,8 @@ class Test(TestCase):
     expected_results_dyn_prop = [0,
                                  0,
                                  0,
-                                 qc_flags.QCFlag.OBSERVED_WEIGTH_MISSING.bitmask    # Verify should be weight
-                                ]
+                                 qc_flags.QCFlag.OBSERVED_WEIGTH_MISSING.bitmask  # Verify should be weight
+                                 ]
 
     def test_check_record(self):
         results = []
@@ -54,7 +54,6 @@ class Test(TestCase):
     def test_check(self):
         results = measurements.check(self.records[0:11])
         self.assertTrue(results == self.expected_results)
-
 
     def test_check_dyn_prop(self):
         results = measurements.check_dyn_prop(self.records[11:])

@@ -27,7 +27,6 @@ class Test(TestCase):
 
         self.assertTrue("isMarine" in self.speciesprofile_fields)
 
-
     def test_verify_querying(self):
 
         """ Verification of speed gain and querying / reconstructing the record structure

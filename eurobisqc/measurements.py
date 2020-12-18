@@ -1,8 +1,8 @@
 """ To check for missing fields in eMoF records as per error masks  """
 
 import sys
-from .util import qc_flags
-from .util import misc
+from eurobisqc.util import qc_flags
+from eurobisqc.util import misc
 from lookupdb import db_functions
 
 error_mask_14 = qc_flags.QCFlag.OBSERVED_COUNT_MISSING.bitmask
@@ -39,33 +39,37 @@ def initialize_lookups():
     if this.lookups_loaded:
         return
 
-    # row factory
+    # row factory - BEWARE - do not use con.row_factory as !
     # db_functions.conn.row_factory = lambda cursor, row: row[0] # important, this has side effects
     # Fill the lookups:
+
+    # COUNT IDs and words
     c = db_functions.conn.cursor()
-    # COUNT
     data = c.execute('SELECT Value FROM countMeasurementTypeID').fetchall()
     this.count_measure_type_ids = [val[0] for val in data]
+
     c = db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM countMeasurementType').fetchall()
     this.count_measure_types = [val[0] for val in data]
-    # SAMPLE
-    c = db_functions.conn.cursor()
 
+    # SAMPLE SIZE IDs and words
+    c = db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM sampleSizeMeasurementTypeID').fetchall()
-    this.sample_size_measure_type_ids =  [val[0] for val in data]
-    c = db_functions.conn.cursor()
-    data= c.execute('SELECT Value FROM sampleSizeMeasurementType').fetchall()
-    this.sample_size_measure_types =  [val[0] for val in data]
-    # WEIGHT
-    c = db_functions.conn.cursor()
+    this.sample_size_measure_type_ids = [val[0] for val in data]
 
+    c = db_functions.conn.cursor()
+    data = c.execute('SELECT Value FROM sampleSizeMeasurementType').fetchall()
+    this.sample_size_measure_types = [val[0] for val in data]
+
+    # WEIGHT IDs and words
+    c = db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM weightMeasurementTypeID').fetchall()
     this.weight_measure_type_ids = [val[0] for val in data]
-    c = db_functions.conn.cursor()
 
+    c = db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM weightMeasurementType').fetchall()
     this.weight_measure_types = [val[0] for val in data]
+
     this.lookups_loaded = True
 
 
@@ -141,8 +145,8 @@ def check_record(record):
     if "measurementTypeID" in record and record["measurementTypeID"] is not None:
 
         measurement_value = None if "measurementValue" not in record else record["measurementValue"]
-        if isinstance(measurement_value,str) :
-            if  not measurement_value.strip():
+        if isinstance(measurement_value, str):
+            if not measurement_value.strip():
                 qc |= check_mtid(record["measurementTypeID"].lower(), None)
         else:
             qc |= check_mtid(record["measurementTypeID"].lower(), measurement_value)
@@ -151,8 +155,8 @@ def check_record(record):
     # We do not have a ID measurement but we have a measurement type
     elif "measurementType" in record and record["measurementType"] is not None:
         measurement_value = None if "measurementValue" not in record else record["measurementValue"]
-        if isinstance(measurement_value,str) :
-            if  not measurement_value.strip():
+        if isinstance(measurement_value, str):
+            if not measurement_value.strip():
                 qc |= check_mt(record["measurementType"].lower(), None)
         else:
             qc |= check_mt(record["measurementType"].lower(), measurement_value)
@@ -170,6 +174,7 @@ def check_record(record):
             qc |= error_mask_17
 
     return qc
+
 
 def check_dyn_prop_record(record):
     """ runs the checks for dynamic property on the occurrence records """
@@ -196,7 +201,6 @@ def check_dyn_prop_record(record):
                                 isinstance(properties[k], str) and not properties[k].strip()):
                             qc |= error_mask_14
 
-
                 for wmt in this.weight_measure_types:
                     if wmt in key:
                         if properties[k] is None or (
@@ -214,6 +218,7 @@ def check_dyn_prop_record(record):
 def check_dyn_prop(records):
     """ runs the checks for dynamic property on the occurrence records """
     return [check_dyn_prop_record(record) for record in records]
+
 
 def check(records):
     """ runs the checks for multiple records """

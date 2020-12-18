@@ -1,5 +1,6 @@
 from unittest import TestCase
 from eurobisqc import location
+from eurobisqc.util.qc_flags import QCFlag
 
 
 class Test(TestCase):
@@ -29,7 +30,15 @@ class Test(TestCase):
         for record in self.records:
             results.append(location.check_basic_record(record))
 
-        assert (results == [0, 8, 16, 16, 0, 0, 0, 0, 0])
+        assert (results == [0,
+                            QCFlag.GEO_LAT_LON_MISSING.bitmask,  # 8
+                            QCFlag.GEO_LAT_LON_INVALID.bitmask,  # 16
+                            QCFlag.GEO_LAT_LON_INVALID.bitmask,  # 16
+                            0,
+                            0,
+                            0,
+                            0,
+                            0])
 
     def test_check_xy(self):
         """ tests calls to the lookup service through pyxylookup """
@@ -42,7 +51,15 @@ class Test(TestCase):
         results = location.check_xy(self.records)
         print(results)
 
-        assert (results == [0, 0, 0, 0, 32, 262176, 0, 262144, 0])
+        assert (results == [0,
+                            0,
+                            0,
+                            0,
+                            QCFlag.GEO_LAT_LON_NOT_SEA.bitmask,  # 32
+                            QCFlag.GEO_LAT_LON_NOT_SEA.bitmask | QCFlag.WRONG_DEPTH_MAP.bitmask,  # 262176
+                            0,
+                            QCFlag.WRONG_DEPTH_MAP.bitmask,  # 262144\
+                            0])
 
     def test_api_call(self):
         """ Generates a number of valid/plausible geographical points and calls the pyxylookup API

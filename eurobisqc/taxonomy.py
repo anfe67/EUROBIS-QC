@@ -4,9 +4,10 @@
 import sys
 from lookupdb import db_functions
 
-from eurobisqc.util import qc_flags, misc
+from eurobisqc.util import qc_flags
+from eurobisqc.util import misc
 
-this = this = sys.modules[__name__]
+this = sys.modules[__name__]
 
 # Masks used to build the return value when the quality check fails
 error_mask_2 = qc_flags.QCFlag.TAXONOMY_APHIAID_MISS.bitmask  # Is the AphiaID Completed
@@ -87,7 +88,7 @@ def check_record(record):
             qc |= error_mask_2  # None of the scientificName fields are filled or valid
 
     else:
-        pass # We have already an aphiaid from the scientificNameId
+        pass  # We have already an aphiaid from the scientificNameId
 
     return qc
 
@@ -97,8 +98,7 @@ def check(records):
 
     # Ensure DB is available
     if db_functions.conn is None:
-        db_functions.open_db() # It shall be closed on exit
+        db_functions.open_db()  # It shall be closed on exit
 
     results = [check_record(record) for record in records]
     return results
-

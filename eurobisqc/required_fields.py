@@ -11,12 +11,12 @@ error_mask_1 = qc_flags.QCFlag.REQUIRED_FIELDS_MISS.bitmask
 error_mask_10 = qc_flags.QCFlag.NO_OBIS_DATAFORMAT.bitmask
 
 this.required_fields = ["eventDate", "decimalLongitude", "decimalLatitude", "scientificName", "scientificNameID",
-                   "occurrenceStatus", "basisOfRecord"]
+                        "occurrenceStatus", "basisOfRecord"]
 
 this.recommended_fields = ["minimumDepthInMeters", "maximumDepthInMeters"]  # Decide whether to do something with these
 
 this.values = ["PreservedSpecimen", "FossilSpecimen", "LivingSpecimen", "MaterialSample", "Event", "HumanObservation",
-             "MachineObservation", "Taxon", "Occurrence"]
+               "MachineObservation", "Taxon", "Occurrence"]
 
 this.vocab = [value.lower() for value in this.values]
 
@@ -49,7 +49,7 @@ def check_record_required(record, option=False):
 
         if count != len(this.required_fields):
             qc |= error_mask_1
-    else :
+    else:
         qc |= error_mask_1
     # An option to be pedantic and require presence of the optional fields
     if option:
@@ -75,7 +75,7 @@ def check_record_obis_format(record):
 
     # QC 10
     if "basisOfRecord" in record and record["basisOfRecord"] is not None:
-        if not record["basisOfRecord"].lower() in  this.vocab:
+        if not record["basisOfRecord"].lower() in this.vocab:
             qc |= error_mask_10
     else:
         qc |= error_mask_10
@@ -91,6 +91,7 @@ def check_obis(records):
 
     return [check_record_obis_format(record) for record in records]
 
+
 def check_required(records):
     """ To be called for a batch of records (list)
         :param records:
@@ -98,6 +99,7 @@ def check_required(records):
         """
 
     return [check_record_required(record) for record in records]
+
 
 def check(records):
     """ To be called for a batch of records (list)

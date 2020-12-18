@@ -5,8 +5,8 @@
     """
 import logging
 
-from .util import qc_flags
-from .util import misc
+from eurobisqc.util import qc_flags
+from eurobisqc.util import misc
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ error_mask_4 = qc_flags.QCFlag.GEO_LAT_LON_MISSING.bitmask
 error_mask_5 = qc_flags.QCFlag.GEO_LAT_LON_INVALID.bitmask
 
 # Need external call to xylookup
-error_mask_6 = qc_flags.QCFlag.GEO_LAT_LON_NOT_SEA.bitmask  # TODO
+error_mask_6 = qc_flags.QCFlag.GEO_LAT_LON_NOT_SEA.bitmask
 
 # Need to verify if lat, lon are in specific area (assume rectangle)
 error_mask_9 = qc_flags.QCFlag.GEO_COORD_AREA.bitmask
@@ -50,8 +50,10 @@ def check_basic_record(record):
     qc_mask |= check_depth_consistent(record)
     return qc_mask
 
+
 def check_basic(records):
     return [check_basic_record(record) for record in records]
+
 
 def check_record_in_area(record, area):
     """ verifies that a geographical point is in a the rectangle area
@@ -63,13 +65,8 @@ def check_record_in_area(record, area):
 
     qc = 0
 
-    # Region boundaries
-    if area is not None:
-        east = area[0][0]
-        west = area[0][1]
-        north = area[1][0]
-        south = area[1][1]
-    else:
+    # In case the call is nonsensical
+    if area is None:
         return qc
 
     # extracting from record
@@ -79,10 +76,11 @@ def check_record_in_area(record, area):
             point_x = float(record['decimalLongitude'])
             point_y = float(record['decimalLatitude'])
 
-            if not (west <= point_x <= east) or not (south <= point_y <= north):
+            if not (area["west"] <= point_x <= area["east"]) or not (area["south"] <= point_y <= area["north"]):
                 qc |= error_mask_9
 
     return qc
+
 
 def check_in_area(records, area):
     """ verifies that a geographical point is in a the rectangle area
@@ -94,25 +92,20 @@ def check_in_area(records, area):
 
     results = []
 
-    # Region boundaries
-    if area is not None:
-        east = area[0][0]
-        west = area[0][1]
-        north = area[1][0]
-        south = area[1][1]
-    else:
-        return [0 for record in records]
+    # In case the call is nonsensical
+    if area is None:
+        return [0] * len(records)
 
     # extracting from record
     for record in records:
-        qc =0
+        qc = 0
         if 'decimalLongitude' in record and 'decimalLatitude' in record:
             if misc.is_number(record['decimalLongitude']) and misc.is_number(record['decimalLatitude']):
 
                 point_x = float(record['decimalLongitude'])
                 point_y = float(record['decimalLatitude'])
 
-                if not (west <= point_x <= east) or not (south <= point_y <= north):
+                if not (area["west"] <= point_x <= area["east"]) or not (area["south"] <= point_y <= area["north"]):
                     qc |= error_mask_9
         results.append(qc)
 
@@ -181,12 +174,21 @@ def check_xy(records):
             if "QC" in record and not (record["QC"] & error_mask_18):
                 for depth_field in ["minimumDepthInMeters", "maximumDepthInMeters"]:
                     if depth_field in record and "bathymetry" in xy["grids"]:
+                        # Sanity check to verify we are not looking at a string
+                        depth_check = misc.check_float(record[depth_field])
+                        if depth_check["valid"]:
+                            depth = depth_check["float"]
+                        else:
+                            depth = None
+
+                        # Should do it also for bathymetry
                         if xy["grids"]["bathymetry"] < 0:
-                            # We can do this because error mask is not set (FLAG: THIS NEEDS TO BE VERIFIED!!)
-                            if float(record[depth_field]) > intercept + xy["grids"]["bathymetry"]:
+                            # We can do this because error mask is not set
+                            # FLAG: THIS NEEDS TO BE VERIFIED, I did not understand the original algorithm
+                            if depth is not None and depth > intercept + xy["grids"]["bathymetry"]:
                                 qc |= error_mask_19
                         else:
-                            if record[depth_field] > intercept + xy["grids"]["bathymetry"] * slope:
+                            if depth is not None and depth > intercept + xy["grids"]["bathymetry"] * slope:
                                 qc |= error_mask_19
 
             # Check point on land

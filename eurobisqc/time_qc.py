@@ -12,8 +12,6 @@ logger = logging.getLogger(__name__)
 error_mask_7 = qc_flags.QCFlag.DATE_TIME_NOT_COMPLETE.bitmask
 error_mask_11 = qc_flags.QCFlag.INVALID_DATE_1.bitmask
 error_mask_12 = qc_flags.QCFlag.INVALID_DATE_2.bitmask
-
-# TODO sampling time or timezone not completed
 error_mask_13 = qc_flags.QCFlag.INVALID_DATE_3.bitmask
 
 

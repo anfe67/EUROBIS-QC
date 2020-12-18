@@ -139,6 +139,8 @@ VC with Bart and agreed to proceed as proposed: pyxylookup, speed, tests/coverag
 - Reference to download archives: http://ipt.vliz.be/eurobis/
 - Bathymetry site to verify or get test points: https://maps.ngdc.noaa.gov/viewers/bathymetry/
 
+---
+
 ## 17/12/2020 
 -- Verify Measurements and test cases, OK (Separated check for dynamic properties from check on eMoF, because 
 dynamic properties are in occurrence records). 
@@ -146,6 +148,28 @@ dynamic properties are in occurrence records).
 ming that calls to pyxylookup work much better if grouped in chunks. 
 -- Verified nosetests from pycharm, need to verify all imports to make it clean from terminal
 
+---
+
+# 18/12/2020
+- Resuming test/test coverage/imports review. Decent coverage and nosetest achieved. 
+- Establishing precedence of QCs to optimize pipeline. 
+  1) Required Fields (1, 10)
+  2) Basic Location checks (4, 5, 9, 18) 
+  3) Taxonomy Checks (2, 3)
+  4) Date Time (7, 11, 12, 13)
+  5) Measurements (14, 15, 16, 17)
+  6) XY Lookup after all the processing above (6, 19)  
+
+- Applied the above to 
+
+While running points 1-5 will the **suitable** records shall be aggregated in lists with a max size to be established, 
+to call for the xy-lookup service in batches of that max size. The call to **pyxylookup** shall be performed when 
+either max size is reached (and results reaggregated) or the file is completely process 
+Multiple QC processes can be run in parallel on different batches of files from an "orchestrator" process (one process 
+shall treat one file at the time but N (10 for instance) processes can run independently. Logs shall report the status
+of each file processed).
+
+- **QUESTION: An eMoF record can never be a core record, right or wrong?** 
 - **Review pipeline to check the records in order and in chunks when possible** 
 - **NOTE: Measurements check should be OK, DB was broken due to lambda - FIXED** 
 - **TODO: Speed/Concept improvements (possible parallelism?)**

@@ -1,10 +1,14 @@
 import datetime
 import re
-from . import qc_flags
-from pyxylookup.pyxylookup import lookup
+from eurobisqc.util import qc_flags
 
 
 def check_float(value, valid_range=None):
+    """ From OBIS-QC, takes a value and determines if this is a valid representation of a float
+        which lies within the given range
+        :param value - The number
+        :param valid_range - The range within the value must lie  """
+
     result = {"valid": None, "float": None, "in_range": None}
     if value is not None:
         try:
@@ -94,6 +98,10 @@ def do_xylookup(records):
         for LAT - LON presence and validity - QC field must
         be present """
 
+    # FLAG: This is ok in pycharm not for nosetest
+    from pyxylookup.pyxylookup import lookup
+    # FLAG: Ths is ok for nosetest, not for running in pycharm
+    # import pyxylookup # and then use pyxylookup.lookup
     output = [None] * len(records)
     indices = []
     coordinates = []

@@ -9,7 +9,7 @@ class Test(TestCase):
         {"id": 1, "scientificName": "Orca gladiator"},  # No Scientific name but in DB there is at least Genus
         {"id": 2, "scientificName": "**non-current code** ??"},  # No scientific name
         {"id": 3, "scientificNameID": "urn:lsid:marinespecies.org:taxname:136980"},  # No Genus
-        {"id": 4, "scientificNameID": "urn:lsid:marinespecies.org:taxname:136980"}, # No Genus repeat
+        {"id": 4, "scientificNameID": "urn:lsid:marinespecies.org:taxname:136980"},  # No Genus repeat
     ]
 
     def test_check_taxa(self):

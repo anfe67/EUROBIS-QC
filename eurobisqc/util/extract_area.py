@@ -53,6 +53,6 @@ def find_area(xml_input):
             if east == 180 and west == -180 and south == -90 and north == 90:
                 return None
 
-            return [(east, west), (north, south)]
+            return {"east": east, "west": west, "north": north, "south": south}
         else:
             return None

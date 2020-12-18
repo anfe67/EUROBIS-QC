@@ -61,12 +61,14 @@ def get_record(table, field_name, value, fields):
 
     return record
 
+
 @atexit.register
 def close_down():
     """ Upon unloading the module close the DB connection """
 
     if this.conn is not None:
         close_db()
+
 
 # Connection should be opened upon load - do not remove
 this.conn = open_db()
