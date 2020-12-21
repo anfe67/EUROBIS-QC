@@ -1,9 +1,13 @@
 import sys
+import os
 import time
 from dwcaprocessor import DwCAProcessor
+
+# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
+# print('__file__={0:<35} | __name__={1:<20} | __package__={2:<20}'.format(__file__,__name__,str(__package__)))
+
 from eurobisqc import location
 from eurobisqc import required_fields
-from eurobisqc import old_taxonomy
 from eurobisqc import taxonomy
 from eurobisqc import time_qc
 from eurobisqc import measurements
@@ -33,14 +37,10 @@ for ext_record in archive.extensions:
         else:
             coord_in_occur = False
 
-# Taxonomy needs to call the lookup-db service
-check_taxonomy = False
-check_taxonomy_db = True
-
 record_count = 0
 with_print = False
 
-# Stock in this list records for lookup (QCs 6 and 19)
+# Stock in this list records for lookup (to execute QCs 6 and 19)
 records_for_lookup = []
 
 # Batch lookup size (should verify)
@@ -53,11 +53,11 @@ time_start = time.time()
 for coreRecord in archive.core_records():
     record_count += 1
     if with_print:
-        print("+++ core: " + archive.core.type)
+        print(f"---> core: {archive.core.type}")
     # Attempt check for lat/lon in full record
     full_core = coreRecord["full"]
 
-    # Core Record
+    # Core Record (any type)
     # Check location
 
     qc = location.check_basic_record(full_core)
@@ -107,15 +107,22 @@ for coreRecord in archive.core_records():
             full_core["QC"] = full_core["QC"] | qc
 
         # QC 2 and 3 (Taxonomy)
-        if check_taxonomy_db:
-            qc = taxonomy.check_record(full_core)
-            full_core["QC"] = full_core["QC"] | qc
+        qc = taxonomy.check_record(full_core)
+        full_core["QC"] = full_core["QC"] | qc
 
         # QC 7, 11, 12 13 (Dates - times)
         qc = time_qc.check_record(full_core, 0)
         full_core["QC"] = full_core["QC"] | qc
 
-    elif archive.core.type == "ExtendedMeasurementOrFact":
+        # Sex
+        qc = measurements.check_sex_record(full_core)
+        full_core["QC"] = full_core["QC"] | qc
+
+        # Dynamic properties
+        qc = measurements.check_dyn_prop_record(full_core)
+        full_core["QC"] = full_core["QC"] | qc
+
+    elif archive.core.type == "MeasurementOrFact" or archive.core.type == "ExtendedMeasurementOrFact":
         # Check measurements (this cannot be, this record type cannot ever be "Core",
         # so it is will never be called, looking for confirmation)
         qc = measurements.check_record(full_core)
@@ -128,10 +135,10 @@ for coreRecord in archive.core_records():
         print(full_core)
 
     for e in archive.extensions:
-        record_count += 1
         if with_print:
             print("--- extension: " + e.type)
         for extensionRecord in archive.extension_records(e):
+            record_count += 1
             if e.type == "Occurrence":
                 full_extension = extensionRecord["full"]
 
@@ -158,22 +165,25 @@ for coreRecord in archive.core_records():
                             count_lookups += 1
                             records_for_lookup = []
 
-                # Check taxonomy (This shall be removed)
-                if check_taxonomy:
-                    qc = old_taxonomy.check(full_extension)
-                    full_extension["QC"] = full_extension["QC"] | qc
-
-                if check_taxonomy_db:
-                    qc = taxonomy.check_record(full_extension)
-                    full_extension["QC"] = full_extension["QC"] | qc
+                # Check taxonomy
+                qc = taxonomy.check_record(full_extension)
+                full_extension["QC"] = full_extension["QC"] | qc
 
                 # Check dates (This is a repeat)
                 qc = time_qc.check_record(full_extension, 0)
                 full_extension["QC"] = full_extension["QC"] | qc
+
+                # Check sex
+                qc = measurements.check_sex_record(full_extension)
+                full_extension["QC"] = full_extension["QC"] | qc
+
+                # Check dynamic properties
+                qc = measurements.check_dyn_prop_record(full_extension)
+                full_extension["QC"] = full_extension["QC"] | qc
                 if with_print:
                     print(full_extension)
 
-            if e.type == "ExtendedMeasurementOrFact":
+            if e.type == "MeasurementOrFact" or e.type == "ExtendedMeasurementOrFact":
                 full_extension = extensionRecord["full"]
                 # Check measurements
                 qc = measurements.check_record(full_extension)
@@ -190,11 +200,12 @@ if len(records_for_lookup) >= 0:
     outputs = location.check_xy(records_for_lookup)
     count_lookups += 1
     # Empty the list
+    print(f"Records looked up: {1000 * (count_lookups - 1) + len(records_for_lookup)}")
     records_for_lookup = []
-    print(outputs)  # This will just work for one time, it is to see some results
 
-print(f"Record count: {record_count}")
-print(f"Total time: {time.time() - time_start}")
+print(f"Filename processed: {filename}")
 print(f"XY lookups: {count_lookups}")
+print(f"Records processed: {record_count}")
+print(f"Total time: {time.time() - time_start}")
 
 sys.exit()

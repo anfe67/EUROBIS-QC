@@ -169,9 +169,19 @@ Multiple QC processes can be run in parallel on different batches of files from 
 shall treat one file at the time but N (10 for instance) processes can run independently. Logs shall report the status
 of each file processed).
 
+## 21/12/2020 
+
+- Running against more files to evaluate processing times and find possible errors (at least two found, 
+  so this is a good process, need to test more) 
+- Corrections made, 
+- Investigating possible ways to implement parallelism
+
+---
+
 - **QUESTION: An eMoF record can never be a core record, right or wrong?** 
-- **Review pipeline to check the records in order and in chunks when possible** 
+- **Review pipeline to check the records in order and in chunks when possible** done, it seems not doable 
 - **NOTE: Measurements check should be OK, DB was broken due to lambda - FIXED** 
 - **TODO: Speed/Concept improvements (possible parallelism?)**
 - **ONGOING: Complete tests and coverage**
-- **TODO: Produce Installable library**
+- **ONGOING: Produce Installable library**
+

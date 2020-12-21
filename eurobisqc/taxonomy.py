@@ -74,6 +74,10 @@ def check_record(record):
         # No Aphiaid Attempt to query by scientificName
         if "scientificName" in record and record["scientificName"] is not None:
 
+            # Have something to query
+            if len(this.taxon_fields) == 0:
+                populate_fields()
+
             # Have something to query upon
             taxon_record = db_functions.get_record('taxon', 'scientificName',
                                                    record['scientificName'], this.taxon_fields)

@@ -27,8 +27,9 @@ this.sample_size_measure_types = []
 this.sample_size_measure_type_ids = []
 
 # Same question for sex / gender (vocabulary) - no need for database lookup for this
+# Sets are faster than lists for lookups
 sex_field = "sex"
-sex_field_vocab = ["female", "male", "hermaphrodite"]
+sex_field_vocab = {"female", "male", "hermaphrodite"}
 
 this.lookups_loaded = False
 
@@ -82,23 +83,28 @@ def check_mtid(measurement_type_id, measurement_value):
         purpose: attempt optimization """
 
     qc = 0
+    found = False
     # Is the measurement type id of a biomass weight
     for wmtid in this.weight_measure_type_ids:
         if wmtid in measurement_type_id:
+            found = True
             if measurement_value is None:
                 qc |= error_mask_15
 
-    # Is it the measurement of a sample size
-    for smtid in this.sample_size_measure_type_ids:
-        if smtid in measurement_type_id:
-            if measurement_value is None:
-                qc |= error_mask_16
+    # Is it the measurement of a sample size - do not check if found
+    if not found:
+        for smtid in this.sample_size_measure_type_ids:
+            if smtid in measurement_type_id:
+                found = True
+                if measurement_value is None:
+                    qc |= error_mask_16
 
-    # Is it a head count
-    for cmtid in this.count_measure_type_ids:
-        if cmtid in measurement_type_id:
-            if measurement_value is None:
-                qc |= error_mask_14
+    # Is it a head count - do not check if found
+    if not found:
+        for cmtid in this.count_measure_type_ids:
+            if cmtid in measurement_type_id:
+                if measurement_value is None:
+                    qc |= error_mask_14
     return qc
 
 
@@ -111,23 +117,28 @@ def check_mt(measurement_type, measurement_value):
         purpose: attempt optimization """
 
     qc = 0
+    found = False
     # Is the measurement type id of a biomass weight
     for wmt in this.weight_measure_types:
         if wmt in measurement_type:
+            found = True
             if measurement_value is None:
                 qc |= error_mask_15
 
     # Is it the measurement of a sample size
-    for smt in this.sample_size_measure_types:
-        if smt in measurement_type:
-            if measurement_value is None:
-                qc |= error_mask_16
+    if not found:
+        for smt in this.sample_size_measure_types:
+            if smt in measurement_type:
+                found = True
+                if measurement_value is None:
+                    qc |= error_mask_16
 
     # Is it a head count
-    for cmt in this.count_measure_types:
-        if cmt in measurement_type:
-            if measurement_value is None:
-                qc |= error_mask_14
+    if not found:
+        for cmt in this.count_measure_types:
+            if cmt in measurement_type:
+                if measurement_value is None:
+                    qc |= error_mask_14
     return qc
 
 
@@ -165,14 +176,21 @@ def check_record(record):
         # Nothing else to verify
         pass
 
-    # We still have to look at sex
+    return qc
+
+
+def check_sex_record(record):
+    """ The sex field is only present in the occurrence records, it makes sense to separate """
+
+    qc = 0
+
+    # We still have to look at sex (for occurrence records)
     if "sex" in record:
         if record["sex"] is not None:
             if record["sex"] not in sex_field_vocab:
                 qc |= error_mask_17
         else:
             qc |= error_mask_17
-
     return qc
 
 
@@ -215,11 +233,16 @@ def check_dyn_prop_record(record):
     return qc
 
 
+def check_sex(records):
+    """ runs the sex check on a list of occurrence records """
+    return [check_sex_record(record) for record in records]
+
+
 def check_dyn_prop(records):
     """ runs the checks for dynamic property on the occurrence records """
     return [check_dyn_prop_record(record) for record in records]
 
 
 def check(records):
-    """ runs the checks for multiple records """
+    """ runs the checks for multiple records (of type eMoF) """
     return [check_record(record) for record in records]

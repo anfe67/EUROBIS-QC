@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name="eurobisqc",
-      version="0.0.5",
+      version="0.1.0",
       python_requires='>=3.6',
       url="https://github.com/anfe67/eurobis-qc",
       license="MIT",

@@ -3,7 +3,6 @@ from eurobisqc import required_fields
 from eurobisqc.util.qc_flags import QCFlag
 
 
-# TODO - Re-allign to the class being tested
 class Test(TestCase):
     records = [
         {"id": 0},  # No fields

@@ -23,6 +23,8 @@ class Test(TestCase):
         {"id": 12, "dynamicProperties": "Net type: Bogorov-Rass; Net mouth opening: 0.8 m; Mesh size: 300 mkm"},  # OK
         {"id": 13, "dynamicProperties": "ObservedWeightInGrams=0.00052"},  # OK
         {"id": 14, "dynamicProperties": "ObservedWeightInGrams=' '"},  # NOT OK
+        {"id": 15, "sex": "hermaphrodite"},  # SEX - OK
+        {"id": 16, "sex": "multiversion"}  # SEX - NOT OK
     ]
 
     expected_results = [0,
@@ -44,6 +46,9 @@ class Test(TestCase):
                                  qc_flags.QCFlag.OBSERVED_WEIGTH_MISSING.bitmask  # Verify should be weight
                                  ]
 
+    expected_results_sex = [0,
+                            qc_flags.QCFlag.SEX_MISSING.bitmask]
+
     def test_check_record(self):
         results = []
         for record in self.records[0:11]:
@@ -56,5 +61,9 @@ class Test(TestCase):
         self.assertTrue(results == self.expected_results)
 
     def test_check_dyn_prop(self):
-        results = measurements.check_dyn_prop(self.records[11:])
+        results = measurements.check_dyn_prop(self.records[11:15])
         self.assertTrue(results == self.expected_results_dyn_prop)
+
+    def test_check_sex(self):
+        results = measurements.check_sex(self.records[15:])
+        self.assertTrue(results == self.expected_results_sex)

@@ -98,9 +98,9 @@ def do_xylookup(records):
         for LAT - LON presence and validity - QC field must
         be present """
 
-    # FLAG: This is ok in pycharm not for nosetest
+    # FLAG: This is ok in pycharm not for nosetest from terminal
     from pyxylookup.pyxylookup import lookup
-    # FLAG: Ths is ok for nosetest, not for running in pycharm
+    # FLAG: Ths is ok for nosetest, not for running in pycharm from terminal
     # import pyxylookup # and then use pyxylookup.lookup
     output = [None] * len(records)
     indices = []
