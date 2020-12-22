@@ -47,7 +47,7 @@ class Test(TestCase):
                                  ]
 
     expected_results_sex = [0,
-                            qc_flags.QCFlag.SEX_MISSING.bitmask]
+                            qc_flags.QCFlag.SEX_MISSING_OR_WRONG.bitmask]
 
     def test_check_record(self):
         results = []

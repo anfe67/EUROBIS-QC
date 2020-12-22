@@ -8,7 +8,7 @@ from lookupdb import db_functions
 error_mask_14 = qc_flags.QCFlag.OBSERVED_COUNT_MISSING.bitmask
 error_mask_15 = qc_flags.QCFlag.OBSERVED_WEIGTH_MISSING.bitmask
 error_mask_16 = qc_flags.QCFlag.SAMPLE_SIZE_MISSING.bitmask
-error_mask_17 = qc_flags.QCFlag.SEX_MISSING.bitmask
+error_mask_17 = qc_flags.QCFlag.SEX_MISSING_OR_WRONG.bitmask
 
 this = sys.modules[__name__]
 
@@ -82,14 +82,14 @@ def check_mtid(measurement_type_id, measurement_value):
         :param measurement_value - as in the record
         purpose: attempt optimization """
 
-    qc = 0
+    qc_mask = 0
     found = False
     # Is the measurement type id of a biomass weight
     for wmtid in this.weight_measure_type_ids:
         if wmtid in measurement_type_id:
             found = True
             if measurement_value is None:
-                qc |= error_mask_15
+                qc_mask |= error_mask_15
 
     # Is it the measurement of a sample size - do not check if found
     if not found:
@@ -97,15 +97,15 @@ def check_mtid(measurement_type_id, measurement_value):
             if smtid in measurement_type_id:
                 found = True
                 if measurement_value is None:
-                    qc |= error_mask_16
+                    qc_mask |= error_mask_16
 
     # Is it a head count - do not check if found
     if not found:
         for cmtid in this.count_measure_type_ids:
             if cmtid in measurement_type_id:
                 if measurement_value is None:
-                    qc |= error_mask_14
-    return qc
+                    qc_mask |= error_mask_14
+    return qc_mask
 
 
 def check_mt(measurement_type, measurement_value):
@@ -116,14 +116,14 @@ def check_mt(measurement_type, measurement_value):
         :param measurement_value - as in the record
         purpose: attempt optimization """
 
-    qc = 0
+    qc_mask = 0
     found = False
     # Is the measurement type id of a biomass weight
     for wmt in this.weight_measure_types:
         if wmt in measurement_type:
             found = True
             if measurement_value is None:
-                qc |= error_mask_15
+                qc_mask |= error_mask_15
 
     # Is it the measurement of a sample size
     if not found:
@@ -131,22 +131,22 @@ def check_mt(measurement_type, measurement_value):
             if smt in measurement_type:
                 found = True
                 if measurement_value is None:
-                    qc |= error_mask_16
+                    qc_mask |= error_mask_16
 
     # Is it a head count
     if not found:
         for cmt in this.count_measure_types:
             if cmt in measurement_type:
                 if measurement_value is None:
-                    qc |= error_mask_14
-    return qc
+                    qc_mask |= error_mask_14
+    return qc_mask
 
 
 def check_record(record):
     """ Applies the sampling verifications, input should be a
         eMoF record or one containing the requested fields """
 
-    qc = 0
+    qc_mask = 0
 
     # It shall be done only once on the first entry
     if not this.lookups_loaded:
@@ -158,9 +158,9 @@ def check_record(record):
         measurement_value = None if "measurementValue" not in record else record["measurementValue"]
         if isinstance(measurement_value, str):
             if not measurement_value.strip():
-                qc |= check_mtid(record["measurementTypeID"].lower(), None)
+                qc_mask |= check_mtid(record["measurementTypeID"].lower(), None)
         else:
-            qc |= check_mtid(record["measurementTypeID"].lower(), measurement_value)
+            qc_mask |= check_mtid(record["measurementTypeID"].lower(), measurement_value)
 
 
     # We do not have a ID measurement but we have a measurement type
@@ -168,37 +168,37 @@ def check_record(record):
         measurement_value = None if "measurementValue" not in record else record["measurementValue"]
         if isinstance(measurement_value, str):
             if not measurement_value.strip():
-                qc |= check_mt(record["measurementType"].lower(), None)
+                qc_mask |= check_mt(record["measurementType"].lower(), None)
         else:
-            qc |= check_mt(record["measurementType"].lower(), measurement_value)
+            qc_mask |= check_mt(record["measurementType"].lower(), measurement_value)
 
     else:
         # Nothing else to verify
         pass
 
-    return qc
+    return qc_mask
 
 
 def check_sex_record(record):
     """ The sex field is only present in the occurrence records, it makes sense to separate """
 
-    qc = 0
+    qc_mask = 0
 
     # We still have to look at sex (for occurrence records)
     if "sex" in record:
         if record["sex"] is not None:
             if record["sex"] not in sex_field_vocab:
-                qc |= error_mask_17
+                qc_mask |= error_mask_17
         else:
-            qc |= error_mask_17
-    return qc
+            qc_mask |= error_mask_17
+    return qc_mask
 
 
 def check_dyn_prop_record(record):
     """ runs the checks for dynamic property on the occurrence records """
     # This is a check on the properties field - to be done on the occurrence records
 
-    qc = 0
+    qc_mask = 0
 
     # It shall be done only once on the first entry
     if not this.lookups_loaded:
@@ -217,20 +217,20 @@ def check_dyn_prop_record(record):
                     if cmt in key:
                         if properties[k] is None or (
                                 isinstance(properties[k], str) and not properties[k].strip()):
-                            qc |= error_mask_14
+                            qc_mask |= error_mask_14
 
                 for wmt in this.weight_measure_types:
                     if wmt in key:
                         if properties[k] is None or (
                                 isinstance(properties[k], str) and not properties[k].strip()):
-                            qc |= error_mask_15
+                            qc_mask |= error_mask_15
 
                 for smt in this.sample_size_measure_types:
                     if smt in key:
                         if properties[k] is None or (
                                 isinstance(properties[k], str) and not properties[k].strip()):
-                            qc |= error_mask_16
-    return qc
+                            qc_mask |= error_mask_16
+    return qc_mask
 
 
 def check_sex(records):

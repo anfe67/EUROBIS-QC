@@ -2,7 +2,6 @@ import datetime
 import re
 from eurobisqc.util import qc_flags
 
-
 def check_float(value, valid_range=None):
     """ From OBIS-QC, takes a value and determines if this is a valid representation of a float
         which lies within the given range
@@ -98,16 +97,17 @@ def do_xylookup(records):
         for LAT - LON presence and validity - QC field must
         be present """
 
-    # FLAG: This is ok in pycharm not for nosetest from terminal
-    from pyxylookup.pyxylookup import lookup
-    # FLAG: Ths is ok for nosetest, not for running in pycharm from terminal
-    # import pyxylookup # and then use pyxylookup.lookup
+    # RESOLVED: This is ok in pycharm not for nosetest from terminal
+    # from pyxylookup.pyxylookup import lookup
+    # RESOLVED: Ths is ok for nosetest or running in a python console, not for running in pycharm
+    import pyxylookup as pxy # and then use pyxylookup.lookup
+
     output = [None] * len(records)
     indices = []
     coordinates = []
     for i in range(len(records)):
         record = records[i]
-        # The record has been already checked for LAT LON validity, but verify anyway...
+        # The record has been already checked LAT LON validity, but verify anyway...
         if "decimalLongitude" in record and \
                 "decimalLatitude" in record and \
                 "QC" in record and \
@@ -120,7 +120,7 @@ def do_xylookup(records):
             coordinates.append([lon, lat])
 
     if len(coordinates) > 0:
-        xy = lookup(coordinates, shoredistance=True, grids=True, areas=True)
+        xy = pxy.lookup(coordinates, shoredistance=True, grids=True, areas=True)
         for i in range(len(indices)):
             output[indices[i]] = xy[i]
     return output

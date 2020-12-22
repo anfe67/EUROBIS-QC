@@ -169,6 +169,8 @@ Multiple QC processes can be run in parallel on different batches of files from 
 shall treat one file at the time but N (10 for instance) processes can run independently. Logs shall report the status
 of each file processed).
 
+---
+
 ## 21/12/2020 
 
 - Running against more files to evaluate processing times and find possible errors (at least two found, 
@@ -178,10 +180,27 @@ of each file processed).
 
 ---
 
-- **QUESTION: An eMoF record can never be a core record, right or wrong?** 
-- **Review pipeline to check the records in order and in chunks when possible** done, it seems not doable 
-- **NOTE: Measurements check should be OK, DB was broken due to lambda - FIXED** 
-- **TODO: Speed/Concept improvements (possible parallelism?)**
-- **ONGOING: Complete tests and coverage**
-- **ONGOING: Produce Installable library**
+## 22/12/2020
 
+- Checking more DwCA files...  
+- Corrected decode_mask in qc_flags, removing loggers and decided that the external callers 
+  shall do the logging
+- Using loggers in dev_pipeline to understand better the data 
+- Tested the pipeline outside the IDE in the global environment (Installing all required packages beforehand)
+- Required packages for the dev pipeline: dwca_processor, isodateparser and pyxylookup. Packages part of 
+eurobis-qc: eurobisqc and lookupdb. 
+  
+- **QUESTION: Is the WORMS DB that I have a full dump ( case of urn:lsid:marinespecies.org:taxname:144431 )? 
+  It is because some the classifications are not public. ANSWERED**
+- **QUESTION: An eMoF or MoF record can never be a core record, right or wrong? Correct. ANSWERED**
+- **QUESTION: Way ahead? Discussion on how to apply all the changes to the DB** 
+- **DONE: Review pipeline to check the records in order and in chunks when possible** Negative, not doable 
+
+---
+
+- **NOTE: Area extraction and QC needs to be reviewed for multiple areas**
+- **ONGOING: Verify that the pipeline works on all available files***   
+- **ONGOING: Complete tests and coverage**
+- **ONGOING: Produce Installable library** 
+- **TODO: Speed/Concept improvements (possible parallelism?)**
+- **TODO: Area check needs to be an "or" between all the areas in the EML** 

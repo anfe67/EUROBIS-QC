@@ -3,27 +3,24 @@
     to perform basic checks (lat lon presence for instance) before calling the pxylookup
     to verify if the point is on land.
     """
-import logging
-
 from eurobisqc.util import qc_flags
 from eurobisqc.util import misc
-
-logger = logging.getLogger(__name__)
 
 error_mask_4 = qc_flags.QCFlag.GEO_LAT_LON_MISSING.bitmask
 error_mask_5 = qc_flags.QCFlag.GEO_LAT_LON_INVALID.bitmask
 
-# Need external call to xylookup
+# Call to xylookup
 error_mask_6 = qc_flags.QCFlag.GEO_LAT_LON_NOT_SEA.bitmask
 
-# Need to verify if lat, lon are in specific area (assume rectangle)
+# Need to verify if lat, lon are in specific area (assume areas are rectangles)
 error_mask_9 = qc_flags.QCFlag.GEO_COORD_AREA.bitmask
 
 # are the dephts coherent
 error_mask_18 = qc_flags.QCFlag.MIN_MAX_DEPTH_ERROR.bitmask
 
-# Need external call to xylookup or bathymetry service
+# Within the call to xylookup
 error_mask_19 = qc_flags.QCFlag.WRONG_DEPTH_MAP.bitmask
+
 
 def check_basic_record(record):
     """ obis-qc equivalent function, to assign bitmask
@@ -39,11 +36,14 @@ def check_basic_record(record):
         # Are they valid ?
         result = misc.check_float(record['decimalLongitude'], [-180, 180])
         result2 = misc.check_float(record['decimalLatitude'], [-90, 90])
-        if not result["valid"] or not result2["valid"]:
+        if result["valid"] and result2["valid"]:
+            pass
+        else:
             qc_mask |= error_mask_5
 
     # Depths - consistency
     qc_mask |= check_depth_consistent(record)
+
     return qc_mask
 
 
@@ -59,11 +59,11 @@ def check_record_in_area(record, area):
         This QC makes sense AFTER Lon and Lat decimal have been verified present and valid
         Assumption: Area is rectangular """
 
-    qc = 0
+    qc_mask = 0
 
     # In case the call is nonsensical
     if area is None:
-        return qc
+        return qc_mask
 
     # extracting from record
     if 'decimalLongitude' in record and 'decimalLatitude' in record:
@@ -73,9 +73,9 @@ def check_record_in_area(record, area):
             point_y = float(record['decimalLatitude'])
 
             if not (area["west"] <= point_x <= area["east"]) or not (area["south"] <= point_y <= area["north"]):
-                qc |= error_mask_9
+                qc_mask |= error_mask_9
 
-    return qc
+    return qc_mask
 
 
 def check_in_area(records, area):
@@ -94,7 +94,7 @@ def check_in_area(records, area):
 
     # extracting from record
     for record in records:
-        qc = 0
+        qc_mask = 0
         if 'decimalLongitude' in record and 'decimalLatitude' in record:
             if misc.is_number(record['decimalLongitude']) and misc.is_number(record['decimalLatitude']):
 
@@ -102,8 +102,8 @@ def check_in_area(records, area):
                 point_y = float(record['decimalLatitude'])
 
                 if not (area["west"] <= point_x <= area["east"]) or not (area["south"] <= point_y <= area["north"]):
-                    qc |= error_mask_9
-        results.append(qc)
+                    qc_mask |= error_mask_9
+        results.append(qc_mask)
 
     return results
 
@@ -112,7 +112,7 @@ def check_depth_consistent(record):
     """ depth checks, in this case they must be numbers (representing meters)
         it is used as part of the basic checks """
 
-    qc = 0
+    qc_mask = 0
     min_depth = 0
     max_depth = 0
 
@@ -120,29 +120,29 @@ def check_depth_consistent(record):
         if misc.is_number(record["minimumDepthInMeters"]):
             min_depth = float(record["minimumDepthInMeters"])
         else:
-            qc |= error_mask_18
+            qc_mask |= error_mask_18
     else:
         # No point checking, minimum depth is not there
-        return qc
+        return qc_mask
 
     if "maximumDepthInMeters" in record and record["maximumDepthInMeters"] is not None:
         if misc.is_number(record["maximumDepthInMeters"]):
             max_depth = float(record["maximumDepthInMeters"])
         else:
-            qc |= error_mask_18
+            qc_mask |= error_mask_18
     else:
         # No point checking, minimum depth is not there
-        return qc
+        return qc_mask
 
     if min_depth > max_depth:
-        qc |= error_mask_18
+        qc_mask |= error_mask_18
 
-    return qc
+    return qc_mask
 
 
 def check_xy(records):
     """ :param records, already QC for location
-        :returns qc values, but QC is already inserted in records bitmasks
+        :returns qc_mask values, but QC is already inserted in records bitmasks
         however, the records shall be augmented with the QC for 2 flags:
         GEO_LAT_LON_NOT_SEA and WRONG_DEPTH_MAP """
 
@@ -159,7 +159,7 @@ def check_xy(records):
 
     for i in range(len(records)):
 
-        qc = 0
+        qc_mask = 0
 
         if xy_res[i] is not None:
             # verify that records[i] does comply: point not on land and bathymetry is correct.
@@ -182,27 +182,34 @@ def check_xy(records):
                             # We can do this because error mask is not set
                             # FLAG: THIS NEEDS TO BE VERIFIED, I did not understand the original algorithm
                             if depth is not None and depth > intercept + xy["grids"]["bathymetry"]:
-                                qc |= error_mask_19
+                                qc_mask |= error_mask_19
                         else:
                             if depth is not None and depth > intercept + xy["grids"]["bathymetry"] * slope:
-                                qc |= error_mask_19
+                                qc_mask |= error_mask_19
 
             # Check point on land
             if "QC" in record and not (record["QC"] & error_mask_5) and not (record["QC"] & error_mask_4):
                 if xy["shoredistance"] < 0:
-                    qc |= error_mask_6
+                    qc_mask |= error_mask_6
 
             # Note: the qc_flag is already added to the record
             if "QC" in record:
-                record["QC"] |= qc
+                record["QC"] |= qc_mask
             else:
-                record["QC"] = qc
-            results.append(qc)
+                record["QC"] = qc_mask
+            results.append(qc_mask)
         else:
             if "QC" not in records[i]:
                 records[i]["QC"] = 0
 
             results.append(0)
-            logger.warning("No xylookup result for %s" % records[i]["id"])
+            # logger.warning("No xylookup result for %s" % records[i]["id"])
 
     return results
+
+
+def check_all_location_params(records, area):
+    """ this shall perform all location verifications for a batch of records
+        """
+    # TODO
+    pass

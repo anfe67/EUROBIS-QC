@@ -6,11 +6,13 @@
 * sqllitebrowser (worked for the smaller tables, **not for taxon**) **not satisfactory**  
 * csvkit, which worked **fully** with the command:  
 ```  
-  * **csvsql --tabs --quoting=3 --db sqlite:///Wdatabase/EUROBIS_QC_LOOKUP_DB.db --no-constraints --insert taxon.txt**
+  csvsql --tabs --quoting=3 --db sqlite:///database/EUROBIS_QC_LOOKUP_DB.db --no-constraints --insert taxon.txt
 ```
-
-This file name needs to be the same as specified in ./resources/config.ini    
-
-* The same type of command was repeated for the other two tables in the WORMS DwCA file provided
-
 The entire table was imported, resulting in the expected number of records. 
+
+- The same type of command was repeated for the other two tables in the WORMS DwCA file provided 
+- The file name (database/EUROBIS_QC_LOOKUP_DB.db=, in order to be used a lookup DB, needs to be specified in ./resources/config.ini    
+
+**NOTE:**
+SQLite is a file based DB, which is efficient for small databases that can be stored in memory. 
+This is the case for the WORMS db. SQLite is supported natively in Python by means of the **sqlite3** library. 

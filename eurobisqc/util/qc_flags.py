@@ -22,7 +22,7 @@ class QCFlag(Enum):
     OBSERVED_COUNT_MISSING = ("Empty or missing observed individual count", 14)  # In measurements
     OBSERVED_WEIGTH_MISSING = ("Empty or missing observed weigth", 15)  # In measurements
     SAMPLE_SIZE_MISSING = ("Observed individual count > 0 but sample size missing", 16)  # In measurements
-    SEX_MISSING = ("Sex missing or wrong OBIS code", 17)  # In measurements
+    SEX_MISSING_OR_WRONG = ("Sex missing or wrong OBIS code", 17)  # In measurements
     MIN_MAX_DEPTH_ERROR = ("Minimum depth greater than maximum depth", 18)  # in location
     WRONG_DEPTH_MAP = ("Depth incoherent with depth map", 19)  # In location
     WRONG_DEPTH_SPECIES = ("Depth incoherent with species depth range", 20)  # FLAG - Probably not doing it
@@ -70,6 +70,7 @@ class QCFlag(Enum):
             if qc_flag.bitmask == position:
                 return QCFlag(qc_flag).name
 
+# TODO: NOT WORKING !
     @classmethod
     def decode_mask(cls, mask):
 
@@ -79,7 +80,7 @@ class QCFlag(Enum):
         qc_flags = []
         sum_all_flags = 0
         for qc_flag in QCFlag:
-            if (1 << qc_flag.bitmask) & mask:
+            if (1 << (qc_flag.qc_number -1) ) & mask:
                 qc_flags.append(QCFlag(qc_flag).name)
                 sum_all_flags += 1 << qc_flag.bitmask
 

@@ -41,7 +41,7 @@ def populate_fields():
 # Rework
 def check_record(record):
     # error mask
-    qc = 0
+    qc_mask = 0
     sn_id = 0  # To mark whether the scientificNameID is valid
 
     # Can we retrieve the aphiaID with scientificNameID?
@@ -61,7 +61,7 @@ def check_record(record):
             # Have we got a record
             if taxon_record is not None:
                 if taxon_record['genus'] is None:
-                    qc |= error_mask_3
+                    qc_mask |= error_mask_3
             else:
                 sn_id |= error_mask_2  # Got some info but not found in DB. so scientificNameID is not OK
         else:
@@ -85,16 +85,16 @@ def check_record(record):
             if taxon_record is not None:
                 if taxon_record['genus'] is None:
                     # We would not be here if scientificNameID was able to resolve
-                    qc |= error_mask_3
+                    qc_mask |= error_mask_3
             else:
-                qc |= error_mask_2  # both fields are wrong...
+                qc_mask |= error_mask_2  # both fields are wrong...
         else:
-            qc |= error_mask_2  # None of the scientificName fields are filled or valid
+            qc_mask |= error_mask_2  # None of the scientificName fields are filled or valid
 
     else:
         pass  # We have already an aphiaid from the scientificNameId
 
-    return qc
+    return qc_mask
 
 
 def check(records):

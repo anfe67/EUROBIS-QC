@@ -1,9 +1,7 @@
 import sys
-import logging
 
 from eurobisqc.util import qc_flags
 
-logger = logging.getLogger(__name__)
 this = sys.modules[__name__]
 
 # Return values for when the quality check fails
@@ -31,7 +29,7 @@ def check_record_required(record, option=False):
         :param option: Recommended fields are verified or not
     """
 
-    qc = 0
+    qc_mask = 0
 
     # This would be value.lower() if not field names must be checked in lowercase
     present_fields = list(record.keys())
@@ -48,9 +46,9 @@ def check_record_required(record, option=False):
                 break  # No need to proceed
 
         if count != len(this.required_fields):
-            qc |= error_mask_1
+            qc_mask |= error_mask_1
     else:
-        qc |= error_mask_1
+        qc_mask |= error_mask_1
     # An option to be pedantic and require presence of the optional fields
     if option:
         present_optional_fields = set(present_fields).intersection(set(this.recommended_fields))
@@ -62,25 +60,25 @@ def check_record_required(record, option=False):
                     break  # No need to proceed
 
             if count != len(this.recommended_fields):
-                qc |= error_mask_1
+                qc_mask |= error_mask_1
 
-    return qc
+    return qc_mask
 
 
 def check_record_obis_format(record):
     """ To be called for source type records
         :param record:
     """
-    qc = 0
+    qc_mask = 0
 
     # QC 10
     if "basisOfRecord" in record and record["basisOfRecord"] is not None:
         if not record["basisOfRecord"].lower() in this.vocab:
-            qc |= error_mask_10
+            qc_mask |= error_mask_10
     else:
-        qc |= error_mask_10
+        qc_mask |= error_mask_10
 
-    return qc
+    return qc_mask
 
 
 def check_obis(records):

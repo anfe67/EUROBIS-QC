@@ -53,7 +53,7 @@ def find_area(xml_input):
                 north = max(float(area['northBoundingCoordinate']), north)
 
             if misc.is_number(area['southBoundingCoordinate']):
-                south = max(float(area['southBoundingCoordinate']), south)
+                south = min(float(area['southBoundingCoordinate']), south)
 
             if not south <= north or not west <= east:
                 valid = False

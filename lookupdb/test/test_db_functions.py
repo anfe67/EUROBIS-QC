@@ -11,18 +11,20 @@ class Test(TestCase):
                      'urn:lsid:marinespecies.org:taxname:170605', '????????']
     semple_sns = ['Polymastia littoralis', 'Scorpaena cocosensis', 'Neoscopelarchoides', 'Pippo Pippo']
 
+    conn = db_functions.open_db()
+
     def test_get_fields(self):
+
         # Open db connection
-        con = db_functions.conn
-        self.assertIsNotNone(con)
+        self.assertIsNotNone(self.conn)
 
         sample_taxon = 'urn:lsid:marinespecies.org:taxname:519212'
-        cur = con.execute(f"SELECT * from taxon where scientificNameID='{sample_taxon}'")
+        cur = self.conn.execute(f"SELECT * from taxon where scientificNameID='{sample_taxon}'")
         self.taxon_fields = [description[0] for description in cur.description]
 
         self.assertTrue("scientificName" in self.taxon_fields)
 
-        cur = con.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
+        cur = self.conn.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
         self.speciesprofile_fields = [description[0] for description in cur.description]
 
         self.assertTrue("isMarine" in self.speciesprofile_fields)
@@ -35,7 +37,7 @@ class Test(TestCase):
         # Querying for scientificNameID
         start = time.time()
         for sn_id in self.sample_sn_ids:
-            cur = db_functions.conn.execute(f"SELECT * from taxon where scientificNameID='{sn_id}'")
+            cur = self.conn.execute(f"SELECT * from taxon where scientificNameID='{sn_id}'")
 
             taxon = cur.fetchone()
             fields = [description[0] for description in cur.description]
@@ -51,7 +53,7 @@ class Test(TestCase):
         # Just querying, no zipping
         start = time.time()
         for sn_id in self.sample_sn_ids:
-            cur = db_functions.conn.execute(f"SELECT * from taxon where scientificNameID='{sn_id}'")
+            cur = self.conn.execute(f"SELECT * from taxon where scientificNameID='{sn_id}'")
             taxon = cur.fetchone()
             print(taxon)
         print("************ WITHOUT ZIPPING ************")
@@ -61,7 +63,7 @@ class Test(TestCase):
         # Querying for scientificName
         start = time.time()
         for sn in self.semple_sns:
-            cur = db_functions.conn.execute(f"SELECT * from taxon where scientificName='{sn}'")
+            cur = self.conn.execute(f"SELECT * from taxon where scientificName='{sn}'")
             taxon = cur.fetchone()
             fields = [description[0] for description in cur.description]
 
@@ -76,7 +78,7 @@ class Test(TestCase):
 
         # Querying for speciesprofile
         for sn_id in self.sample_sn_ids:
-            cur = db_functions.conn.execute(f"SELECT * from speciesprofile where taxonID='{sn_id}'")
+            cur = self.conn.execute(f"SELECT * from speciesprofile where taxonID='{sn_id}'")
             speciesprofile = cur.fetchone()
             fields = [description[0] for description in cur.description]
             record = None
@@ -87,12 +89,12 @@ class Test(TestCase):
     def test_get_record(self):
 
         sample_taxon = 'urn:lsid:marinespecies.org:taxname:519212'
-        cur = db_functions.conn.execute(f"SELECT * from taxon where scientificNameID='{sample_taxon}'")
+        cur = self.conn.execute(f"SELECT * from taxon where scientificNameID='{sample_taxon}'")
         self.taxon_fields = [description[0] for description in cur.description]
 
         self.assertTrue("scientificName" in self.taxon_fields)
 
-        cur = db_functions.conn.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
+        cur = self.conn.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
         self.speciesprofile_fields = [description[0] for description in cur.description]
 
         self.assertTrue("isMarine" in self.speciesprofile_fields)

@@ -1,10 +1,11 @@
-# lookupdb (also contains worms tables)
+# lookupdb (same db contains also WORMS lookup tables)
 
 ## Worms
 To imported the WORMS database in SQLite follow the instructions in **IMPORT_WORMS.md** file. 
 
 ## lookup tables
-To create/recreate the lookup tables, the following text files (all names ending in Lookup) need to be in resources: 
+To create/recreate the lookup tables, the following text files (all names ending in Lookup) need to be in 
+the **resources** folder: 
 
 - countMeasurementTypeIDLookup      - Contains appropriate entries from the The NERC Vocabulary Server (NVS)
 - weightMeasurementTypeIDLookup     - Contains appropriate entries from the The NERC Vocabulary Server (NVS)
