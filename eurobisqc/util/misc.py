@@ -2,6 +2,7 @@ import datetime
 import re
 from eurobisqc.util import qc_flags
 
+
 def check_float(value, valid_range=None):
     """ From OBIS-QC, takes a value and determines if this is a valid representation of a float
         which lies within the given range
@@ -100,7 +101,7 @@ def do_xylookup(records):
     # RESOLVED: This is ok in pycharm not for nosetest from terminal
     # from pyxylookup.pyxylookup import lookup
     # RESOLVED: Ths is ok for nosetest or running in a python console, not for running in pycharm
-    import pyxylookup as pxy # and then use pyxylookup.lookup
+    import pyxylookup as pxy  # and then use pyxylookup.lookup
 
     output = [None] * len(records)
     indices = []
@@ -124,3 +125,11 @@ def do_xylookup(records):
         for i in range(len(indices)):
             output[indices[i]] = xy[i]
     return output
+
+
+def split_list(a, n):
+    """ Splits a list in n chunks """
+
+    k, m = divmod(len(a), n)
+    result = list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
+    return result

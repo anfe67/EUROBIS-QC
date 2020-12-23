@@ -23,6 +23,7 @@ else:
 
 this.database_location = os.path.join(os.path.dirname(__file__), database_file)
 
+
 # Opening the lookupdb database
 def open_db():
     try:
@@ -33,8 +34,10 @@ def open_db():
         this.conn = None
         return None
 
+
 # Connection should be opened upon load - do not remove
 this.conn = open_db()
+
 
 # Close it after use
 def close_db():
@@ -69,6 +72,3 @@ def close_down():
 
     if this.conn is not None:
         close_db()
-
-
-

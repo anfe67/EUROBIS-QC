@@ -70,7 +70,7 @@ class QCFlag(Enum):
             if qc_flag.bitmask == position:
                 return QCFlag(qc_flag).name
 
-# TODO: NOT WORKING !
+    # TODO: NOT WORKING !
     @classmethod
     def decode_mask(cls, mask):
 
@@ -80,7 +80,7 @@ class QCFlag(Enum):
         qc_flags = []
         sum_all_flags = 0
         for qc_flag in QCFlag:
-            if (1 << (qc_flag.qc_number -1) ) & mask:
+            if (1 << (qc_flag.qc_number - 1)) & mask:
                 qc_flags.append(QCFlag(qc_flag).name)
                 sum_all_flags += 1 << qc_flag.bitmask
 

@@ -4,6 +4,7 @@ import PySimpleGUI as sg
 
 this = sys.modules[__name__]
 this.filename = None
+this.foldername = None
 
 
 def get_archive_chooser():
@@ -82,10 +83,34 @@ def get_archive_chooser():
             this.filename = None
             run_loop = False
             window.Hide()
-        elif event == event == sg.WIN_CLOSED:
+        elif event == sg.WIN_CLOSED:
             this.filename = None
             run_loop = False
 
     window.Close()
-
     return this.filename
+
+
+def browse_for_folder():
+    layout = [[sg.Text('Select Directory')],
+              [sg.In(size=(25, 1), enable_events=True, key="-FOLDER-"), sg.FolderBrowse()],
+              [sg.Button('OK'), sg.Button('Cancel')]]
+
+    # event1, values1 = sg.Window('Window Title', layout).read(close=True)
+    window = sg.Window('Folder Browser', layout)
+    run_loop = True
+    while run_loop:
+        event, values = window.read()
+        if event == 'OK':
+            this.foldername = values["-FOLDER-"]
+            window.Hide()
+            run_loop = False
+        elif event == "Exit" or event == "Cancel" or event == sg.WIN_CLOSED:
+            this.foldername = None
+            window.Hide()
+            run_loop = False
+        elif event == "FOLDER":
+            this.foldername = values["-FOLDER-"]
+
+    window.Close()
+    return this.foldername

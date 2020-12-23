@@ -51,18 +51,18 @@ def check_basic(records):
     return [check_basic_record(record) for record in records]
 
 
-def check_record_in_area(record, area):
-    """ verifies that a geographical point is in a the rectangle area
+def check_record_in_areas(record, areas):
+    """ verifies that a geographical point is in one of the rectangle areas
         :param record: The event record
-        :param area: The geographical area - 2 segments east west and north south
+        :param areas: The geographical areas - list of dicts - 2 segments east west and north south
         as [(east,west), (north,south)]
         This QC makes sense AFTER Lon and Lat decimal have been verified present and valid
-        Assumption: Area is rectangular """
+        Assumption: Areas are rectangular """
 
     qc_mask = 0
 
     # In case the call is nonsensical
-    if area is None:
+    if areas is None:
         return qc_mask
 
     # extracting from record
@@ -72,7 +72,13 @@ def check_record_in_area(record, area):
             point_x = float(record['decimalLongitude'])
             point_y = float(record['decimalLatitude'])
 
-            if not (area["west"] <= point_x <= area["east"]) or not (area["south"] <= point_y <= area["north"]):
+            found = False
+
+            for area in areas:
+                if (area["west"] <= point_x <= area["east"]) and (area["south"] <= point_y <= area["north"]):
+                    found = True
+
+            if not found:
                 qc_mask |= error_mask_9
 
     return qc_mask

@@ -197,10 +197,17 @@ eurobis-qc: eurobisqc and lookupdb.
 - **DONE: Review pipeline to check the records in order and in chunks when possible** Negative, not doable 
 
 ---
+## 23/12/2020 
 
-- **NOTE: Area extraction and QC needs to be reviewed for multiple areas**
-- **ONGOING: Verify that the pipeline works on all available files***   
+- Reviewed are aextraction from eml, and implemented the check with multiple areas as discussed yesterday
+- **DONE: Area check needs to be an "or" between all the areas in the EML**
+- Looking at area verification tests 
+- Looking at sdist procedures 
+- looking at parallelism, using multiprocessing and detecting # of CPUs
+
+
+- **ONGOING: Verify that the pipeline works on all available files**   
 - **ONGOING: Complete tests and coverage**
 - **ONGOING: Produce Installable library** 
-- **TODO: Speed/Concept improvements (possible parallelism?)**
-- **TODO: Area check needs to be an "or" between all the areas in the EML** 
+- **ONGOING: Speed/Concept improvements (possible parallelism?)**
+- **TODO: Get even more DwCA files** 
