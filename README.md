@@ -1,8 +1,8 @@
 # EUROBIS-QC
 
-Implementation of a seiries of Quality Control checks on EUROBIS DwC-A records (dictionaries). 
+Implementation of a seiries of Quality Control checks on EUROBIS DwC-A records (dictionaries).
 
-Based on: 
+Based on:
 
 obistools: https://github.com/iobis/obistools
 obis-qc: https://github.com/iobis/obis-qc

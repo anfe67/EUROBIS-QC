@@ -6,7 +6,6 @@ from isodateparser import ISODateParser
 from eurobisqc.util import qc_flags
 from eurobisqc.util import misc
 
-
 error_mask_7 = qc_flags.QCFlag.DATE_TIME_NOT_COMPLETE.bitmask
 error_mask_11 = qc_flags.QCFlag.INVALID_DATE_1.bitmask
 error_mask_12 = qc_flags.QCFlag.INVALID_DATE_2.bitmask
