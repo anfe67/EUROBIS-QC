@@ -198,6 +198,7 @@ N (10 for instance) processes can run independently. Logs shall report the statu
 - **QUESTION: An eMoF or MoF record can never be a core record, right or wrong? Correct. ANSWERED**
 - **QUESTION: Way ahead? Discussion on how to apply all the changes to the DB**
 - **DONE: Review pipeline to check the records in order and in chunks when possible** Negative, not doable
+- **ANSWER TO QUESTION about algorithm for verification of pyxylookup - it is like a "buffer"**
 
 ---
 
@@ -208,14 +209,18 @@ N (10 for instance) processes can run independently. Logs shall report the statu
 - Looking at area verification tests
 - Looking at sdist procedures
 - looking at parallelism, using multiprocessing and detecting # of CPUs
+- Writing more tests for location / area QC
+
+
+--- 
 
 ## 28/12/2020
 
-- Continued looking at possible parallelisms, performances and tests
+- Continued looking at possible parallelisms, performances and tests. Got results, evaluated strategy, 
+corrected error. 
+- **DONE: Speed/Concept improvements (Used multiprocessing.Pool.apply_async)**
+- **DONE: Verified that the pipeline works on all available files (currently downloaded)**
 
-
-- **ONGOING: Verify that the pipeline works on all available files**
 - **ONGOING: Complete tests and coverage**
 - **ONGOING: Produce Installable library**
-- **ONGOING: Speed/Concept improvements (possible parallelism?)**
 - **TODO: Get even more DwCA files** 

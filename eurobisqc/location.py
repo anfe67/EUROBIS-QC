@@ -48,6 +48,9 @@ def check_basic_record(record):
 
 
 def check_basic(records):
+    """ performs the basic lat/lon presence and validity checks
+        on a list of records
+        :param records """
     return [check_basic_record(record) for record in records]
 
 
@@ -84,34 +87,18 @@ def check_record_in_areas(record, areas):
     return qc_mask
 
 
-def check_in_area(records, area):
-    """ verifies that a geographical point is in a the rectangle area
+def check_in_areas(records, areas):
+    """ verifies that the records are located in one of the rectangle areas
         :param records: The records to check
-        :param area: The geographical area - 2 segments east west and north south
+        :param areas: The geographical areas -Each  2 segments east west and north south
         as [(east,west), (north,south)]
-        NOTE: This QC makes sense AFTER Lon and Lat decimal have been verified present and valid
-        Assumption: Area is rectangular """
+        NOTE: This QC makes sense AFTER Lon and Lat decimal have been verified present and valid  """
 
-    results = []
+    qc_masks = []
+    for idx, record in enumerate(records):
+        qc_masks.append(check_record_in_areas(record, areas))
 
-    # In case the call is nonsensical
-    if area is None:
-        return [0] * len(records)
-
-    # extracting from record
-    for record in records:
-        qc_mask = 0
-        if 'decimalLongitude' in record and 'decimalLatitude' in record:
-            if misc.is_number(record['decimalLongitude']) and misc.is_number(record['decimalLatitude']):
-
-                point_x = float(record['decimalLongitude'])
-                point_y = float(record['decimalLatitude'])
-
-                if not (area["west"] <= point_x <= area["east"]) or not (area["south"] <= point_y <= area["north"]):
-                    qc_mask |= error_mask_9
-        results.append(qc_mask)
-
-    return results
+    return qc_masks
 
 
 def check_depth_consistent(record):
@@ -186,7 +173,6 @@ def check_xy(records):
                         # Should do it also for bathymetry
                         if xy["grids"]["bathymetry"] < 0:
                             # We can do this because error mask is not set
-                            # FLAG: THIS NEEDS TO BE VERIFIED, I did not understand the original algorithm
                             if depth is not None and depth > intercept + xy["grids"]["bathymetry"]:
                                 qc_mask |= error_mask_19
                         else:
@@ -214,8 +200,30 @@ def check_xy(records):
     return results
 
 
-def check_all_location_params(records, area):
-    """ this shall perform all location verifications for a batch of records
+def check_all_location_params(records, areas):
+    """ Given a list of records it shall perform all
+        location verifications for a batch of records
+        including lookups. The records are modified, and it
+        does not return any value
+        :param records
+        :param areas
         """
-    # TODO
-    pass
+    # LON, LAT presence and validity, depth consistency
+    qc_masks = check_basic(records)
+
+    # Check if the points are within the areas...
+    if areas is not None and len(areas):
+        for idx, record in enumerate(records):
+            if not qc_masks[idx]:  # Should not be "positive" to basic checks
+                qc_masks[idx] |= check_record_in_areas(record, areas)
+
+    # If the points are good, do the lookups...
+    recs_for_lookup = []
+    for idx, record in enumerate(records):
+        record["QC"] = qc_masks[idx]
+        if not qc_masks[idx]:
+            recs_for_lookup.append(record)
+
+    # pyxylookup
+    check_xy(recs_for_lookup)
+    return None

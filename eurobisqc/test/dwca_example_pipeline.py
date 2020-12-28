@@ -161,7 +161,7 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
         for e in archive.extensions:
             if with_print:
                 print("--- extension: " + e.type)
-            if e.type.lower() in ["occurrence", "measurementorfact", "extendedmeasurementorfact" ]:
+            if e.type.lower() in ["occurrence", "measurementorfact", "extendedmeasurementorfact"]:
                 for extensionRecord in archive.extension_records(e):
                     record_count += 1
                     full_extension = extensionRecord["full"]
@@ -224,8 +224,9 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
                         print(full_extension)
 
                     if with_logging and full_extension["QC"] > 0:
-                        this.logger.error(f"Errors processing record {qc_flags.QCFlag.decode_mask(full_extension['QC'])} "
-                                          f"record: {full_extension}")
+                        this.logger.error(
+                            f"Errors processing record {qc_flags.QCFlag.decode_mask(full_extension['QC'])} "
+                            f"record: {full_extension}")
 
     # do I need a last lookup ?
     if len(records_for_lookup) >= 0:
@@ -280,7 +281,7 @@ def dwca_parallel_processing():
     print(dwca_file_lists)
 
     # Each one of the CPUs shall get a similar load...
-    result_pool=[]
+    result_pool = []
     for i, dwca_file_list in enumerate(dwca_file_lists):
         result_pool.append(pool.apply_async(dwca_list_process, args=(i, dwca_file_list, False, False)))
 

@@ -22,6 +22,14 @@ class Test(TestCase):
          "maximumDepthInMeters": 600},  # Near Capri - Depth ok
     ]
 
+    # Dictionary area
+    single_area = [{"east": 10.0, "west": 2.0, "north": 54.0, "south": 52.0}]
+
+    # list of areas
+    more_areas = [{"east": 10.0, "west": 2.0, "north": 54.0, "south": 52.0},
+                  {"east": 16.0, "west": 10.0, "north": 54.0, "south": 34.0},
+                  {"east": 100, "west": -150, "north": 0.5, "south": -20.0}]
+
     def test_check_record(self):
         """ tests regular lat lon verifications """
 
@@ -92,3 +100,38 @@ class Test(TestCase):
         results = location.check_xy(rand_records)
         print(f"Time elapsed: {time() - start}")
         print(results)
+
+    def test_areas(self):
+        """ Tests to verify LAT/LON in areas """
+
+        res_1 = location.check_record_in_areas(self.records[0], self.single_area)
+
+        area_check_records = []
+        for record in self.records:
+            if not location.check_basic_record(record):
+                area_check_records.append(record)
+
+        res_2 = location.check_in_areas(area_check_records, self.more_areas)
+
+        assert (res_1 == 0)
+        assert (res_2 == [0,
+                          QCFlag.GEO_COORD_AREA.bitmask,
+                          QCFlag.GEO_COORD_AREA.bitmask, 0, 0, 0])
+
+    def test_all_params(self):
+        location.check_all_location_params(self.records, self.more_areas)
+
+        qc_res = []
+
+        for record in self.records:
+            qc_res.append(record["QC"])
+
+        assert (qc_res == [0,
+                           QCFlag.GEO_LAT_LON_MISSING.bitmask,
+                           QCFlag.GEO_LAT_LON_INVALID.bitmask,
+                           QCFlag.GEO_LAT_LON_INVALID.bitmask,
+                           QCFlag.GEO_COORD_AREA.bitmask,
+                           QCFlag.GEO_COORD_AREA.bitmask,
+                           0,
+                           QCFlag.WRONG_DEPTH_MAP.bitmask,
+                           0])
