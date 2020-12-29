@@ -2,7 +2,7 @@
     the lookup-db database (in SQLLite format in a first attempt)
     """
 import sys
-from lookupdb import db_functions
+from lookupdb import sqlite_db_functions
 
 from eurobisqc.util import qc_flags
 from eurobisqc.util import misc
@@ -25,15 +25,15 @@ def populate_fields():
         from the worms database assumes con is an active connection to
         the database """
 
-    if db_functions.conn is None:
+    if sqlite_db_functions.conn is None:
         return
 
     # Used for populating the field names
     sample_taxon = 'urn:lsid:marinespecies.org:taxname:519212'
-    cur = db_functions.conn.execute(f"SELECT * from taxon where scientificNameID='{sample_taxon}'")
+    cur = sqlite_db_functions.conn.execute(f"SELECT * from taxon where scientificNameID='{sample_taxon}'")
     taxons = [description[0] for description in cur.description]
     this.taxon_fields.extend(taxons)
-    cur = db_functions.conn.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
+    cur = sqlite_db_functions.conn.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
     speciesprofiles = [description[0] for description in cur.description]
     this.speciesprofile_fields.extend(speciesprofiles)
 
@@ -55,8 +55,8 @@ def check_record(record):
         aphiaid = misc.parse_lsid(record["scientificNameID"])
 
         if aphiaid is not None:  # Verify that the aphiaid retrieved is valid
-            taxon_record = db_functions.get_record('taxon', 'scientificNameID',
-                                                   record['scientificNameID'], this.taxon_fields)
+            taxon_record = sqlite_db_functions.get_record('taxon', 'scientificNameID',
+                                                          record['scientificNameID'], this.taxon_fields)
 
             # Have we got a record
             if taxon_record is not None:
@@ -79,8 +79,8 @@ def check_record(record):
                 populate_fields()
 
             # Have something to query upon
-            taxon_record = db_functions.get_record('taxon', 'scientificName',
-                                                   record['scientificName'], this.taxon_fields)
+            taxon_record = sqlite_db_functions.get_record('taxon', 'scientificName',
+                                                          record['scientificName'], this.taxon_fields)
             # Have we got a record
             if taxon_record is not None:
                 if taxon_record['genus'] is None:
@@ -101,8 +101,8 @@ def check(records):
     """ Checks a list of records for taxonomy """
 
     # Ensure DB is available
-    if db_functions.conn is None:
-        db_functions.open_db()  # It shall be closed on exit
+    if sqlite_db_functions.conn is None:
+        sqlite_db_functions.open_db()  # It shall be closed on exit
 
     results = [check_record(record) for record in records]
     return results

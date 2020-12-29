@@ -4,7 +4,7 @@
 
 import sys
 import os
-from lookupdb import db_functions
+from lookupdb import sqlite_db_functions
 
 this = sys.modules[__name__]
 this.resources_dir = None
@@ -26,12 +26,12 @@ def import_files():
         # Connection to the DB is obtained upon importing the module
 
         # If table exists in the DB, drop it
-        db_functions.conn.execute(f"drop table if exists {table_name};")
+        sqlite_db_functions.conn.execute(f"drop table if exists {table_name};")
 
         # Create the table
         q_str = f"CREATE TABLE {table_name} ('Value' TEXT)"
 
-        db_functions.conn.execute(q_str)
+        sqlite_db_functions.conn.execute(q_str)
 
         with open(os.path.join(this.resources_dir, file_name), 'r') as f:
             lines = f.readlines()
@@ -40,8 +40,8 @@ def import_files():
                 if line.strip() != "" and line.strip()[0] != '#':
                     # Add lookup value to the table
                     q_str = f"insert into {table_name}(Value) values('{line.strip().lower()}')"
-                    db_functions.conn.execute(q_str)
+                    sqlite_db_functions.conn.execute(q_str)
 
-    db_functions.conn.commit()
+    sqlite_db_functions.conn.commit()
 
 # import_files()

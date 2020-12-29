@@ -224,3 +224,17 @@ corrected error.
 - **ONGOING: Complete tests and coverage**
 - **ONGOING: Produce Installable library**
 - **TODO: Get even more DwCA files** 
+
+--- 
+## 29/12/2020 
+
+- Received email from Bart, link to DB and basic explainations / Data field mappings 
+- Install MS SQL to local machine (Linux) Issues with install procedure, resolved. Dev license is free of charge
+- Connected to Server with DBeaver, checked basic functionality
+- Create DB and built Python code for basic access 
+- Demonstrated querying DB and outputting Python dictionary (ready for QCs)
+  
+- **TODO: Import DB from BAK file** 
+- **TODO: Study DB** 
+- **TODO: Read article: https://stackoverflow.com/questions/34646655/populating-row-number-on-new-column-for-table-without-primary-key**
+- This is related to speed ups in SQL  

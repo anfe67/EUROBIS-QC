@@ -3,7 +3,7 @@
 import sys
 from eurobisqc.util import qc_flags
 from eurobisqc.util import misc
-from lookupdb import db_functions
+from lookupdb import sqlite_db_functions
 
 error_mask_14 = qc_flags.QCFlag.OBSERVED_COUNT_MISSING.bitmask
 error_mask_15 = qc_flags.QCFlag.OBSERVED_WEIGTH_MISSING.bitmask
@@ -45,29 +45,29 @@ def initialize_lookups():
     # Fill the lookups:
 
     # COUNT IDs and words
-    c = db_functions.conn.cursor()
+    c = sqlite_db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM countMeasurementTypeID').fetchall()
     this.count_measure_type_ids = [val[0] for val in data]
 
-    c = db_functions.conn.cursor()
+    c = sqlite_db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM countMeasurementType').fetchall()
     this.count_measure_types = [val[0] for val in data]
 
     # SAMPLE SIZE IDs and words
-    c = db_functions.conn.cursor()
+    c = sqlite_db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM sampleSizeMeasurementTypeID').fetchall()
     this.sample_size_measure_type_ids = [val[0] for val in data]
 
-    c = db_functions.conn.cursor()
+    c = sqlite_db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM sampleSizeMeasurementType').fetchall()
     this.sample_size_measure_types = [val[0] for val in data]
 
     # WEIGHT IDs and words
-    c = db_functions.conn.cursor()
+    c = sqlite_db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM weightMeasurementTypeID').fetchall()
     this.weight_measure_type_ids = [val[0] for val in data]
 
-    c = db_functions.conn.cursor()
+    c = sqlite_db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM weightMeasurementType').fetchall()
     this.weight_measure_types = [val[0] for val in data]
 

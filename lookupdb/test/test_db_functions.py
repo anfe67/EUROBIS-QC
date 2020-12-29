@@ -1,6 +1,6 @@
 import time
 from unittest import TestCase
-from lookupdb import db_functions
+from lookupdb import sqlite_db_functions
 
 
 class Test(TestCase):
@@ -11,7 +11,7 @@ class Test(TestCase):
                      'urn:lsid:marinespecies.org:taxname:170605', '????????']
     semple_sns = ['Polymastia littoralis', 'Scorpaena cocosensis', 'Neoscopelarchoides', 'Pippo Pippo']
 
-    conn = db_functions.open_db()
+    conn = sqlite_db_functions.open_db()
 
     def test_get_fields(self):
 
@@ -99,7 +99,7 @@ class Test(TestCase):
 
         self.assertTrue("isMarine" in self.speciesprofile_fields)
         sn_id = self.sample_sn_ids[0]
-        taxon = db_functions.get_record('taxon', 'scientificNameID', sn_id, self.taxon_fields)
+        taxon = sqlite_db_functions.get_record('taxon', 'scientificNameID', sn_id, self.taxon_fields)
         self.assertTrue(taxon['scientificNameID'] == sn_id)
-        species_profile = db_functions.get_record('speciesprofile', 'taxonID', sn_id, self.speciesprofile_fields)
+        species_profile = sqlite_db_functions.get_record('speciesprofile', 'taxonID', sn_id, self.speciesprofile_fields)
         self.assertTrue(species_profile['taxonID'] == sn_id)
