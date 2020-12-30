@@ -283,91 +283,190 @@ Do we need to apply QC 17? I suppose so...
 7. what is ices (37 M records)
 8. Mappings. In table QC there are queries for updating the QC fields on the DB. I believe at least one (17) is wrong.
 In this respect, what is the mapping between sex (here 'M','F','H','I','U','T','B')
-   what we discussed before was different , see also this result)
+   what we discussed before was different , see also this result, obtained from measurement of facts)
 ```
+FROM EUROBIS_MEASUREMENTORFACT
+
 "measurementValue","count"
-"1 Male & 1 Female",1
-"1 male & 2 female",1
-"1 male, 1 female",6
-"1 male, 3 female",1
-"10Male 7Female",1
-"11Male 5Female",1
-"11Male 9Female",1
-"12Male 14Female",1
-"12Male 9Female",1
-"15Male 13Female",1
-"19Male 17Female",1
-"1Female",1
-"1Male 1Female",1
-"1Male 2Female",4
-"1Male 3Female",2
-"1Male 4Female",1
-"1Male, 1Female",4
-"2 female",1
-"2 male & 1 female",1
-"2 male & 3 female",1
-"2 males",1
-"24Male 18Female",1
-"2Male 1Female",2
-"2Male 2Female",1
-"2MaleMale, 3FemaleFemale",1
-"3 male, 7 female",1
-"3 males",1
-"3Male",1
-"3Male 10Female",1
-"3Male 4Female",1
-"3Male 7Female",1
-"3Male 8Female",1
-"3Male, 3Female",1
-"4 male, 2 female",1
-"4Male 6Female",1
-"5 male, 6 female",1
-"5 males, 3 females",2
-"52Male 46Female",1
-"5Male2Female",1
-"8 males",1
-"8Male 3Female",1
-"9 Males and 1 female",1
-"9Male 6Female",1
-"Adult, 2 Female",1
-F,10263
-Female,44714
-Female  zoea,3
-female & male,1
-Female & zoea,1
-Female and male,1
-Female juvenile,2
-Female Ova,38
-Female Ova Larv.,1
-female/immature male,17
-Immature female,1
-indeterminate,40857
-Juv,1
-Juvenile,10
-Juvenile female,1
-M,6253
-male,51817
-Male & female,137
-Male & female adults  juveniles,1
-Male & female ova,10
-Male & female with ova,2
-Male and female,10
+"1 Male & 1 Female",                1
+"1 male & 2 female",                1
+"1 male, 1 female",                 6
+"1 male, 3 female",                 1
+"10Male 7Female",                   1
+"11Male 5Female",                   1
+"11Male 9Female",                   1
+"12Male 14Female",                  1
+"12Male 9Female",                   1
+"15Male 13Female",                  1
+"19Male 17Female",                  1
+"1Female",                          1
+"1Male 1Female",                    1
+"1Male 2Female",                    4
+"1Male 3Female",                    2
+"1Male 4Female",                    1
+"1Male, 1Female",                   4
+"2 female",                         1
+"2 male & 1 female",                1
+"2 male & 3 female",                1
+"2 males",                          1
+"24Male 18Female",                  1
+"2Male 1Female",                    2
+"2Male 2Female",                    1
+"2MaleMale, 3FemaleFemale",         1
+"3 male, 7 female",                 1
+"3 males",                          1
+"3Male",                            1
+"3Male 10Female",                   1
+"3Male 4Female",                    1
+"3Male 7Female",                    1
+"3Male 8Female",                    1
+"3Male, 3Female",                   1
+"4 male, 2 female",                 1
+"4Male 6Female",                    1
+"5 male, 6 female",                 1
+"5 males, 3 females",               2
+"52Male 46Female",                  1
+"5Male2Female",                     1
+"8 males",                          1
+"8Male 3Female",                    1
+"9 Males and 1 female",             1
+"9Male 6Female",                    1
+"Adult, 2 Female",                  1
+F,                                  10263
+Female,                             44714
+Female  zoea,                       3
+female & male,                      1
+Female & zoea,                      1
+Female and male,                    1
+Female juvenile,                    2
+Female Ova,                         38
+Female Ova Larv.,                   1
+female/immature male,               17
+Immature female,                    1
+indeterminate,                      40857
+Juv,                                1
+Juvenile,                           10 
+Juvenile female,                    1
+M,                                  6253
+male,                               51817
+Male & female,                      137
+Male & female adults  juveniles,    1
+Male & female ova,                  10
+Male & female with ova,             2
+Male and female,                    10
 Male and female adults and a juvenile of indeterminate gender,1
-Male immature,1
-Male Juv,1
-Male juvenile,1
-"Male, Female",3
-MaleFemale,251
-MaleFemale Juv,2
-MaleFemale Ova,23
-MaleMale,1
-mixed,219
-non applicable,37
-Not Specified,736808
-not stated,17
-U,31160
-undefined,47114
-unknown,65314
+Male immature,                      1
+Male Juv,                           1
+Male juvenile,                      1
+"Male, Female",                     3
+MaleFemale,                         251
+MaleFemale Juv,                     2
+MaleFemale Ova,                     23
+MaleMale,                           1
+mixed,                              219
+non applicable,                     37
+Not Specified,                      736808
+not stated,                         17
+U,                                  31160
+undefined,                          47114
+unknown,                            65314
+
+FROM EUROBIS (SEx)
+"sex","count"
+[NULL],                 0
+"1 Male 1 Female",      1
+"1 Male 2 Female",      1
+"1 Male 3 Female",      1
+B,                      44695
+Both,                   284
+F,                      558634
+female,                 58448
+female & male,          1
+Female (1),             94
+Female (2),             17
+Female (3),             8
+Female (4),             1
+Female (5),             3
+Female (8),             1
+Female (9),             1
+Female;Male,            25
+Female;Male;Unknown,    6
+Female;Unknown,         12
+H,                      93
+Hermaphrodite,          6
+I,                      21073
+Immature,               9441
+IND,                    382226
+indeterminate,          3600
+Juveniles,              1
+Larvae,                 1
+M,                      479674
+male,                   60374
+Male (1),               47
+"Male (1), female (1)", 2
+"Male (1), female (16)",1
+"Male (1), female (2)", 7
+"Male (1), female (3)", 7
+"Male (1), female (4)", 4
+"Male (1), female (7)", 1
+"Male (1),Female (1)",  26
+"Male (1),Female (2)",  1
+"Male (1),Female (4)",  2
+"Male (12), female (2)",1
+Male (2),               13
+"Male (2), female (1)", 15
+"Male (2), female (2)", 3
+"Male (2), female (3)", 6
+"Male (2), female (5)", 1
+"Male (2), female (7)", 1
+"Male (2),female (1)",  1
+"Male (3), female (10)",1
+"Male (3), female (2)", 2
+"Male (3), female (3)", 1
+"Male (3), female (4)", 1
+"Male (3),Female (2)",  1
+Male (4),               1
+"Male (4), female (1)", 2
+"Male (4), Female (2)", 2
+"male (4), female (3)", 1
+"Male (4), female (8)", 1
+"Male (5), female (2)", 1
+"Male (6), female (4)", 1
+"Male (8), female (5)", 1
+Male;Unknown,           10
+Mixed,                  1225
+non applicable,         37
+Not specified,          7966
+not stated,             17
+NULL,                   1833
+p,                      1
+U,                      5925629
+undefined,              46103
+Undetermined,           52590
+UNK,                    1400
+unknown,                66000
+x,                      1
 
 ```   
+
 9. Same thing for BasisOfRecord ('O','L','S','G','P','D')
+``` 
+"BasisOfRecord","count"
+[NULL],                 0
+A,                      462
+D,                      176936
+HumanObservation,       3860996
+L,                      364
+literatureObservation,  12
+MachineObservation,     193684
+materialSample,         5014769
+O,                      14481255
+observation,            1228517
+Occurrence,             37945
+Preserved Specimen,     10373
+PreservedSpecimen,      2411524
+S,                      162088
+StillImage,             6481
+T,                      9454
+
+```
