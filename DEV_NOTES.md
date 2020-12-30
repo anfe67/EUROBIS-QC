@@ -282,6 +282,92 @@ Do we need to apply QC 17? I suppose so...
 6. eurobis_measurementorfact_type can be used to fill the lookup database (true?)
 7. what is ices (37 M records)
 8. Mappings. In table QC there are queries for updating the QC fields on the DB. I believe at least one (17) is wrong.
-In this respect, what is the mapping between sex (here 'M','F','H','I','U','T','B', 
-   what we discussed before was different)
+In this respect, what is the mapping between sex (here 'M','F','H','I','U','T','B')
+   what we discussed before was different , see also this result)
+```
+"measurementValue","count"
+"1 Male & 1 Female",1
+"1 male & 2 female",1
+"1 male, 1 female",6
+"1 male, 3 female",1
+"10Male 7Female",1
+"11Male 5Female",1
+"11Male 9Female",1
+"12Male 14Female",1
+"12Male 9Female",1
+"15Male 13Female",1
+"19Male 17Female",1
+"1Female",1
+"1Male 1Female",1
+"1Male 2Female",4
+"1Male 3Female",2
+"1Male 4Female",1
+"1Male, 1Female",4
+"2 female",1
+"2 male & 1 female",1
+"2 male & 3 female",1
+"2 males",1
+"24Male 18Female",1
+"2Male 1Female",2
+"2Male 2Female",1
+"2MaleMale, 3FemaleFemale",1
+"3 male, 7 female",1
+"3 males",1
+"3Male",1
+"3Male 10Female",1
+"3Male 4Female",1
+"3Male 7Female",1
+"3Male 8Female",1
+"3Male, 3Female",1
+"4 male, 2 female",1
+"4Male 6Female",1
+"5 male, 6 female",1
+"5 males, 3 females",2
+"52Male 46Female",1
+"5Male2Female",1
+"8 males",1
+"8Male 3Female",1
+"9 Males and 1 female",1
+"9Male 6Female",1
+"Adult, 2 Female",1
+F,10263
+Female,44714
+Female  zoea,3
+female & male,1
+Female & zoea,1
+Female and male,1
+Female juvenile,2
+Female Ova,38
+Female Ova Larv.,1
+female/immature male,17
+Immature female,1
+indeterminate,40857
+Juv,1
+Juvenile,10
+Juvenile female,1
+M,6253
+male,51817
+Male & female,137
+Male & female adults  juveniles,1
+Male & female ova,10
+Male & female with ova,2
+Male and female,10
+Male and female adults and a juvenile of indeterminate gender,1
+Male immature,1
+Male Juv,1
+Male juvenile,1
+"Male, Female",3
+MaleFemale,251
+MaleFemale Juv,2
+MaleFemale Ova,23
+MaleMale,1
+mixed,219
+non applicable,37
+Not Specified,736808
+not stated,17
+U,31160
+undefined,47114
+unknown,65314
+
+```   
 9. Same thing for BasisOfRecord ('O','L','S','G','P','D')
