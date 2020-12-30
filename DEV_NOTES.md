@@ -263,9 +263,25 @@ QC = 30, meaning: "11110"
 
 But point is in see (Mediterranean, near Genoa) and coordinates are valid, so even if the bits are slightly misaligned, these records do not compute ... 
 ```
-2. What tables do we have to work on? How to associate data? 
-3. How do I find the Areas for QC 9 ? (Saw a Bounding Box somewhere)
+2. What tables do we have to work on? How to associate data? Tables with the QC field are: 
+   - dp_eurobis (25M records)
+   - eurobis
+   - eurobis_geo 
+   - eurobis_eventcore_occrec
+   - what about **eurobis_eventcore_eventrec** 
+   - eurobis_harvest 
+   - what about **eurobis_harvest_eventcore_eventrec**
+   - what about **eurobis_harvest_measurementorfact** and all the MOF tables? 
+   - eurobis_schelde
+   - what about **ices, ices_eggs_occurrences and ices_eggs_emof**
+  
+3. How do I find the Areas to test for QC 9 ? (Saw a Bounding Box somewhere)
 4. Measurement of Facts type tables do not have QC. I suppose we need to add it
 5. Measurement of Facts have sometimes SEX (MeasurementTypeID=http://vocab.nerc.ac.uk/collection/P01/current/ENTSEX01/). 
 Do we need to apply QC 17? I suppose so...
-6.    
+6. eurobis_measurementorfact_type can be used to fill the lookup database (true?)
+7. what is ices (37 M records)
+8. Mappings. In table QC there are queries for updating the QC fields on the DB. I believe at least one (17) is wrong.
+In this respect, what is the mapping between sex (here 'M','F','H','I','U','T','B', 
+   what we discussed before was different)
+9. Same thing for BasisOfRecord ('O','L','S','G','P','D')
