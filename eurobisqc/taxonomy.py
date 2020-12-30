@@ -2,7 +2,7 @@
     the lookup-db database (in SQLLite format in a first attempt)
     """
 import sys
-from lookupdb import sqlite_db_functions
+from dbworks import sqlite_db_functions
 
 from eurobisqc.util import qc_flags
 from eurobisqc.util import misc

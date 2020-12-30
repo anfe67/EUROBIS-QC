@@ -1,6 +1,6 @@
 import time
 from unittest import TestCase
-from lookupdb import sqlite_db_functions
+from dbworks import sqlite_db_functions
 
 
 class Test(TestCase):

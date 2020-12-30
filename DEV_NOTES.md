@@ -229,12 +229,43 @@ corrected error.
 ## 29/12/2020 
 
 - Received email from Bart, link to DB and basic explainations / Data field mappings 
-- Install MS SQL to local machine (Linux) Issues with install procedure, resolved. Dev license is free of charge
+- Install MS SQL to local machine (Linux) Issues with install procedure, resolved. (Dev license is free of charge)
+  - Note: For Ubuntu 20.04 needed to download and install by hand a 18.04 package called **multiarch-support_2.27-3ubuntu1.4_amd64.deb**
 - Connected to Server with DBeaver, checked basic functionality
 - Create DB and built Python code for basic access 
 - Demonstrated querying DB and outputting Python dictionary (ready for QCs)
-  
-- **TODO: Import DB from BAK file** 
-- **TODO: Study DB** 
+- Downloaded DB, investigating import 
+
+- **ONGOING: Import DB from BAK file**
 - **TODO: Read article: https://stackoverflow.com/questions/34646655/populating-row-number-on-new-column-for-table-without-primary-key**
-- This is related to speed ups in SQL  
+- This is related to speed ups in SQL, Creating indexes from non indexed data on the fly  
+
+---
+## 30/12/2020 
+- Import DB with command:
+``` 
+RESTORE DATABASE eurobis_dat FROM DISK = '/mnt/opt/VLIZ/eurobis_backup_2020_12_27_212114_3196520.bak' WITH MOVE 'eurobis_dat' TO '/var/opt/mssql/data/eurobis.mdf', MOVE 'eurobis_log' TO '/var/opt/mssql/data/eurobis.log', REPLACE
+```
+- (I run inside DBeaver, using it a as a sort of SSMS under Linux)
+- **ONGOING: Study DB*** 
+- Questions for Bart: 
+1. Most of the records have a qc already set of 30, but what am I not getting, since:
+```
+LAT	   LON	 
+44.26666   9.26666
+
+QC = 30, meaning: "11110"
+
+16 - GEO_LAT_LON_INVALID +  
+8  - GEO_LAT_LON_MISSING +
+4  - TAXONOMY_RANK_LOW +
+2  - TAXONOMY_APHIAID_MISS... 
+
+But point is in see (Mediterranean, near Genoa) and coordinates are valid, so even if the bits are slightly misaligned, these records do not compute ... 
+```
+2. What tables do we have to work on? How to associate data? 
+3. How do I find the Areas for QC 9 ? (Saw a Bounding Box somewhere)
+4. Measurement of Facts type tables do not have QC. I suppose we need to add it
+5. Measurement of Facts have sometimes SEX (MeasurementTypeID=http://vocab.nerc.ac.uk/collection/P01/current/ENTSEX01/). 
+Do we need to apply QC 17? I suppose so...
+6.    

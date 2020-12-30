@@ -3,7 +3,7 @@
 import sys
 from eurobisqc.util import qc_flags
 from eurobisqc.util import misc
-from lookupdb import sqlite_db_functions
+from dbworks import sqlite_db_functions
 
 error_mask_14 = qc_flags.QCFlag.OBSERVED_COUNT_MISSING.bitmask
 error_mask_15 = qc_flags.QCFlag.OBSERVED_WEIGTH_MISSING.bitmask

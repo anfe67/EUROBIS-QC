@@ -4,7 +4,7 @@
 
 import sys
 import os
-from lookupdb import sqlite_db_functions
+from dbworks import sqlite_db_functions
 
 this = sys.modules[__name__]
 this.resources_dir = None

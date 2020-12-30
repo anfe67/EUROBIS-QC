@@ -24,7 +24,7 @@ else:
 this.database_location = os.path.join(os.path.dirname(__file__), database_file)
 
 
-# Opening the lookupdb database
+# Opening the dbworks database
 def open_db():
     try:
         db_conn = lite.connect(this.database_location)

@@ -1,1 +1,1 @@
-__all__ = ["eurobisqc", "lookupdb"]
+__all__ = ["eurobisqc", "dbworks"]

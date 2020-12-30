@@ -1,4 +1,4 @@
-from dbupdater import mssql_db_functions
+import mssql_db_functions
 from unittest import TestCase
 
 
