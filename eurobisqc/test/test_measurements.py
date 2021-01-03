@@ -27,27 +27,28 @@ class Test(TestCase):
         {"id": 16, "sex": "multiversion"}  # SEX - NOT OK
     ]
 
+    # TODO: Recalculate
     expected_results = [0,
                         0,
                         0,
-                        qc_flags.QCFlag.OBSERVED_WEIGTH_MISSING.bitmask,
-                        qc_flags.QCFlag.OBSERVED_WEIGTH_MISSING.bitmask,
-                        qc_flags.QCFlag.OBSERVED_COUNT_MISSING.bitmask,
-                        qc_flags.QCFlag.OBSERVED_COUNT_MISSING.bitmask,
+                        qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask,
+                        qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask,
+                        qc_flags.QCFlag.OBSERVED_COUNT_PRESENT.bitmask,
+                        qc_flags.QCFlag.OBSERVED_COUNT_PRESENT.bitmask,
                         0,
-                        qc_flags.QCFlag.SAMPLE_SIZE_MISSING.bitmask,
+                        qc_flags.QCFlag.SAMPLE_SIZE_PRESENT.bitmask,
                         0,
                         0,
                         ]
-
+    # TODO: Recalculate
     expected_results_dyn_prop = [0,
                                  0,
                                  0,
-                                 qc_flags.QCFlag.OBSERVED_WEIGTH_MISSING.bitmask  # Verify should be weight
+                                 qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask  # Verify should be weight
                                  ]
 
     expected_results_sex = [0,
-                            qc_flags.QCFlag.SEX_MISSING_OR_WRONG.bitmask]
+                            qc_flags.QCFlag.SEX_PRESENT.bitmask]
 
     def test_check_record(self):
         results = []

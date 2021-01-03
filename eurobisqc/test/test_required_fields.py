@@ -28,26 +28,27 @@ class Test(TestCase):
         # All fields with lowercase value for BasisOfRecord
     ]
 
+    # TODO: Recalculate assertions
     def test_check_record(self):
-        self.assertTrue(required_fields.check_record_required(self.records[0]) == QCFlag.REQUIRED_FIELDS_MISS.bitmask)
+        self.assertTrue(required_fields.check_record_required(self.records[0]) == QCFlag.REQUIRED_FIELDS_PRESENT.bitmask)
         self.assertTrue(required_fields.check_record_required(self.records[1]) == 0)
-        self.assertTrue(required_fields.check_record_required(self.records[2]) == QCFlag.REQUIRED_FIELDS_MISS.bitmask)
-        self.assertTrue(required_fields.check_record_required(self.records[3]) == QCFlag.REQUIRED_FIELDS_MISS.bitmask)
+        self.assertTrue(required_fields.check_record_required(self.records[2]) == QCFlag.REQUIRED_FIELDS_PRESENT.bitmask)
+        self.assertTrue(required_fields.check_record_required(self.records[3]) == QCFlag.REQUIRED_FIELDS_PRESENT.bitmask)
         self.assertTrue(required_fields.check_record_required(self.records[7]) == 0)
 
     def test_source_record(self):
         # Source Records
         self.assertTrue(required_fields.check_record_obis_format(self.records[4]) == 0)
-        self.assertTrue(required_fields.check_record_obis_format(self.records[5]) == QCFlag.NO_OBIS_DATAFORMAT.bitmask)
-        self.assertTrue(required_fields.check_record_obis_format(self.records[6]) == QCFlag.NO_OBIS_DATAFORMAT.bitmask)
+        self.assertTrue(required_fields.check_record_obis_format(self.records[5]) == QCFlag.OBIS_DATAFORMAT_OK.bitmask)
+        self.assertTrue(required_fields.check_record_obis_format(self.records[6]) == QCFlag.OBIS_DATAFORMAT_OK.bitmask)
 
     def test_check(self):
         # Comparison is OK as we want to see element by element
-        self.assertTrue(required_fields.check_required(self.records[0:4]) == [QCFlag.REQUIRED_FIELDS_MISS.bitmask,
+        self.assertTrue(required_fields.check_required(self.records[0:4]) == [QCFlag.REQUIRED_FIELDS_PRESENT.bitmask,
                                                                               0,
-                                                                              QCFlag.REQUIRED_FIELDS_MISS.bitmask,
-                                                                              QCFlag.REQUIRED_FIELDS_MISS.bitmask])
-        self.assertTrue(required_fields.check_obis(self.records[0:4]) == [QCFlag.NO_OBIS_DATAFORMAT.bitmask,
+                                                                              QCFlag.REQUIRED_FIELDS_PRESENT.bitmask,
+                                                                              QCFlag.REQUIRED_FIELDS_PRESENT.bitmask])
+        self.assertTrue(required_fields.check_obis(self.records[0:4]) == [QCFlag.OBIS_DATAFORMAT_OK.bitmask,
                                                                           0,
                                                                           0,
-                                                                          QCFlag.NO_OBIS_DATAFORMAT.bitmask])
+                                                                          QCFlag.OBIS_DATAFORMAT_OK.bitmask])

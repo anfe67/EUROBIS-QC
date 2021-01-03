@@ -1,0 +1,8 @@
+# Values allowed for the Sex field in both Occurrence and eMoF records
+female
+male
+hermaphrodite
+f
+m
+h
+

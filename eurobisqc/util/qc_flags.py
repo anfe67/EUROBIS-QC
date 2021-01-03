@@ -3,29 +3,29 @@ from enum import Enum
 
 
 class QCFlag(Enum):
-    """ The error bitmask shall be determined by the bitmask, second element in the tuple
+    """ The quality bitmask shall be determined by the bitmask, second element in the tuple
         includes class and object utility methods """
 
-    REQUIRED_FIELDS_MISS = ("Not all the required fields are present", 1)  # In required_fields
-    TAXONOMY_APHIAID_MISS = ("AphiaID not found", 2)  # In taxonomy_db
-    TAXONOMY_RANK_LOW = ("Taxon level lower than family", 3)  # In taxonomy_db
-    GEO_LAT_LON_MISSING = ("Lat or Lon missing or either equal to None", 4)  # In location
-    GEO_LAT_LON_INVALID = ("Lat or Lon missing or not within boundaries (-90 to 90 and -180 to 180)", 5)  # In location
-    GEO_LAT_LON_NOT_SEA = ("Lat - Lon not on sea / coastline", 6)  # In location
-    DATE_TIME_NOT_COMPLETE = ("Year or Start Year or End Year incomplete or invalid", 7)  # In time_qc
+    REQUIRED_FIELDS_PRESENT = ("Not all the required fields are present", 1)  # In required_fields
+    TAXONOMY_APHIAID_PRESENT = ("AphiaID not found", 2)  # In taxonomy_db
+    TAXONOMY_RANK_OK = ("Taxon level lower than family", 3)  # In taxonomy_db
+    GEO_LAT_LON_PRESENT = ("Lat or Lon missing or either equal to None", 4)  # In location
+    GEO_LAT_LON_VALID = ("Lat or Lon missing or not within boundaries (-90 to 90 and -180 to 180)", 5)  # In location
+    GEO_LAT_LON_ON_SEA = ("Lat - Lon not on sea / coastline", 6)  # In location
+    DATE_TIME_OK = ("Year or Start Year or End Year incomplete or invalid", 7)  # In time_qc
     TAXON_APHIAID_NOT_EXISTING = ("Marine Taxon not existing in APHIA", 8)  # FLAG - Probably not doing it
     GEO_COORD_AREA = ("Coordinates not in the specified area", 9)  # In location
-    NO_OBIS_DATAFORMAT = ("No valid code found in basisOfRecord", 10)  # in required_fields
-    INVALID_DATE_1 = ("Invalid sampling date", 11)  # In time_qc
-    INVALID_DATE_2 = ("End sampling date before start date", 12)  # In time_qc
-    INVALID_DATE_3 = ("Sampling time invalid or timezone not completed", 13)  # In time_qc
-    OBSERVED_COUNT_MISSING = ("Empty or missing observed individual count", 14)  # In measurements
-    OBSERVED_WEIGTH_MISSING = ("Empty or missing observed weigth", 15)  # In measurements
-    SAMPLE_SIZE_MISSING = ("Observed individual count > 0 but sample size missing", 16)  # In measurements
-    SEX_MISSING_OR_WRONG = ("Sex missing or wrong OBIS code", 17)  # In measurements
-    MIN_MAX_DEPTH_ERROR = ("Minimum depth greater than maximum depth", 18)  # in location
-    WRONG_DEPTH_MAP = ("Depth incoherent with depth map", 19)  # In location
-    WRONG_DEPTH_SPECIES = ("Depth incoherent with species depth range", 20)  # FLAG - Probably not doing it
+    OBIS_DATAFORMAT_OK = ("No valid code found in basisOfRecord", 10)  # in required_fields
+    VALID_DATE_1 = ("Invalid sampling date", 11)  # In time_qc
+    VALID_DATE_2 = ("End sampling date before start date", 12)  # In time_qc
+    VALID_DATE_3 = ("Sampling time invalid or timezone not completed", 13)  # In time_qc
+    OBSERVED_COUNT_PRESENT = ("Empty or missing observed individual count", 14)  # In measurements
+    OBSERVED_WEIGTH_PRESENT = ("Empty or missing observed weigth", 15)  # In measurements
+    SAMPLE_SIZE_PRESENT = ("Observed individual count > 0 but sample size missing", 16)  # In measurements
+    SEX_PRESENT = ("Sex missing or wrong OBIS code", 17)  # In measurements
+    MIN_MAX_DEPTH_VERIFIED = ("Minimum depth greater than maximum depth", 18)  # in location
+    DEPTH_MAP_VERIFIED = ("Depth incoherent with depth map", 19)  # In location
+    DEPTH_FOR_SPECIES_OK = ("Depth incoherent with species depth range", 20)  # FLAG - Probably not doing it
 
     # All the required codes to follow
 

@@ -11,8 +11,8 @@ insufficient_detail = ['Kingdom', 'Subkingdom', 'Infrakingdom', 'Phylum', 'Subph
                        'Family']
 
 # Return value when the quality check fails
-error_mask_1 = qc_flags.QCFlag.TAXONOMY_APHIAID_MISS.bitmask  # Is the AphiaID Completed
-error_mask_2 = qc_flags.QCFlag.TAXONOMY_RANK_LOW.bitmask  # Is the Taxon Level lower than the family
+error_mask_1 = qc_flags.QCFlag.TAXONOMY_APHIAID_PRESENT.bitmask  # Is the AphiaID Completed
+error_mask_2 = qc_flags.QCFlag.TAXONOMY_RANK_OK.bitmask  # Is the Taxon Level lower than the family
 
 """ Idea : Call the obis-qc taxonomy, get the taxa records and parse them to assign the QC field to the input records
     Shall process all the taxonomy QC in this one, shall take one or more records in a list of records.

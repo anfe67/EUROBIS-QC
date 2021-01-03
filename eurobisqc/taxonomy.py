@@ -10,8 +10,8 @@ from eurobisqc.util import misc
 this = sys.modules[__name__]
 
 # Masks used to build the return value when the quality check fails
-error_mask_2 = qc_flags.QCFlag.TAXONOMY_APHIAID_MISS.bitmask  # Is the AphiaID Completed
-error_mask_3 = qc_flags.QCFlag.TAXONOMY_RANK_LOW.bitmask  # Is the Taxon Level lower than the family
+qc_mask_2 = qc_flags.QCFlag.TAXONOMY_APHIAID_PRESENT.bitmask  # Is the AphiaID Completed
+qc_mask_3 = qc_flags.QCFlag.TAXONOMY_RANK_OK.bitmask  # Is the Taxon Level lower than the family
 
 # error_mask_8 = qc_flags.QCFlag.TAXON_APHIAID_NOT_EXISTING. bitmask # Unclear how to do this one
 
@@ -38,7 +38,7 @@ def populate_fields():
     this.speciesprofile_fields.extend(speciesprofiles)
 
 
-# Rework
+# Modified to Quality mask instead of error mask
 def check_record(record):
     # error mask
     qc_mask = 0
@@ -55,21 +55,24 @@ def check_record(record):
         aphiaid = misc.parse_lsid(record["scientificNameID"])
 
         if aphiaid is not None:  # Verify that the aphiaid retrieved is valid
+
             taxon_record = sqlite_db_functions.get_record('taxon', 'scientificNameID',
                                                           record['scientificNameID'], this.taxon_fields)
 
             # Have we got a record
             if taxon_record is not None:
-                if taxon_record['genus'] is None:
-                    qc_mask |= error_mask_3
-            else:
-                sn_id |= error_mask_2  # Got some info but not found in DB. so scientificNameID is not OK
-        else:
-            sn_id |= error_mask_2
-    else:
-        sn_id |= error_mask_2
+                sn_id = True
+                qc_mask |= qc_mask_2
+                if taxon_record['genus'] is not None:
+                    qc_mask |= qc_mask_3
+            # else:
+            #     sn_id |= qc_mask_2  # Got some info but not found in DB. so scientificNameID is not OK
+    #     else:
+    #         sn_id |= qc_mask_2
+    # else:
+    #     sn_id |= qc_mask_2
 
-    if sn_id:  # We still have a chance to verify by scientificName
+    if not sn_id:  # We still have a chance to verify by scientificName
 
         # No Aphiaid Attempt to query by scientificName
         if "scientificName" in record and record["scientificName"] is not None:
@@ -83,13 +86,14 @@ def check_record(record):
                                                           record['scientificName'], this.taxon_fields)
             # Have we got a record
             if taxon_record is not None:
-                if taxon_record['genus'] is None:
+                qc_mask |= qc_mask_2
+                if taxon_record['genus'] is not None:
                     # We would not be here if scientificNameID was able to resolve
-                    qc_mask |= error_mask_3
-            else:
-                qc_mask |= error_mask_2  # both fields are wrong...
-        else:
-            qc_mask |= error_mask_2  # None of the scientificName fields are filled or valid
+                    qc_mask |= qc_mask_3
+        #     else:
+        #         qc_mask |= qc_mask_2  # both fields are wrong...
+        # else:
+        #     qc_mask |= qc_mask_2  # None of the scientificName fields are filled or valid
 
     else:
         pass  # We have already an aphiaid from the scientificNameId

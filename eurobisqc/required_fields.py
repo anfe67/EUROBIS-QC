@@ -5,8 +5,8 @@ from eurobisqc.util import qc_flags
 this = sys.modules[__name__]
 
 # Return values for when the quality check fails
-error_mask_1 = qc_flags.QCFlag.REQUIRED_FIELDS_MISS.bitmask
-error_mask_10 = qc_flags.QCFlag.NO_OBIS_DATAFORMAT.bitmask
+qc_mask_1 = qc_flags.QCFlag.REQUIRED_FIELDS_PRESENT.bitmask
+qc_mask_10 = qc_flags.QCFlag.OBIS_DATAFORMAT_OK.bitmask
 
 this.required_fields = ["eventDate", "decimalLongitude", "decimalLatitude", "scientificName", "scientificNameID",
                         "occurrenceStatus", "basisOfRecord"]
@@ -22,6 +22,7 @@ this.vocab = [value.lower() for value in this.values]
 fields_to_compare = [value.lower() for value in this.required_fields]
 
 
+# Modified to Quality mask instead of error mask
 def check_record_required(record, option=False):
     """ Check for presence of required fields, as per reference. This corresponds to QC1.
         Optionally look at a set of recommended fields
@@ -45,10 +46,10 @@ def check_record_required(record, option=False):
             if record[required_field] is None:
                 break  # No need to proceed
 
-        if count != len(this.required_fields):
-            qc_mask |= error_mask_1
-    else:
-        qc_mask |= error_mask_1
+        if count == len(this.required_fields):
+            qc_mask |= qc_mask_1
+    # else:
+    #     qc_mask |= qc_mask_1
     # An option to be pedantic and require presence of the optional fields
     if option:
         present_optional_fields = set(present_fields).intersection(set(this.recommended_fields))
@@ -59,12 +60,13 @@ def check_record_required(record, option=False):
                 if record[optional_field] is None:
                     break  # No need to proceed
 
-            if count != len(this.recommended_fields):
-                qc_mask |= error_mask_1
+            if count == len(this.recommended_fields):
+                qc_mask |= qc_mask_1
 
     return qc_mask
 
 
+# Updated to treat the QC as a label of quality, not as an error
 def check_record_obis_format(record):
     """ To be called for source type records
         :param record:
@@ -73,10 +75,10 @@ def check_record_obis_format(record):
 
     # QC 10
     if "basisOfRecord" in record and record["basisOfRecord"] is not None:
-        if not record["basisOfRecord"].lower() in this.vocab:
-            qc_mask |= error_mask_10
-    else:
-        qc_mask |= error_mask_10
+        if record["basisOfRecord"].lower() in this.vocab:
+            qc_mask |= qc_mask_10
+    # else:
+    #     qc_mask |= qc_mask_10
 
     return qc_mask
 

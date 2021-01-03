@@ -38,15 +38,15 @@ class Test(TestCase):
         for record in self.records:
             results.append(location.check_basic_record(record))
 
-        assert (results == [0,
-                            QCFlag.GEO_LAT_LON_MISSING.bitmask,  # 8
-                            QCFlag.GEO_LAT_LON_INVALID.bitmask,  # 16
-                            QCFlag.GEO_LAT_LON_INVALID.bitmask,  # 16
+        assert (results == [QCFlag.GEO_LAT_LON_PRESENT.bitmask | QCFlag.GEO_LAT_LON_VALID.bitmask,
                             0,
                             0,
                             0,
-                            0,
-                            0])
+                            QCFlag.GEO_LAT_LON_PRESENT.bitmask | QCFlag.GEO_LAT_LON_VALID.bitmask,
+                            QCFlag.GEO_LAT_LON_PRESENT.bitmask | QCFlag.GEO_LAT_LON_VALID.bitmask,
+                            QCFlag.GEO_LAT_LON_PRESENT.bitmask | QCFlag.GEO_LAT_LON_VALID.bitmask,
+                            QCFlag.GEO_LAT_LON_PRESENT.bitmask | QCFlag.GEO_LAT_LON_VALID.bitmask,
+                            QCFlag.GEO_LAT_LON_PRESENT.bitmask | QCFlag.GEO_LAT_LON_VALID.bitmask,])
 
     def test_check_xy(self):
         """ tests calls to the lookup service through pyxylookup """
@@ -59,15 +59,16 @@ class Test(TestCase):
         results = location.check_xy(self.records)
         print(results)
 
-        assert (results == [0,
+        assert (results == [QCFlag.GEO_LAT_LON_ON_SEA.bitmask,
                             0,
                             0,
                             0,
-                            QCFlag.GEO_LAT_LON_NOT_SEA.bitmask,  # 32
-                            QCFlag.GEO_LAT_LON_NOT_SEA.bitmask | QCFlag.WRONG_DEPTH_MAP.bitmask,  # 262176
                             0,
-                            QCFlag.WRONG_DEPTH_MAP.bitmask,  # 262144\
-                            0])
+                            0,
+                            QCFlag.GEO_LAT_LON_ON_SEA.bitmask | QCFlag.DEPTH_MAP_VERIFIED.bitmask,
+                            QCFlag.GEO_LAT_LON_ON_SEA.bitmask,
+                            QCFlag.GEO_LAT_LON_ON_SEA.bitmask | QCFlag.DEPTH_MAP_VERIFIED.bitmask,
+                            ])
 
     def test_api_call(self):
         """ Generates a number of valid/plausible geographical points and calls the pyxylookup API
@@ -108,15 +109,19 @@ class Test(TestCase):
 
         area_check_records = []
         for record in self.records:
-            if not location.check_basic_record(record):
+            if location.check_basic_record(record):
                 area_check_records.append(record)
 
+        # TODO - RE-ASSESS records to check
         res_2 = location.check_in_areas(area_check_records, self.more_areas)
 
-        assert (res_1 == 0)
-        assert (res_2 == [0,
+        assert (res_1 == QCFlag.GEO_COORD_AREA.bitmask)
+        assert (res_2 == [QCFlag.GEO_COORD_AREA.bitmask,
+                          0,
+                          0,
                           QCFlag.GEO_COORD_AREA.bitmask,
-                          QCFlag.GEO_COORD_AREA.bitmask, 0, 0, 0])
+                          QCFlag.GEO_COORD_AREA.bitmask,
+                          QCFlag.GEO_COORD_AREA.bitmask])
 
     def test_all_params(self):
         location.check_all_location_params(self.records, self.more_areas)
@@ -127,11 +132,11 @@ class Test(TestCase):
             qc_res.append(record["QC"])
 
         assert (qc_res == [0,
-                           QCFlag.GEO_LAT_LON_MISSING.bitmask,
-                           QCFlag.GEO_LAT_LON_INVALID.bitmask,
-                           QCFlag.GEO_LAT_LON_INVALID.bitmask,
+                           QCFlag.GEO_LAT_LON_PRESENT.bitmask,
+                           QCFlag.GEO_LAT_LON_VALID.bitmask,
+                           QCFlag.GEO_LAT_LON_VALID.bitmask,
                            QCFlag.GEO_COORD_AREA.bitmask,
                            QCFlag.GEO_COORD_AREA.bitmask,
                            0,
-                           QCFlag.WRONG_DEPTH_MAP.bitmask,
+                           QCFlag.DEPTH_MAP_VERIFIED.bitmask,
                            0])

@@ -470,3 +470,17 @@ StillImage,             6481
 T,                      9454
 
 ```
+
+## 31/12/2021
+
+- QC logic is all inverse, QC bits are 1 if the QC is "passed" meaning they are quality stamps, not error flags.
+
+## 03/01/2021
+
+- Recommended fields in OBIS, what to do in EUROBIS? Options to look for. 
+- Continuing adapting to QMask logic instead of Error mask logic (Location, Taxonomy and Required fields OK, tests to be 
+  corrected, time and measurements too)
+- Corrected tests for location QCs, noticed that DB has fields MinimumDepth and MaximumDepth while DwCA 
+  records have minimumDepthInMeters and maximumDepthinMeters. Need to map to a SQL table to SQL view in the 
+  QC pipeline with "proper names" OR make names dynamic (such as lower case check for smaller field name)? 
+  To be clarified.
