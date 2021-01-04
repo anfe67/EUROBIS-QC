@@ -92,6 +92,7 @@ def string_to_dict(dyn_prop_string):
     else:
         return {'conversion_fail': True}
 
+
 # Modify to take into account QC masks and not error masks
 def do_xylookup(records):
     """ derived from equivalent in obis-qc - takes a list of records already QCd
@@ -112,8 +113,8 @@ def do_xylookup(records):
         if "decimalLongitude" in record and \
                 "decimalLatitude" in record and \
                 "QC" in record and \
-                 record["QC"] & qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask and \
-                 record["QC"] & qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask:
+                record["QC"] & qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask and \
+                record["QC"] & qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask:
             indices.append(i)
             lon = check_float(record["decimalLongitude"])["float"]
             lat = check_float(record["decimalLatitude"])["float"]

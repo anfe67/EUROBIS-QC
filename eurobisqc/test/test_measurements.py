@@ -27,28 +27,26 @@ class Test(TestCase):
         {"id": 16, "sex": "multiversion"}  # SEX - NOT OK
     ]
 
-    # TODO: Recalculate
     expected_results = [0,
-                        0,
-                        0,
                         qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask,
                         qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask,
-                        qc_flags.QCFlag.OBSERVED_COUNT_PRESENT.bitmask,
-                        qc_flags.QCFlag.OBSERVED_COUNT_PRESENT.bitmask,
+                        0,
+                        0,
+                        0,
                         0,
                         qc_flags.QCFlag.SAMPLE_SIZE_PRESENT.bitmask,
                         0,
-                        0,
+                        qc_flags.QCFlag.SAMPLE_SIZE_PRESENT.bitmask,
+                        qc_flags.QCFlag.OBSERVED_COUNT_PRESENT.bitmask,
                         ]
-    # TODO: Recalculate
-    expected_results_dyn_prop = [0,
+    expected_results_dyn_prop = [qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask,
                                  0,
-                                 0,
-                                 qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask  # Verify should be weight
+                                 qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask,
+                                 0  # Verify should be weight
                                  ]
 
-    expected_results_sex = [0,
-                            qc_flags.QCFlag.SEX_PRESENT.bitmask]
+    expected_results_sex = [qc_flags.QCFlag.SEX_PRESENT.bitmask,
+                            0, ]
 
     def test_check_record(self):
         results = []
@@ -68,3 +66,6 @@ class Test(TestCase):
     def test_check_sex(self):
         results = measurements.check_sex(self.records[15:])
         self.assertTrue(results == self.expected_results_sex)
+
+# TODO - Verify also sex within measurementTypeID and measurementType
+# TODO - Verify where dynamicProperties can be found in DB

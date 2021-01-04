@@ -48,7 +48,6 @@ def check_record(record, min_year=0):
                 if parser.components["start"]["minutes"] is not None:
                     qc_mask |= qc_mask_13
 
-
         except (ValueError, TypeError):
             return qc_mask
 
@@ -87,7 +86,6 @@ def check_date(date_string):
         if parser.components["start"]["hours"] is not None:
             if parser.components["start"]["minutes"] is not None:
                 qc_mask |= qc_mask_13
-
 
     except (ValueError, TypeError):
         return qc_mask

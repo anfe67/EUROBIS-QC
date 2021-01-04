@@ -1,4 +1,6 @@
 from unittest import TestCase
+
+import qc_flags
 from eurobisqc import location
 from eurobisqc.util.qc_flags import QCFlag
 
@@ -46,7 +48,7 @@ class Test(TestCase):
                             QCFlag.GEO_LAT_LON_PRESENT.bitmask | QCFlag.GEO_LAT_LON_VALID.bitmask,
                             QCFlag.GEO_LAT_LON_PRESENT.bitmask | QCFlag.GEO_LAT_LON_VALID.bitmask,
                             QCFlag.GEO_LAT_LON_PRESENT.bitmask | QCFlag.GEO_LAT_LON_VALID.bitmask,
-                            QCFlag.GEO_LAT_LON_PRESENT.bitmask | QCFlag.GEO_LAT_LON_VALID.bitmask,])
+                            QCFlag.GEO_LAT_LON_PRESENT.bitmask | QCFlag.GEO_LAT_LON_VALID.bitmask, ])
 
     def test_check_xy(self):
         """ tests calls to the lookup service through pyxylookup """
@@ -124,19 +126,38 @@ class Test(TestCase):
                           QCFlag.GEO_COORD_AREA.bitmask])
 
     def test_all_params(self):
-        location.check_all_location_params(self.records, self.more_areas)
+        qc_res = location.check_all_location_params(self.records, self.more_areas)
 
-        qc_res = []
+        for idx, record in enumerate(self.records):
+            if "QC" in record:
+                if qc_res[idx] is not None:
+                    record["QC"] |= qc_res[idx]
+            else:
+                record["QC"] = qc_res[idx]
 
-        for record in self.records:
-            qc_res.append(record["QC"])
-
-        assert (qc_res == [0,
-                           QCFlag.GEO_LAT_LON_PRESENT.bitmask,
-                           QCFlag.GEO_LAT_LON_VALID.bitmask,
-                           QCFlag.GEO_LAT_LON_VALID.bitmask,
-                           QCFlag.GEO_COORD_AREA.bitmask,
-                           QCFlag.GEO_COORD_AREA.bitmask,
+        assert (qc_res == [qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask |
+                           qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask |
+                           qc_flags.QCFlag.GEO_LAT_LON_ON_SEA.bitmask |
+                           qc_flags.QCFlag.GEO_COORD_AREA.bitmask,
                            0,
-                           QCFlag.DEPTH_MAP_VERIFIED.bitmask,
-                           0])
+                           0,
+                           0,
+                           qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask |
+                           qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask,
+                           qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask |
+                           qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask,
+                           qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask |
+                           qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask |
+                           qc_flags.QCFlag.GEO_LAT_LON_ON_SEA.bitmask |
+                           qc_flags.QCFlag.GEO_COORD_AREA.bitmask |
+                           qc_flags.QCFlag.DEPTH_MAP_VERIFIED.bitmask,
+                           qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask |
+                           qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask |
+                           qc_flags.QCFlag.GEO_LAT_LON_ON_SEA.bitmask |
+                           qc_flags.QCFlag.GEO_COORD_AREA.bitmask,
+                           qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask |
+                           qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask |
+                           qc_flags.QCFlag.GEO_LAT_LON_ON_SEA.bitmask |
+                           qc_flags.QCFlag.GEO_COORD_AREA.bitmask |
+                           qc_flags.QCFlag.DEPTH_MAP_VERIFIED.bitmask,
+                           ])

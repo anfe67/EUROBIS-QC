@@ -17,14 +17,20 @@ this.weight_measure_types = {}
 # And the measurement type ID must be :
 this.weight_measure_type_ids = {}
 
+this.weight_measures = {}
+
 # For count :The measurement type must contain for weight verification (lowercase check)
 this.count_measure_types = {}
 # And the measurement type ID must match one of
 this.count_measure_type_ids = {}
 
+this.count_measures = {}
+
 # For sample size
 this.sample_size_measure_types = {}
 this.sample_size_measure_type_ids = {}
+
+this.sample_size_measures = {}
 
 # Same question for sex / gender (vocabulary) - no need for database lookup for this
 # Sets are faster than lists for lookups
@@ -90,12 +96,17 @@ def initialize_lookups():
 
     this.lookups_loaded = True
 
+    # These will function as lookups for the dynamicProperty field on Occurrence when found
+    this.weight_measures = this.weight_measure_type_ids.union(this.weight_measure_types)
+    this.sample_size_measures = this.sample_size_measure_type_ids.union(this.sample_size_measure_types)
+    this.count_measures = this.count_measure_type_ids.union(this.count_measure_types)
 
-# Modified to Quality mask instead of error mask
+
 def check_mtid(measurement_type_id, measurement_value):
-    """ verifies that if one of the sought measurement
-        types IDs is present, then the measurementValue is also
-        present and not None
+    """ FOR eMoF records.
+        Verifies that the measurement value is not none,
+        if one of the sought measurement
+        types IDS is present, then the QC is passed
         :param measurement_type_id - as in the record
         :param measurement_value - as in the record
         purpose: attempt optimization """
@@ -103,90 +114,91 @@ def check_mtid(measurement_type_id, measurement_value):
     qc_mask = 0
     found = False
 
+    if measurement_value is None:
+        return qc_mask
+
     # Is the measurement type id of a biomass weight
     for wmtid in this.weight_measure_type_ids:
         if wmtid in measurement_type_id:
             found = True
-            if measurement_value is not None:
-                qc_mask |= qc_mask_15
+            qc_mask |= qc_mask_15
 
     # Is it the measurement of a sample size - do not check if found
     if not found:
         for smtid in this.sample_size_measure_type_ids:
             if smtid in measurement_type_id:
                 found = True
-                if measurement_value is not None:
-                    qc_mask |= qc_mask_16
+                qc_mask |= qc_mask_16
 
     # Is it a head count - do not check if found
     if not found:
         for cmtid in this.count_measure_type_ids:
             if cmtid in measurement_type_id:
                 found = True
-                if measurement_value is not None:
-                    qc_mask |= qc_mask_14
+                qc_mask |= qc_mask_14
 
     # Does the measurement contain the gender - and check validity of value
     if not found:
         for smtid in this.sex_field_measure_type_ids:
-            if measurement_value is not None:
-                if smtid in measurement_type_id:
-                    for m_v in this.sex_field_values:
-                        if m_v in measurement_value:
-                            qc_mask |= qc_mask_17
+            if smtid in measurement_type_id:
+                for m_v in this.sex_field_values:
+                    if m_v in measurement_value:
+                        qc_mask |= qc_mask_17
 
     return qc_mask
 
 
-# Modified to Quality mask instead of error mask
 def check_mt(measurement_type, measurement_value):
-    """ verifies that if one of the sought measurement
-        types is present, then the measurementValue is also
-        present and not None
+    """ FOR eMoF records.
+        Verifies that the measurement value is not none,
+        if one of the sought measurement
+        types is present, then the QC is passed
         :param measurement_type - as in the record
         :param measurement_value - as in the record
         purpose: attempt optimization """
 
     qc_mask = 0
     found = False
+
+    if measurement_value is None:
+        return qc_mask
+
     # Is the measurement type id of a biomass weight
     for wmt in this.weight_measure_types:
         if wmt in measurement_type:
             found = True
-            if measurement_value is not None:
-                qc_mask |= qc_mask_15
+            qc_mask |= qc_mask_15
 
     # Is it the measurement of a sample size
     if not found:
         for smt in this.sample_size_measure_types:
             if smt in measurement_type:
                 found = True
-                if measurement_value is not None:
-                    qc_mask |= qc_mask_16
+                qc_mask |= qc_mask_16
 
     # Is it a head count
     if not found:
         for cmt in this.count_measure_types:
             if cmt in measurement_type:
                 found = True
-                if measurement_value is not None:
-                    qc_mask |= qc_mask_14
+                qc_mask |= qc_mask_14
 
-    # Does it concern the gender - and check the values
+    # Does it concern the gender/sex - and check the values
     if not found:
         for sex_mt in this.sex_field_measure_types:
             if sex_mt in measurement_type:
-                if measurement_value is not None:
-                    for m_v in this.sex_field_values:
-                        if m_v in measurement_value:
-                            qc_mask |= qc_mask_17
+                for m_v in this.sex_field_values:
+                    if m_v in measurement_value:
+                        qc_mask |= qc_mask_17
 
     return qc_mask
 
 
 def check_record(record):
     """ Applies the sampling verifications, input should be a
-        eMoF record or one containing the requested fields """
+        eMoF record or one containing the requested fields
+        if the a measure is found but the measurementValue is null
+        then QC is not passed """
 
     qc_mask = 0
 
@@ -196,22 +208,18 @@ def check_record(record):
 
     # Starting with IDs - weight
     if "measurementTypeID" in record and record["measurementTypeID"] is not None:
-
         measurement_value = None if "measurementValue" not in record else record["measurementValue"]
         if isinstance(measurement_value, str):
-            if not measurement_value.strip():
-                qc_mask |= check_mtid(record["measurementTypeID"].lower(), None)
-        else:
+            measurement_value = None if not measurement_value.strip() else measurement_value
+        if measurement_value is not None:
             qc_mask |= check_mtid(record["measurementTypeID"].lower(), measurement_value)
-
 
     # We do not have a ID measurement but we have a measurement type
     elif "measurementType" in record and record["measurementType"] is not None:
         measurement_value = None if "measurementValue" not in record else record["measurementValue"]
         if isinstance(measurement_value, str):
-            if not measurement_value.strip():
-                qc_mask |= check_mt(record["measurementType"].lower(), None)
-        else:
+            measurement_value = None if not measurement_value.strip() else measurement_value
+        if measurement_value is not None:
             qc_mask |= check_mt(record["measurementType"].lower(), measurement_value)
 
     else:
@@ -221,11 +229,15 @@ def check_record(record):
     return qc_mask
 
 
-# Only apply to occurrences; Modified to Quality mask instead of error mask
 def check_sex_record(record):
-    """ The sex field is only present in the occurrence records, it makes sense to separate """
+    """ The sex field is only present in the occurrence records,
+        so use on occurrence only. It makes sense to separate """
 
     qc_mask = 0
+
+    # It shall be done only once on the first entry
+    if not this.lookups_loaded:
+        initialize_lookups()
 
     # We still have to look at sex (for occurrence records)
     if "sex" in record:
@@ -255,24 +267,38 @@ def check_dyn_prop_record(record):
         if "conversion_fail" not in properties:
 
             for k in properties.keys():
+                # We test each key againsts all possibilities
                 key = k.lower()
-                for cmt in this.count_measure_types:
+
+                for cmt in this.count_measures:
                     if cmt in key:
-                        if properties[k] is not None and (
-                                isinstance(properties[k], str) and properties[k].strip()):
-                            qc_mask |= qc_mask_14
+                        if properties[k] is not None:
+                            if isinstance(properties[k], str):
+                                if properties[k].strip():
+                                    qc_mask |= qc_mask_14  # It is a non empty string
+                            else:
+                                qc_mask |= qc_mask_14  # It is another value type
 
-                for wmt in this.weight_measure_types:
+                for wmt in this.weight_measures:
                     if wmt in key:
-                        if properties[k] is not None and (
-                                isinstance(properties[k], str) and properties[k].strip()):
-                            qc_mask |= qc_mask_15
+                        if properties[k] is not None:
+                            if isinstance(properties[k], str):
+                                if properties[k].strip():
+                                    qc_mask |= qc_mask_15  # It is a non empty string
+                            else:
+                                qc_mask |= qc_mask_15  # It is another value type
 
-                for smt in this.sample_size_measure_types:
+                for smt in this.sample_size_measures:
                     if smt in key:
-                        if properties[k] is not None and (
-                                isinstance(properties[k], str) and properties[k].strip()):
-                            qc_mask |= qc_mask_16
+                        if properties[k] is not None:
+                            if isinstance(properties[k], str):
+                                if properties[k].strip():
+                                    qc_mask |= qc_mask_16  # It is a non empty string
+                            else:
+                                qc_mask |= qc_mask_16  # It is another value type
+
+                # Can they contain sex? Can they contain the typeIDs?
+
     return qc_mask
 
 

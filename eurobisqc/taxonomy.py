@@ -65,12 +65,6 @@ def check_record(record):
                 qc_mask |= qc_mask_2
                 if taxon_record['genus'] is not None:
                     qc_mask |= qc_mask_3
-            # else:
-            #     sn_id |= qc_mask_2  # Got some info but not found in DB. so scientificNameID is not OK
-    #     else:
-    #         sn_id |= qc_mask_2
-    # else:
-    #     sn_id |= qc_mask_2
 
     if not sn_id:  # We still have a chance to verify by scientificName
 
@@ -90,10 +84,6 @@ def check_record(record):
                 if taxon_record['genus'] is not None:
                     # We would not be here if scientificNameID was able to resolve
                     qc_mask |= qc_mask_3
-        #     else:
-        #         qc_mask |= qc_mask_2  # both fields are wrong...
-        # else:
-        #     qc_mask |= qc_mask_2  # None of the scientificName fields are filled or valid
 
     else:
         pass  # We have already an aphiaid from the scientificNameId

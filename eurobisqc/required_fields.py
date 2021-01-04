@@ -22,7 +22,6 @@ this.vocab = [value.lower() for value in this.values]
 fields_to_compare = [value.lower() for value in this.required_fields]
 
 
-# Modified to Quality mask instead of error mask
 def check_record_required(record, option=False):
     """ Check for presence of required fields, as per reference. This corresponds to QC1.
         Optionally look at a set of recommended fields
@@ -66,7 +65,6 @@ def check_record_required(record, option=False):
     return qc_mask
 
 
-# Updated to treat the QC as a label of quality, not as an error
 def check_record_obis_format(record):
     """ To be called for source type records
         :param record:

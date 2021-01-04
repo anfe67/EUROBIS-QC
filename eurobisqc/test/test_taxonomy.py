@@ -15,10 +15,11 @@ class Test(TestCase):
     def test_check_taxa(self):
         results = taxonomy.check(self.records)
         print(results)
-        check = [QCFlag.TAXONOMY_APHIAID_PRESENT.bitmask,
+        check = [0,
+                 QCFlag.TAXONOMY_APHIAID_PRESENT.bitmask |
+                 QCFlag.TAXONOMY_RANK_OK.bitmask,
                  0,
                  QCFlag.TAXONOMY_APHIAID_PRESENT.bitmask,
-                 QCFlag.TAXONOMY_RANK_OK.bitmask,
-                 QCFlag.TAXONOMY_RANK_OK.bitmask,
+                 QCFlag.TAXONOMY_APHIAID_PRESENT.bitmask,
                  ]
         self.assertTrue(results == check)

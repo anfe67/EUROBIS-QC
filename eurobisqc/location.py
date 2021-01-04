@@ -22,7 +22,6 @@ qc_mask_18 = qc_flags.QCFlag.MIN_MAX_DEPTH_VERIFIED.bitmask
 qc_mask_19 = qc_flags.QCFlag.DEPTH_MAP_VERIFIED.bitmask
 
 
-# NOTE - Changed after moving from "error mask to quality mask concept"
 def check_basic_record(record):
     """ obis-qc equivalent function, to assign bitmask
         for basic lat/lon validity / presence and
@@ -58,7 +57,6 @@ def check_basic(records):
     return [check_basic_record(record) for record in records]
 
 
-# NOTE - Changed after moving from "error mask to quality mask concept"
 def check_record_in_areas(record, areas):
     """ verifies that a geographical point is in one of the rectangle areas
         :param record: The event record
@@ -103,7 +101,6 @@ def check_in_areas(records, areas):
     return qc_masks
 
 
-# Modified to Quality mask instead of error mask
 def check_depth_consistent(record):
     """ depth checks, in this case they must be numbers (representing meters)
         it is used as part of the basic checks """
@@ -152,7 +149,7 @@ def extract_depths(record):
             res.append(depth["float"])
     return res
 
-# Modified to Quality mask instead of error mask - TO VERIFY
+
 def check_xy(records):
     """ :param records, already QC for location
         :returns qc_mask values, but QC is already inserted in records bitmasks
@@ -189,7 +186,7 @@ def check_xy(records):
             if qc_mask & qc_mask_6:
                 depths = extract_depths(record)
                 for depth in depths:
-                    if  "bathymetry" in xy["grids"]:
+                    if "bathymetry" in xy["grids"]:
                         if xy["grids"]["bathymetry"] < 0:
                             # We can do this because quality mask is set
                             if depth is not None and depth <= intercept + xy["grids"]["bathymetry"]:
@@ -213,7 +210,7 @@ def check_xy(records):
 
     return results
 
-# TODO - MAKE IT COMPUTE AND ASSIGN QCs
+
 def check_all_location_params(records, areas):
     """ Given a list of records it shall perform all
         location verifications for a batch of records
@@ -225,19 +222,27 @@ def check_all_location_params(records, areas):
     # LON, LAT presence and validity, depth consistency
     qc_masks = check_basic(records)
 
-    # Check if the points are within the areas...
+    # Check if the points are within the areas for all records ...
     if areas is not None and len(areas):
         for idx, record in enumerate(records):
-            if not qc_masks[idx]:  # Should not be "positive" to basic checks
+            if qc_masks[idx]:  # Should be "positive" to basic checks (no point to check otherwise)
                 qc_masks[idx] |= check_record_in_areas(record, areas)
 
     # If the points are good, do the lookups...
     recs_for_lookup = []
     for idx, record in enumerate(records):
         record["QC"] = qc_masks[idx]
-        if not qc_masks[idx]:
+        if qc_masks[idx]:
             recs_for_lookup.append(record)
 
     # pyxylookup
-    check_xy(recs_for_lookup)
-    return None
+    outputs = check_xy(recs_for_lookup)
+
+    for idx, output_val in enumerate(outputs):
+        recs_for_lookup[idx]["QC"] |= output_val
+
+    # Build a consistent return value for each rec (should find a better way)
+    for idx, record in enumerate(records):
+        qc_masks[idx] |= record["QC"]
+
+    return qc_masks

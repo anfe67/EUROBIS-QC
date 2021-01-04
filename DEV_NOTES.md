@@ -483,4 +483,12 @@ T,                      9454
 - Corrected tests for location QCs, noticed that DB has fields MinimumDepth and MaximumDepth while DwCA 
   records have minimumDepthInMeters and maximumDepthinMeters. Need to map to a SQL table to SQL view in the 
   QC pipeline with "proper names" OR make names dynamic (such as lower case check for smaller field name)? 
-  To be clarified.
+  Look at the mapping provided by Bart.
+  
+## 04/01/2021
+
+- Resuming corrections : Tests for measurement checks - improved code as well
+- Completed review of test cases, with corrections to use the QC as a quality label  
+  
+- **Question** Where are the DynamicProperties in the database (or are there any in the DB)? 
+

@@ -38,7 +38,8 @@ class Test(TestCase):
 
         cursor2 = mssql_db_functions.conn.cursor()
         cursor2.execute(
-            f"SELECT  eurobis_measurementorfact.* from eurobis join eurobis_measurementorfact on eurobis.occurrenceID = "
+            f"SELECT  eurobis_measurementorfact.* from eurobis join eurobis_measurementorfact on "
+            f"eurobis.occurrenceID = "
             f"eurobis_measurementorfact.occurrenceID where eurobis.CollectionCode ='{collection}'")
 
         columns = [column[0] for column in cursor2.description]

@@ -38,7 +38,7 @@ class TestQCFlag(TestCase):
             self.fail()
 
         self.assertTrue(flags[0] != 'INVALID')
-        self.assertTrue(flags[-1] == 'WRONG_DEPTH_SPECIES')
+        self.assertTrue(flags[-1] == 'DEPTH_FOR_SPECIES_OK')
 
     def test_encode_qc(self):
         record1 = {'id': 1, 'QC': 2}  # Record with QC
