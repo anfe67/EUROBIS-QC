@@ -3,39 +3,32 @@ from unittest import TestCase
 import sys
 import os
 import time
-from eurobisqc.util import extract_area
+from eurobisqc.util import extract_dates
 
 from dwcaprocessor import DwCAProcessor
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 
+# TODO: Test with more datasets
 class Test(TestCase):
 
-    def test_find_areas(self):
+    def test_find_times(self):
         # Need to make sure that this is correct...
         filename = os.path.join(os.path.dirname(__file__),
                                 "../data/dwca-gelatinous_macrozoo_in_deepw_sevastopol-v1.1.zip")
+
         archive = DwCAProcessor(filename)
 
         xml_input = archive.eml
-        areas = None
+        date_string = None
         start = time.time()
 
+        # Repeat some times to get timing
         for i in range(100):
-            areas = extract_area.find_areas(xml_input)
+            date_string = extract_dates.find_dates(xml_input)
         end = time.time()
 
         print(f"Duration with xmltodict: {end - start}")
-        # Not complete, should verify areas content
 
-        self.assertIsNotNone(areas)
-        # [{"east": east, "west": west, "north": north, "south": south}]
-
-        self.assertTrue(len(areas) == 1)
-        self.assertTrue(areas[0]["west"] == 28.63)
-        self.assertTrue(areas[0]["east"] == 36.45)
-        self.assertTrue(areas[0]["south"] == 41.624)
-        self.assertTrue(areas[0]["north"] == 46.218)
-
-        print(areas)
+        self.assertIsNotNone(date_string)

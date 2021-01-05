@@ -320,6 +320,6 @@ def dwca_list_process(pool_no, dwca_files, with_print=False, with_logging=False)
 
 
 # dwca_parallel_processing()
-dwca_file_labeling(None, with_print=False, with_logging=True)
+dwca_file_labeling(None, with_print=False, with_logging=False)
 # dwca_labeling(with_print=False, with_logging=False)
 # exit(0)

@@ -489,6 +489,39 @@ T,                      9454
 
 - Resuming corrections : Tests for measurement checks - improved code as well
 - Completed review of test cases, with corrections to use the QC as a quality label  
-  
-- **Question** Where are the DynamicProperties in the database (or are there any in the DB)? 
+- Exploring Data 
 
+  
+- **Question** Where are the DynamicProperties in the database (or are there any in the DB)?
+- Answered - they may have been removed 
+
+``` 
+-- How to create an ID column on a table without one
+
+;WITH cte AS
+(
+    SELECT Id, ROW_NUMBER() OVER (ORDER BY NEWID()) AS RowId
+    FROM   #test
+)
+
+UPDATE cte
+    SET Id = RowId
+    
+```
+
+## 05/01/2021
+
+- started working on dataset extraction 
+
+- **question** on dates: according to the mapping eventDate is derived from the start and end fields and the timezone,
+however there is not enough of them filled to get the event date. For example all records for dataset with providerID=5480 
+  have all their temporal data set to NULL. The correspondant DwCA file has the event date set to 1982-09 for the events and 
+  nothing for the occurrences. This can be derived only from an external source, like the EML (which contains 1982-09-02 to 1982-09-02). Is this a correct way of deriving 
+  the eventDate ? Should I do that? In general the DwCA files have this field filled most of the time. Asked to Bart
+  
+- Designing the dataset class, and writing the extraction code, initial ideas, tested extraction of dates from EML 
+- Must design API call to retrieve EML from data service 
+- started implementation of retrieval of provider data from SQL 
+- Must complete by adding other SQL for records, call to EML service and extraction of dates and areas from EML
+- 
+  

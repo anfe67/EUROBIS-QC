@@ -25,7 +25,7 @@ def check_record(record, min_year=0):
             qc_mask |= qc_mask_7
 
             if parser.dates["mid"].year >= min_year:
-                # year does not precede minimum year in settings: Invalid
+                # year not precede minimum year in settings
                 qc_mask |= qc_mask_11
 
             ms_start = misc.date_to_millis(parser.dates["start"])

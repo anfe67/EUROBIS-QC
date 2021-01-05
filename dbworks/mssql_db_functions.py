@@ -7,11 +7,10 @@ import logging
 
 this = sys.modules[__name__]
 
-this.conn = None
-
 config = configparser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'resources/config.ini'))
 
+this.conn = None
 this.database = None
 this.driver = None
 this.username = None
@@ -28,10 +27,10 @@ if "SQLSERVERDB" in config:
         this.username = config['SQLSERVERDB']['username']
         this.password = config['SQLSERVERDB']['password']
     except KeyError:
-        # Some Parameters cannot be loaded or are missing - Should find exit strategy
+        # Some Parameters cannot be loaded or are missing - Should find clean exit strategy
         pass
 else:
-    # Parameters cannot be loaded - Should find exit strategy
+    # Parameters cannot be loaded - Should find clean exit strategy
     pass
 
 # Build a connection string
