@@ -523,5 +523,17 @@ however there is not enough of them filled to get the event date. For example al
 - Must design API call to retrieve EML from data service 
 - started implementation of retrieval of provider data from SQL 
 - Must complete by adding other SQL for records, call to EML service and extraction of dates and areas from EML
-- 
+
+## 06/01/2021 
+
+- Received answer from Bart, incorporating feedback. Looked at SQL function to get ISO_8601 dates  
+- Designing query/routines for dataset extraction - would there be a convenience in using Pandas? Use SQL in any case
+- Extracted dataset records from DB based on dataproviders.id. Also implemented API to get the EML and extract areas from it  
+- TODO: Verify query returns all necessary fields for QC runs.
+- TODO: Verify the hypothesis of not really needing an ID for the eurobis table
+- TODO: Start implementing an update query for the eurobis table 
+- TODO: Start implementing a test pipeline for xyz number of files.  
+
+
+
   

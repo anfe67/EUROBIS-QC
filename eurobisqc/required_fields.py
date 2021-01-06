@@ -8,6 +8,7 @@ this = sys.modules[__name__]
 qc_mask_1 = qc_flags.QCFlag.REQUIRED_FIELDS_PRESENT.bitmask
 qc_mask_10 = qc_flags.QCFlag.OBIS_DATAFORMAT_OK.bitmask
 
+# TODO: Maybe make this parameterable as in measurements...
 this.required_fields = ["eventDate", "decimalLongitude", "decimalLatitude", "scientificName", "scientificNameID",
                         "occurrenceStatus", "basisOfRecord"]
 

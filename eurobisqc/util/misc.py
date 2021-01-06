@@ -1,7 +1,5 @@
 import datetime
 import re
-
-from eurobisqc.util import extract_dates
 from eurobisqc.util import qc_flags
 
 
@@ -138,7 +136,7 @@ def split_list(a, n):
     return result
 
 
-# TODO: Write tests
+# TODO: This IS not correct, and in any case not fast. Use existing SQL function instead as per answer by Bart
 def build_event_date(end_year,
                      end_month,
                      end_day,
@@ -233,8 +231,8 @@ def build_event_date(end_year,
                             event_date_string_end += f":{time_zone}"
 
     # Still no luck? Attempt extraction from EML
-    if event_date_string is None:
-        event_date_string = extract_dates.find_dates(eml)
+    # if event_date_string is None:
+    #     event_date_string = extract_dates.find_dates(eml)
 
     # And that's it for the eventDate, no more looking
     return event_date_string
