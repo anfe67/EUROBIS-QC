@@ -14,7 +14,7 @@ from eurobisqc import time_qc
 from eurobisqc import measurements
 
 from eurobisqc.util import extract_area
-from eurobisqc.test import file_chooser
+from .util import file_chooser
 from eurobisqc.util import qc_flags
 from eurobisqc.util import misc
 
@@ -23,12 +23,17 @@ this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)
 
 
+# May be out of line with last discussions it is left here as an example,
+# to update time allowing.
 def dwca_file_labeling(filename, with_print=False, with_logging=True):
     """ Processes a DwCA archive if it is passed as a filename,
         shall popup a file chooser dialog if this is None
         :param filename (The DwCA zip file name)
         :param with_print (Extensive printing of the records)
-        :param with_logging (every QC failed is printed) """
+        :param with_logging (every QC passed is printed)
+
+        FLAG: This is an example, the (e)MoF records do not contain QC, and their QCs should be combined
+        FLAG: and assigned to the core event or occurrence record """
 
     if filename is None:
         # Adding a simple file chooser...
@@ -136,16 +141,6 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
             # Dynamic properties
             qc_mask = measurements.check_dyn_prop_record(full_core)
             full_core["QC"] = full_core["QC"] | qc_mask
-
-        # CANNOT BE
-        # elif archive.core.type == "MeasurementOrFact" or archive.core.type == "ExtendedMeasurementOrFact":
-        #     # Check measurements (this cannot be, this record type cannot ever be "Core",
-        #     # so it is will never be called, looking for confirmation)
-        #     qc_mask = measurements.check_record(full_core)
-        #     if "QC" in full_core:
-        #         full_core["QC"] = full_core["QC"] | qc_mask
-        #     else:
-        #         full_core["QC"] = qc_mask
 
         else:
             # Skip taxons and other record types
@@ -302,7 +297,6 @@ def dwca_list_process(pool_no, dwca_files, with_print=False, with_logging=False)
         :param with_logging (Logs on screen every QC failed) """
 
     # Prints pool data
-
     start = time.time()
     print(f"Pool {pool_no} started")
     for dwca_file in dwca_files:

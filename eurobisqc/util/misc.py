@@ -136,103 +136,103 @@ def split_list(a, n):
     return result
 
 
-# TODO: This IS not correct, and in any case not fast. Use existing SQL function instead as per answer by Bart
-def build_event_date(end_year,
-                     end_month,
-                     end_day,
-                     end_time,
-                     start_year,
-                     start_month,
-                     start_day,
-                     start_time,
-                     time_zone,
-                     year_collected,
-                     month_collected,
-                     day_collected,
-                     time_of_day,
-                     eml):
-    """ Attempts to build a parseable ISO format date - to keep consistency with DwCA processing
-        The values are the fields of the database, they are integer for the date components,
-        float for the time and string for the timezone. The eml is the last resort """
-
-    from math import modf, trunc
-
-    event_date_string_start = None
-    event_date_string_end = None
-    event_date_string = None
-
-    start_time_hours = None,
-    start_time_minutes = None
-    end_time_hours = None
-    end_time_minutes = None
-    time_hours = None
-    time_minutes = None
-
-    if start_time is not None:
-        start_time_minutes, start_time_hours = modf(start_time)
-        start_time_minutes = trunc(start_time_minutes * 100 / 60)
-
-    if end_time is not None:
-        end_time_minutes, end_time_hours = modf(end_time)
-        end_time_minutes = trunc(end_time_minutes * 100 / 60)
-
-    if time_of_day is not None:
-        time_minutes, time_hours = modf(time_of_day)
-        time_minutes = trunc(time_minutes * 100 / 60)
-
-    # We need at least the year - Start Date
-    if start_year is not None:
-        event_date_string_start = str(start_year)
-
-    if event_date_string_start is not None:
-        if start_month is not None:
-            event_date_string_start += f"-{str(start_month).zfill(2)}"
-            if start_day is not None:
-                event_date_string_start += f"-{str(start_day).zfill(2)}"
-                if start_time is not None:
-                    event_date_string_start += f"T{str(start_time_hours).zfill(2)}:{str(start_time_minutes).zfill(2)}"
-                    if time_zone is not None:
-                        event_date_string_start += f":{time_zone}"
-
-    # End Date
-    if end_year is not None:
-        event_date_string_end = str(end_year)
-    if event_date_string_end is not None:
-        if end_month is not None:
-            event_date_string_end += f"-{str(end_month).zfill(2)}"
-            if end_day is not None:
-                event_date_string_end += f"-{str(end_day).zfill(2)}"
-                if end_time is not None:
-                    event_date_string_end += f"T{str(end_time_hours).zfill(2)}:{str(end_time_minutes).zfill(2)}"
-                    if time_zone is not None:
-                        event_date_string_end += f":{time_zone}"
-
-    if event_date_string_start is not None:
-        event_date_string += event_date_string_start
-
-    if event_date_string_end is not None:
-        if event_date_string is not None:
-            event_date_string += f"/{event_date_string_start}"
-        else:
-            event_date_string = event_date_string_end
-
-    # looking at the collection date / time
-    if event_date_string is None:
-        if year_collected is not None:
-            event_date_string = str(year_collected)
-            if month_collected is not None:
-                event_date_string += f"-{str(month_collected).zfill(2)}"
-                if day_collected is not None:
-                    event_date_string += f"-{str(day_collected).zfill(2)}"
-                    if time_of_day is not None:
-                        # split the time as above
-                        event_date_string += f"T{str(time_hours).zfill(2)}:{str(time_minutes).zfill(2)}"
-                        if time_zone is not None:
-                            event_date_string_end += f":{time_zone}"
-
-    # Still no luck? Attempt extraction from EML
-    # if event_date_string is None:
-    #     event_date_string = extract_dates.find_dates(eml)
-
-    # And that's it for the eventDate, no more looking
-    return event_date_string
+# Use existing SQL function instead as per answer by Bart
+# def build_event_date(end_year,
+#                      end_month,
+#                      end_day,
+#                      end_time,
+#                      start_year,
+#                      start_month,
+#                      start_day,
+#                      start_time,
+#                      time_zone,
+#                      year_collected,
+#                      month_collected,
+#                      day_collected,
+#                      time_of_day,
+#                      eml):
+#     """ Attempts to build a parseable ISO format date - to keep consistency with DwCA processing
+#         The values are the fields of the database, they are integer for the date components,
+#         float for the time and string for the timezone. The eml is the last resort """
+#
+#     from math import modf, trunc
+#
+#     event_date_string_start = None
+#     event_date_string_end = None
+#     event_date_string = None
+#
+#     start_time_hours = None,
+#     start_time_minutes = None
+#     end_time_hours = None
+#     end_time_minutes = None
+#     time_hours = None
+#     time_minutes = None
+#
+#     if start_time is not None:
+#         start_time_minutes, start_time_hours = modf(start_time)
+#         start_time_minutes = trunc(start_time_minutes * 100 / 60)
+#
+#     if end_time is not None:
+#         end_time_minutes, end_time_hours = modf(end_time)
+#         end_time_minutes = trunc(end_time_minutes * 100 / 60)
+#
+#     if time_of_day is not None:
+#         time_minutes, time_hours = modf(time_of_day)
+#         time_minutes = trunc(time_minutes * 100 / 60)
+#
+#     # We need at least the year - Start Date
+#     if start_year is not None:
+#         event_date_string_start = str(start_year)
+#
+#     if event_date_string_start is not None:
+#         if start_month is not None:
+#             event_date_string_start += f"-{str(start_month).zfill(2)}"
+#             if start_day is not None:
+#                 event_date_string_start += f"-{str(start_day).zfill(2)}"
+#                 if start_time is not None:
+#                     event_date_string_start += f"T{str(start_time_hours).zfill(2)}:{str(start_time_minutes).zfill(2)}"
+#                     if time_zone is not None:
+#                         event_date_string_start += f":{time_zone}"
+#
+#     # End Date
+#     if end_year is not None:
+#         event_date_string_end = str(end_year)
+#     if event_date_string_end is not None:
+#         if end_month is not None:
+#             event_date_string_end += f"-{str(end_month).zfill(2)}"
+#             if end_day is not None:
+#                 event_date_string_end += f"-{str(end_day).zfill(2)}"
+#                 if end_time is not None:
+#                     event_date_string_end += f"T{str(end_time_hours).zfill(2)}:{str(end_time_minutes).zfill(2)}"
+#                     if time_zone is not None:
+#                         event_date_string_end += f":{time_zone}"
+#
+#     if event_date_string_start is not None:
+#         event_date_string += event_date_string_start
+#
+#     if event_date_string_end is not None:
+#         if event_date_string is not None:
+#             event_date_string += f"/{event_date_string_start}"
+#         else:
+#             event_date_string = event_date_string_end
+#
+#     # looking at the collection date / time
+#     if event_date_string is None:
+#         if year_collected is not None:
+#             event_date_string = str(year_collected)
+#             if month_collected is not None:
+#                 event_date_string += f"-{str(month_collected).zfill(2)}"
+#                 if day_collected is not None:
+#                     event_date_string += f"-{str(day_collected).zfill(2)}"
+#                     if time_of_day is not None:
+#                         # split the time as above
+#                         event_date_string += f"T{str(time_hours).zfill(2)}:{str(time_minutes).zfill(2)}"
+#                         if time_zone is not None:
+#                             event_date_string_end += f":{time_zone}"
+#
+#     # Still no luck? Attempt extraction from EML
+#     # if event_date_string is None:
+#     #     event_date_string = extract_dates.find_dates(eml)
+#
+#     # And that's it for the eventDate, no more looking
+#     return event_date_string

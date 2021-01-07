@@ -532,7 +532,28 @@ however there is not enough of them filled to get the event date. For example al
 - TODO: Verify query returns all necessary fields for QC runs.
 - TODO: Verify the hypothesis of not really needing an ID for the eurobis table
 - TODO: Start implementing an update query for the eurobis table 
-- TODO: Start implementing a test pipeline for xyz number of files.  
+- TODO: Start implementing a test pipeline for xyz number of files. 
+
+## 07/01/2021
+
+- Looking at the area extraction. This is not solid, and the API is inconsistent. Looking at the JSON output, which would 
+  be easier to parse, it is even more inconsistent, as the areas are reported as nulls, while in the eml sometimes (Mostly) 
+  are wrong.
+- First version of dataset.py, containing a class that represents a eurobis dataset ready to be labeled for quality 
+- Fields are mapped as per DwCA names, extraction follows the view in the DB to preserve consistency. Only the necessary
+  fields used by the QC and the fields useful to retrieve the records in the DB are retrieved. 
+- Corrected data extraction to retrieve scientificNameId in the Obis format (to preserve pipeline consistency between DB 
+  and DwCA files. Note, the DwCA pipeline is only a DEMO, while the MS SQL shall change the records) 
+- Built easy access index map between EV_OCC to EMOF in dataset 
+- Built Dataset chooser gui for easy demo of dataset loading. Loads all sorts, good example: 795, shark_bacterioplancton
+- Correcting tests, verifications. 
+- Working at the processing pipeline: 
+   - event records, cumulate for pyxy calls in batches of 1000, do basics, then emof 
+   - occurrence records, cumulate for pyxy calls in batches of 1000, then emof 
+   - update events in DB table (strategy to be figured out)
+   - update occurrences in DB table (strategy to be figured out)
+
+
 
 
 

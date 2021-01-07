@@ -14,8 +14,6 @@ def find_areas(xml_input):
         listed, which is defined by the westmost, eastmost, southmost and northmost coordinates
     """
 
-    dict_input = xmltodict.parse(xml_input)
-
     west_most = -180
     east_most = 180
     south_most = -90
@@ -23,6 +21,12 @@ def find_areas(xml_input):
 
     xml_areas = []
     geo_areas = []
+
+    # Safety measure:
+    if xml_input is None:
+        return None
+
+    dict_input = xmltodict.parse(xml_input)
 
     # Notice that we have a problem if we have a list of areas... ...to be adjusted.
     # If there are multiple areas, we have to decide how to proceed,
