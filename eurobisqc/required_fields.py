@@ -8,19 +8,19 @@ this = sys.modules[__name__]
 qc_mask_1 = qc_flags.QCFlag.REQUIRED_FIELDS_PRESENT.bitmask
 qc_mask_10 = qc_flags.QCFlag.OBIS_DATAFORMAT_OK.bitmask
 
-# TODO: Maybe make this parameterable as in measurements...
-this.required_fields = ["eventDate", "decimalLongitude", "decimalLatitude", "scientificName", "scientificNameID",
-                        "occurrenceStatus", "basisOfRecord"]
+# TODO: Maybe make this parameterable from config file as in measurements...
+this.required_fields = {"eventDate", "decimalLongitude", "decimalLatitude", "scientificName", "scientificNameID",
+                        "occurrenceStatus", "basisOfRecord"}
 
-this.recommended_fields = ["minimumDepthInMeters", "maximumDepthInMeters"]  # Decide whether to do something with these
+this.recommended_fields = {"minimumDepthInMeters", "maximumDepthInMeters"}  # Decide whether to do something with these
 
-this.values = ["PreservedSpecimen", "FossilSpecimen", "LivingSpecimen", "MaterialSample", "Event", "HumanObservation",
-               "MachineObservation", "Taxon", "Occurrence"]
+this.values_basis_of_record = {"PreservedSpecimen", "FossilSpecimen", "LivingSpecimen", "MaterialSample", "Event",
+                               "HumanObservation", "MachineObservation", "Taxon", "Occurrence"}
 
-this.vocab = [value.lower() for value in this.values]
+this.vocab = {value.lower() for value in this.values_basis_of_record}
 
 # When Using lowercase for field names
-fields_to_compare = [value.lower() for value in this.required_fields]
+fields_to_compare = {value.lower() for value in this.required_fields}
 
 
 def check_record_required(record, option=False):
@@ -33,10 +33,10 @@ def check_record_required(record, option=False):
     qc_mask = 0
 
     # This would be value.lower() if not field names must be checked in lowercase
-    present_fields = list(record.keys())
+    present_fields = set(record.keys())
 
     # May be it can be done differently (faster)
-    present_required_fields = set(present_fields).intersection(set(this.required_fields))
+    present_required_fields = present_fields.intersection(this.required_fields)
 
     if len(present_required_fields) == len(this.required_fields):
         # Looking at the checks from obis-qc, verify that fields are present but also that they are not None

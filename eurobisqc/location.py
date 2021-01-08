@@ -178,7 +178,7 @@ def check_xy(records):
             record = records[i]
 
             # Check point on land
-            if "QC" in record and (record["QC"] & qc_mask_5) and (record["QC"] & qc_mask_4):
+            if "qc" in record and (record["qc"] & qc_mask_5) and (record["qc"] & qc_mask_4):
                 if xy["shoredistance"] >= 0:
                     qc_mask |= qc_mask_6
 
@@ -196,14 +196,14 @@ def check_xy(records):
                                 qc_mask |= qc_mask_19
 
             # Note: the qc_flag is already added to the record
-            if "QC" in record:
-                record["QC"] |= qc_mask
+            if "qc" in record:
+                record["qc"] |= qc_mask
             else:
-                record["QC"] = qc_mask
+                record["qc"] = qc_mask
             results.append(qc_mask)
         else:
-            if "QC" not in records[i]:
-                records[i]["QC"] = 0
+            if "qc" not in records[i]:
+                records[i]["qc"] = 0
             results.append(0)
 
             # logger.warning("No xylookup result for %s" % records[i]["id"])
@@ -231,7 +231,7 @@ def check_all_location_params(records, areas):
     # If the points are good, do the lookups...
     recs_for_lookup = []
     for idx, record in enumerate(records):
-        record["QC"] = qc_masks[idx]
+        record["qc"] = qc_masks[idx]
         if qc_masks[idx]:
             recs_for_lookup.append(record)
 
@@ -239,10 +239,10 @@ def check_all_location_params(records, areas):
     outputs = check_xy(recs_for_lookup)
 
     for idx, output_val in enumerate(outputs):
-        recs_for_lookup[idx]["QC"] |= output_val
+        recs_for_lookup[idx]["qc"] |= output_val
 
     # Build a consistent return value for each rec (should find a better way)
     for idx, record in enumerate(records):
-        qc_masks[idx] |= record["QC"]
+        qc_masks[idx] |= record["qc"]
 
     return qc_masks

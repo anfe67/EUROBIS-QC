@@ -553,6 +553,23 @@ however there is not enough of them filled to get the event date. For example al
    - update events in DB table (strategy to be figured out)
    - update occurrences in DB table (strategy to be figured out)
 
+## 08/01/2021
+
+- Re-building QC pipeline for datasets: Preparing batches for pyxylookups - per event type (as they are now split) - or find 
+  other way. 
+- Improve required_fields by replacing lookup lists with sets (which are hashed) and eliminating conversions during the QC
+- Testing extraction and evaluation pipeline on dataset 
+- Evaluating profiling to spot time hogs - MAJOR RESULT by correctly indexing taxon and reducing output/reqest size to "genus"
+  - Rebuilt two search indexes for taxon on scientificNameID and scientificName
+  - Built function to return only sought fields from lokup (not entire record)  
+  - Used sets for presence checks, they are faster as they are hashed  
+  - time improved by a factor of 1000 on occurrences, improved also events 
+- VC with Bart, Proposed course of action: Parallelization, Verification, Write to DB (look at way to get key with ROW_NUMBER, may be 
+  already during dataset load)
+- Discussed way to feed back QC to the event records when CORE Type is Event (other look-up like in emof) and maybe not write the 
+  QC to the occurrence records. 
+- **TODO**: Generate new version of lookupDB and publish to github
+- **TODO**: Take care of the testing / coverage / package properties 
 
 
 

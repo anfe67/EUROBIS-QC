@@ -45,6 +45,33 @@ def close_db():
     this.conn = None
 
 
+def get_fields_of_record(table, field_name, value, fields_sought):
+    """ Query the WORMS db and gets a partial record from the database
+        :param table - The table to interrogate
+        :param field_name: The Columns to interrogate
+        :param value : The value sought
+        :param fields_sought : The fields to extract
+
+        :returns a dictionary mapped to the fields or None if no record is found
+        """
+
+    record = None
+    # build a partial string
+    fields_sql = ""
+    for idx, f in enumerate(fields_sought):
+        fields_sql += f"{f} "
+        if idx < len(fields_sought)-1:
+            fields_sql +=", "
+
+
+    cur = this.conn.execute(f"SELECT {fields_sql} from {table} where {field_name}='{value}'")
+    retrieved_record = cur.fetchone()
+    if retrieved_record is not None:
+        record = dict(zip(fields_sought, retrieved_record))
+
+    return record
+
+
 def get_record(table, field_name, value, fields):
     """ Query the WORMS db and gets a single record from the database
         :param table - The table to interrogate
@@ -57,9 +84,7 @@ def get_record(table, field_name, value, fields):
 
     record = None
     cur = this.conn.execute(f"SELECT * from {table} where {field_name}='{value}'")
-
     retrieved_record = cur.fetchone()
-
     if retrieved_record is not None:
         record = dict(zip(fields, retrieved_record))
 

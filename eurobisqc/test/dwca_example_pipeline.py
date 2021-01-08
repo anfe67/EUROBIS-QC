@@ -81,11 +81,12 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
         # Check location
 
         qc_mask = location.check_basic_record(full_core)
-        if "QC" in full_core:
-            full_core["QC"] = full_core["QC"] | qc_mask
+        if "qc" in full_core:
+            full_core["qc"] = full_core["qc"] | qc_mask
         else:
-            full_core["QC"] = qc_mask
-        if not qc_mask:
+            full_core["qc"] = qc_mask
+        # If locations are present and valid
+        if qc_mask & (qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask | qc_flags.QCFlag.GEO_LAT_LON_VALID):
             records_for_lookup.append(full_core)
             if len(records_for_lookup) >= lookup_batch_size:
                 location.check_xy(records_for_lookup)
@@ -98,55 +99,55 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
             # Check location in area
             if geo_areas is not None:
                 qc_mask = location.check_record_in_areas(full_core, geo_areas)
-                full_core["QC"] = full_core["QC"] | qc_mask
+                full_core["qc"] = full_core["qc"] | qc_mask
 
             # Check dates (This is a repeat)
             qc_mask = time_qc.check_record(full_core, 0)
-            full_core["QC"] = full_core["QC"] | qc_mask
+            full_core["qc"] = full_core["qc"] | qc_mask
 
         elif archive.core.type.lower() == "occurrence":
 
             # QC 9 (basis of records)
             qc_mask = required_fields.check_record_obis_format(full_core)
-            if "QC" in full_core:
-                full_core["QC"] = full_core["QC"] | qc_mask
+            if "qc" in full_core:
+                full_core["qc"] = full_core["qc"] | qc_mask
             else:
-                full_core["QC"] = qc_mask
+                full_core["qc"] = qc_mask
 
             # QC 1 (required fields)
             qc_mask = required_fields.check_record_required(full_core)
-            full_core["QC"] = full_core["QC"] | qc_mask
+            full_core["qc"] = full_core["qc"] | qc_mask
 
             # QC 4 and 5 (Check location)
             qc_mask = location.check_basic_record(full_core)
-            full_core["QC"] = full_core["QC"] | qc_mask
+            full_core["qc"] = full_core["qc"] | qc_mask
 
             # QC 9 (Area Check)
             if geo_areas is not None:
                 qc_mask = location.check_record_in_areas(full_core, geo_areas)
-                full_core["QC"] = full_core["QC"] | qc_mask
+                full_core["qc"] = full_core["qc"] | qc_mask
 
             # QC 2 and 3 (Taxonomy)
             qc_mask = taxonomy.check_record(full_core)
-            full_core["QC"] = full_core["QC"] | qc_mask
+            full_core["qc"] = full_core["qc"] | qc_mask
 
             # QC 7, 11, 12 13 (Dates - times)
             qc_mask = time_qc.check_record(full_core, 0)
-            full_core["QC"] = full_core["QC"] | qc_mask
+            full_core["qc"] = full_core["qc"] | qc_mask
 
             # Sex
             qc_mask = measurements.check_sex_record(full_core)
-            full_core["QC"] = full_core["QC"] | qc_mask
+            full_core["qc"] = full_core["qc"] | qc_mask
 
             # Dynamic properties
             qc_mask = measurements.check_dyn_prop_record(full_core)
-            full_core["QC"] = full_core["QC"] | qc_mask
+            full_core["qc"] = full_core["qc"] | qc_mask
 
         else:
             # Skip taxons and other record types
-            full_core["QC"] = 0
+            full_core["qc"] = 0
 
-        if with_logging and full_core["QC"] > 0:
+        if with_logging and full_core["qc"] > 0:
             this.logger.error(f"Errors processing record {qc_flags.QCFlag.decode_mask(full_core['QC'])} "
                               f"record: : {full_core}")
 
@@ -165,19 +166,19 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
 
                         # QC 9 (basis of records)
                         qc_mask = required_fields.check_record_obis_format(full_extension)
-                        if "QC" in full_extension:
-                            full_extension["QC"] = full_extension["QC"] | qc_mask
+                        if "qc" in full_extension:
+                            full_extension["qc"] = full_extension["qc"] | qc_mask
                         else:
-                            full_extension["QC"] = qc_mask
+                            full_extension["qc"] = qc_mask
 
                         # QC 1 (required fields)
                         qc_mask = required_fields.check_record_required(full_extension)
-                        full_extension["QC"] = full_extension["QC"] | qc_mask
+                        full_extension["qc"] = full_extension["qc"] | qc_mask
 
                         # Check location if necessary
                         if coord_in_occur:
                             qc_mask = location.check_basic_record(full_extension)
-                            full_extension["QC"] = full_extension["QC"] | qc_mask
+                            full_extension["qc"] = full_extension["qc"] | qc_mask
                             # Also add it for the lookup if OK
                             if not qc_mask:
                                 records_for_lookup.append(full_extension)
@@ -188,28 +189,28 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
 
                         # Check taxonomy
                         qc_mask = taxonomy.check_record(full_extension)
-                        full_extension["QC"] = full_extension["QC"] | qc_mask
+                        full_extension["qc"] = full_extension["qc"] | qc_mask
 
                         # Check dates (This is a repeat)
                         qc_mask = time_qc.check_record(full_extension, 0)
-                        full_extension["QC"] = full_extension["QC"] | qc_mask
+                        full_extension["qc"] = full_extension["qc"] | qc_mask
 
                         # Check sex
                         qc_mask = measurements.check_sex_record(full_extension)
-                        full_extension["QC"] = full_extension["QC"] | qc_mask
+                        full_extension["qc"] = full_extension["qc"] | qc_mask
 
                         # Check dynamic properties
                         qc_mask = measurements.check_dyn_prop_record(full_extension)
-                        full_extension["QC"] = full_extension["QC"] | qc_mask
+                        full_extension["qc"] = full_extension["qc"] | qc_mask
 
                     elif e.type.lower() in ["measurementorfact", "extendedmeasurementorfact"]:
                         full_extension = extensionRecord["full"]
                         # Check measurements
                         qc_mask = measurements.check_record(full_extension)
-                        if "QC" in full_extension:
-                            full_extension["QC"] = full_extension["QC"] | qc_mask
+                        if "qc" in full_extension:
+                            full_extension["qc"] = full_extension["qc"] | qc_mask
                         else:
-                            full_extension["QC"] = qc_mask
+                            full_extension["qc"] = qc_mask
 
                     else:
                         # Skip taxons and other types
@@ -218,7 +219,7 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
                     if with_print:
                         print(full_extension)
 
-                    if with_logging and full_extension["QC"] > 0:
+                    if with_logging and full_extension["qc"] > 0:
                         this.logger.error(
                             f"Errors processing record {qc_flags.QCFlag.decode_mask(full_extension['QC'])} "
                             f"record: {full_extension}")

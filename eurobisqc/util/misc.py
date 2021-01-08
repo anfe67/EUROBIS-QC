@@ -112,9 +112,9 @@ def do_xylookup(records):
         # The record has been already checked LAT LON validity, but verify anyway...
         if "decimalLongitude" in record and \
                 "decimalLatitude" in record and \
-                "QC" in record and \
-                record["QC"] & qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask and \
-                record["QC"] & qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask:
+                "qc" in record and \
+                record["qc"] & qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask and \
+                record["qc"] & qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask:
             indices.append(i)
             lon = check_float(record["decimalLongitude"])["float"]
             lat = check_float(record["decimalLatitude"])["float"]

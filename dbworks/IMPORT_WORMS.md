@@ -19,3 +19,18 @@ The entire table was imported, resulting in the expected number of records.
 **NOTE:**
 SQLite is a file based DB, which is efficient for small databases that can be stored in memory. This is the case for the
 WORMS db. SQLite is supported natively in Python by means of the **sqlite3** library. 
+
+To improve efficiency of the lookup queries, only the necessary fields should be extracted from the DB. Furthermore, as the 
+fields sought are scientificNameID and scientificName, the following indexes should be created: 
+
+```
+CREATE INDEX "taxon_scientific_name" ON "taxon" (
+	"scientificName"	ASC
+)
+
+CREATE INDEX "taxon_scientific_name_id" ON "taxon" (
+	"scientificNameID"	ASC
+)
+```
+**NOTE:** This is extremely important for performance, as it can improve lookup times by a factor of 1000. 
+

@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from eurobisqc import dataset
+from eurobisqc import eurobis_dataset
 from dbworks import mssql_db_functions
 
 
@@ -16,7 +16,7 @@ class Test(TestCase):
         """ Retrieving events and occurrence records in a dataset from MS SQL
             using the assembled query string """
 
-        data_archive = dataset.Dataset()
+        data_archive = eurobis_dataset.EurobisDataset()
 
         sql_string = data_archive.query_builder_eve_occur(self.test_dataset)
 
@@ -40,7 +40,7 @@ class Test(TestCase):
         """ Retrieving eMof records in a dataset from MS SQL
             using the assembled query string """
 
-        data_archive = dataset.Dataset()
+        data_archive = eurobis_dataset.EurobisDataset()
 
         sql_string = data_archive.query_builder_emof(self.test_dataset)
 
@@ -64,7 +64,7 @@ class Test(TestCase):
         """ retrieving EML from the IMIS service to extract
             areas after having queried the DB for dataset info """
 
-        data_archive = dataset.Dataset()
+        data_archive = eurobis_dataset.EurobisDataset()
         data_archive.get_provider_data(self.test_dataset)
         data_archive.get_areas_from_eml(data_archive.imis_das_id)
 
@@ -75,7 +75,7 @@ class Test(TestCase):
             is not available (it does not fail for that reason) """
 
         fake_imis_das_id = 10000
-        data_archive = dataset.Dataset()
+        data_archive = eurobis_dataset.EurobisDataset()
         data_archive.get_areas_from_eml(fake_imis_das_id)
 
         # Negative
@@ -91,7 +91,7 @@ class Test(TestCase):
 
     def test_load_dataset(self):
 
-        data_archive = dataset.Dataset()
+        data_archive = eurobis_dataset.EurobisDataset()
         data_archive.load_dataset(self.test_dataset)
 
         assert (len(data_archive.event_recs) == self.test_dataset_events)
@@ -106,7 +106,7 @@ class Test(TestCase):
         assert (sum_len == len(data_archive.emof_recs))
 
         test_dataset2 = 1199
-        data_archive2 = dataset.Dataset()
+        data_archive2 = eurobis_dataset.EurobisDataset()
         data_archive2.load_dataset(test_dataset2)
 
         sum_len = 0

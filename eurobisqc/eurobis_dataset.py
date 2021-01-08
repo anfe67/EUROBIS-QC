@@ -3,7 +3,7 @@ from dbworks import mssql_db_functions as mssql
 from eurobisqc.util import extract_area
 
 
-class Dataset:
+class EurobisDataset:
     """ all the necessary to represent
         an archive as retrieved from the DB """
     # The data that I need from eurobis and their names
@@ -12,7 +12,7 @@ class Dataset:
     # FLAG: Prerequisite is that the columns exist in the DB and that names do not change.
     # FLAG: This has been verified for these columns
     field_map_eurobis = {'dataprovider_id': 'dataprovider_id',
-                         'occurrenceID': 'occurenceID',
+                         'occurrenceID': 'occurrenceID',
                          'eventID': 'eventID',
                          'DarwinCoreType': 'DarwinCoreType',
                          'BasisOfRecord': 'basisOfRecord',
@@ -21,7 +21,7 @@ class Dataset:
                          'MaximumDepth': 'maximumDepthInMeters',
                          'MinimumDepth': 'minimumDepthInMeters',
                          'ScientificName': 'scientificName',
-                         "'urn:lsid:marinespecies.org:taxname:' + CONVERT(VARCHAR(255), aphia_id)": 'scientificNameId',
+                         "'urn:lsid:marinespecies.org:taxname:' + CONVERT(VARCHAR(255), aphia_id)": 'scientificNameID',
                          'occurrenceStatus': 'occurrenceStatus',
                          'Sex': 'sex',
                          'Genus': 'genus',

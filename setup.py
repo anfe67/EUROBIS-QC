@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
-# The database contains the big part of WORMS and it is BIG - not sure whether I want to distribute it.
+# The database contains a big part of WORMS and it is BIG - not sure whether I want to distribute it.
 
 setup(name="eurobisqc",
-      version="0.2.0",
+      version="0.3.0",
       python_requires='>=3.6',
       data_files=[  # ('database', ['dbworks/database/EUROBIS_QC_LOOKUP_DB.tar.gz']),
           ('resources', ['dbworks/resources/config.ini',

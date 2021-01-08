@@ -17,6 +17,7 @@ qc_mask_3 = qc_flags.QCFlag.TAXONOMY_RANK_OK.bitmask  # Is the Taxon Level lower
 
 this.taxon_fields = []
 this.speciesprofile_fields = []
+this.taxon_fields_sought = ["genus"]
 
 
 # Retrieve fields from lookup-db, call it only once, open the DB in advance
@@ -56,8 +57,8 @@ def check_record(record):
 
         if aphiaid is not None:  # Verify that the aphiaid retrieved is valid
 
-            taxon_record = sqlite_db_functions.get_record('taxon', 'scientificNameID',
-                                                          record['scientificNameID'], this.taxon_fields)
+            taxon_record = sqlite_db_functions.get_fields_of_record('taxon', 'scientificNameID',
+                                                          record['scientificNameID'], this.taxon_fields_sought)
 
             # Have we got a record
             if taxon_record is not None:
@@ -76,8 +77,9 @@ def check_record(record):
                 populate_fields()
 
             # Have something to query upon
-            taxon_record = sqlite_db_functions.get_record('taxon', 'scientificName',
-                                                          record['scientificName'], this.taxon_fields)
+            taxon_record = sqlite_db_functions.get_fields_of_record('taxon', 'scientificName',
+                                                          record['scientificName'], this.taxon_fields_sought)
+
             # Have we got a record
             if taxon_record is not None:
                 qc_mask |= qc_mask_2
