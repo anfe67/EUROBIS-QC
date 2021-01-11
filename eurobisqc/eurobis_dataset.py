@@ -2,15 +2,35 @@ import requests
 from dbworks import mssql_db_functions as mssql
 from eurobisqc.util import extract_area
 
-
 class EurobisDataset:
     """ all the necessary to represent
         an archive as retrieved from the DB """
-    # The data that I need from eurobis and their names
+
+    OCCURRENCE = 1
+    EVENT = 2
+
+    # Query to verify that the id column exists. if no record is returned, then column does not exist
+    sql_check_id_field = "SELECT COLUMN_NAME  " \
+                         "FROM INFORMATION_SCHEMA.COLUMNS " \
+                         "WHERE TABLE_NAME = 'eurobis' " \
+                         "and COLUMN_NAME ='id' " \
+                         "ORDER BY ORDINAL_POSITION"
+
+    # Query to create id field - takes about 4 minutes
+    sql_create_id = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE " \
+                    "BEGIN TRANSACTION " \
+                      "DECLARE @id INT SET @id = 0 " \
+                      "UPDATE eurobis SET @id = id = @id + 1  " \
+                      "OPTION ( MAXDOP 1 ) " \
+                    "COMMIT TRANSACTION "
+
+    # Query to disable the triggers
+    sql_disable_trigger = "disable TRIGGER [fill_field_sync_dataproviders] on [eurobis_dat].[dbo].[eurobis];"
+    sql_enable_trigger  = "enable TRIGGER [fill_field_sync_dataproviders] on [eurobis_dat].[dbo].[eurobis];"
 
     # FLAG: These maps could be parametric based on the Lookup DB
     # FLAG: Prerequisite is that the columns exist in the DB and that names do not change.
-    # FLAG: This has been verified for these columns
+    # FLAG: Pipeline has been verified for the columns listed below
     field_map_eurobis = {'dataprovider_id': 'dataprovider_id',
                          'occurrenceID': 'occurrenceID',
                          'eventID': 'eventID',
@@ -25,7 +45,8 @@ class EurobisDataset:
                          'occurrenceStatus': 'occurrenceStatus',
                          'Sex': 'sex',
                          'Genus': 'genus',
-                         'qc': 'qc'
+                         'qc': 'qc',
+                         'id': 'id' # This need to be created before starting fetching the records
                          }  # The mapping of the interesting fields DB <--> DwCA as defined for eurobis table
 
     field_map_emof = {'dataprovider_id': 'dataprovider_id',
@@ -86,7 +107,8 @@ class EurobisDataset:
         self.event_recs = []  # The Event Records
         self.occurrence_recs = []  # The Occurrence Records
         self.emof_recs = []  # The MoF/eMof records
-        self.emof_indices = {}  # Key (being defined) to list of emof
+        self.occ_indices ={}  # Key to list of occurrences for datasets where coretype = 2
+        self.emof_indices = {}  # Key to list of emof
         self.dataprovider_id = None  # The dataset ID from the dataproviders table
         self.imis_das_id = None  # The IMIS dataset ID for querying the eml
         self.eml = None  # Eml as from the http://www.eurobis.org/imis?dasid=<IMIS_DasID>&show=eml API
@@ -94,11 +116,6 @@ class EurobisDataset:
         self.areas = None  # Extract areas from EML (Bounding box do not have useful info - seek advice)
         self.provider_record = None  # Provider record extracted
         self.dataset_name = ""
-
-    def get_eml(self, imis_das_id):
-        """ retrieves eml for the dataset """
-
-        pass
 
     def get_provider_data(self, das_prov_id):
         if not mssql.conn:
@@ -146,10 +163,24 @@ class EurobisDataset:
                 records.append(dict(zip(columns, row)))
 
             for record in records:
-                if record['DarwinCoreType'] == 1:  # Occurrence
+                if record['DarwinCoreType'] == self.OCCURRENCE:
                     self.occurrence_recs.append(record)
-                elif record['DarwinCoreType'] == 2:
+                elif record['DarwinCoreType'] == self.EVENT:
                     self.event_recs.append(record)
+
+                    # For the datasets where the coretype is event
+                    # we calculate a key. When processing the events,
+                    # we will also process the occurrences related to this,
+                    # to be able to "or" the qc mask upward without lookups
+                    if self.darwin_core_type == self.EVENT:
+                        # Create key
+                        if record['eventID'] is not None:  # There should be none anyway
+                            key = f"{record['dataprovider_id']}_{record['eventID']}"
+                            if key in self.occ_indices:
+                                # All the records with this key shall be in a list at 'key'
+                                self.occ_indices[key].append(record)
+                            else:
+                                self.occ_indices[key] = [record]
 
     def get_mof_records(self, das_prov_id):
         """ retrieves measurementorfact records for the dataset in das_id from SQL Server """
@@ -215,12 +246,9 @@ class EurobisDataset:
         """ given a dataset id from the dataprovider
             loads an entire dataset in RAM for processing
             """
-
         self.get_provider_data(das_prov_id)
         self.get_ev_occ_records(das_prov_id)
         self.get_mof_records(das_prov_id)
-        # Misses the API call to get the areas, this needs to be called AFTER having loaded the dataset data
-        # from providers ...
         self.get_areas_from_eml(self.imis_das_id)
 
     def get_areas_from_eml(self, imis_das_id):
@@ -266,3 +294,51 @@ class EurobisDataset:
             for each unique 'key' combination """
 
         pass
+
+    @classmethod
+    def toggle_trigger(cls, enable):
+        """ to be called before creation and deletion of the id column
+            with param False to avoid affecting the dataproviders table and
+            with param True after creation/deletion
+            :param enable, boolean True or False """
+
+        if not mssql.conn:
+            mssql.open_db()
+
+        if mssql.conn is None:
+            # Should find a way to exit and advice
+            pass
+        else:
+            if enable:
+                cursor = mssql.conn.cursor()
+                cursor.execute(cls.sql_enable_trigger)
+            else:
+                cursor = mssql.conn.cursor()
+                cursor.execute(cls.sql_disable_trigger)
+
+    @classmethod
+    def create_eurobis_id(cls):
+        if not mssql.conn:
+            mssql.open_db()
+
+        if mssql.conn is None:
+            # Should find a way to exit and advice
+            pass
+        else:
+            # Verify that it does not exist...
+            cursor = mssql.conn.cursor()
+            cursor.execute(cls.sql_check_id_field)
+            col = cursor.fetchone()
+
+            if col == None:  # we know we must create the column
+                cursor2 = mssql.conn.cursor()
+                cursor2.execute(cls.sql_create_id)
+
+            # Repeat check
+            cursor = mssql.conn.cursor()
+            cursor.execute(cls.sql_check_id_field)
+            col = cursor.fetchone()
+
+            if col == None:
+                raise EurobisDataset()
+

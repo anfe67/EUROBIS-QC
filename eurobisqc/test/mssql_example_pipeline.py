@@ -70,6 +70,7 @@ def dataset_qc_labeling(dataset_id, with_print=False, with_logging=True, with_re
     records_for_lookup = []
 
     event_count = 0
+
     for record in data_archive.event_recs:
 
         event_start = time.time()

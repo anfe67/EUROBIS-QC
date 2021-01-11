@@ -570,6 +570,33 @@ however there is not enough of them filled to get the event date. For example al
   QC to the occurrence records. 
 - **TODO**: Generate new version of lookupDB and publish to github
 - **TODO**: Take care of the testing / coverage / package properties 
+- **TODO**: Fix example pipeline for DwCA files 
+- **TODO**: Consider implementing lookups also for QC 10 for better flexibility (question on the recommended fields)
+
+## 11/01/2021
+- Database study: Which understand how to process the records with no Event ID and no Occurrence ID. 
+- Attempted solution at : https://www.mssqltips.com/sqlservertip/1467/populate-a-sql-server-column-with-a-sequential-number-not-using-an-identity/
+  to create an ID with an integer column updated. This should be much faster than creating an autoincrement. The solution in memory 
+  should not work because you are not guaranteed that the row_id will always be the same as we do not know what can be used to 
+  distinguish the rows (order by clause) calculating the time.  
+- Error in update: Stored procedures and triggers refer to [eurobis].[dbo].[eurobis]. In the imported MSSQL the database name is þeurobis_dat]. 
+  Therefore, update queries do not work (dataset records - modification dates - in dataprovider are updated upon update/insertion etc).
+- Should : 1) Remove triggers, 2) re-create triggers after temp key creation. Tested on DB - OK, not yet in python.
+- Pipeline for DB (avoid lookups at all costs): 
+  - If dataset core type is occurrence: 
+    - Process eMof For that occurrence (if any) 
+    - process occurrence and OR all QC together on the occurrence
+  - if core type is event: 
+    - Process emof for event (hold it)
+    - For each occurrence: 
+      - Process eMoF for that occurrence (if any) 
+      - process occurrence and OR al QC together on the occurrence - Hold QC 
+    - process event and OR all QC together on the event, including the eMoF 
+    
+    
+
+
+
 
 
 
