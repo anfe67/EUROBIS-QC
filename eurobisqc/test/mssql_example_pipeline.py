@@ -11,6 +11,8 @@ from eurobisqc import time_qc
 from eurobisqc import measurements
 from eurobisqc import taxonomy
 from eurobisqc.util import qc_flags
+from dbworks import mssql_db_functions as mssql
+from eurobisqc.util import misc
 
 # Use "this" trick
 this = sys.modules[__name__]
@@ -100,8 +102,12 @@ def qc_emof(record, data_archive):
 
     qc_em = 0
 
-    key = f"{record['dataprovider_id']}_{'NULL' if record['eventID'] is None else record['eventID']}_" \
-          f"{'NULL' if record['occurrenceID'] is None else record['occurrenceID']}"
+    if data_archive.darwin_core_type == data_archive.EVENT:
+        key = f"{record['dataprovider_id']}_{'NULL' if record['eventID'] is None else record['eventID']}_" \
+              f"{'NULL' if record['occurrenceID'] is None else record['occurrenceID']}"
+    else:
+        key = f"{record['dataprovider_id']}_NULL_" \
+              f"{'NULL' if record['occurrenceID'] is None else record['occurrenceID']}"
 
     if key in data_archive.emof_indices:
         measurements_qc = measurements.check(data_archive.emof_indices[key])
@@ -220,5 +226,88 @@ def dataset_qc_labeling(dataset_id, with_print=False, with_logging=True):
         this.logger.log(0, f"Processed dataset {data_archive.dataset_name} in: {duration} ")
 
 
-# To call it...
-dataset_qc_labeling(None, with_print=True, with_logging=False)
+def dataset_parallel_processing():
+    """ Example of processing multiple datasets at the same time in
+            order to exploit the computing resources available """
+
+    # Now set to 1% of datasets...
+    sql_random_percent_of_datasets = "SELECT id FROM dataproviders WHERE 0.01 >= CAST(CHECKSUM(NEWID(), id) " \
+                                     "& 0x7fffffff AS float) / CAST (0x7fffffff AS int)"
+
+    dataset_ids = []
+
+    import multiprocessing as mp
+    # we dedicate to the task the total number of processors - 3 or 1 if we only have 2 cores or less.
+    # Knowing that mssql needs 2 cores at least.
+    if mp.cpu_count() > 3:
+        n_cpus = mp.cpu_count() - 3
+    else:
+        n_cpus = 1
+
+    pool = mp.Pool(n_cpus)
+
+    # Connect to the database
+    if not mssql.conn:
+        mssql.open_db()
+
+    if mssql.conn is None:
+        # Should find a way to exit and advice
+        print("No connection to DB, nothing can be done! ")
+        exit(0)
+    else:
+        # Fetch a random set of datasets
+        cur = mssql.conn.cursor()
+        cur.execute(sql_random_percent_of_datasets)
+        for row in cur:
+            dataset_ids.append(row[0])
+
+    # Retrieved list, now need to split
+    dataset_id_lists = misc.split_list(dataset_ids, n_cpus)  # We are OK until here.
+
+    result_pool = []
+    for i, dataset_id_list in enumerate(dataset_id_lists):
+        result_pool.append(pool.apply_async(process_dataset_list, args=(i, dataset_id_list, False, False)))
+
+    for r in result_pool:
+        r.wait()
+
+    pool.terminate()
+    pool.join()
+
+
+def process_dataset_list(pool_no, dataset_id_list, with_print=False, with_logging=False):
+    """ Processes a list of DwCA archives, ideally to be called in parallel
+        :param pool_no - Pool number to take track of the pools
+        :param dataset_id_list (The list of datasets to be processed)
+        :param with_print (Printouts enabled or not)
+        :param with_logging (Logging enabled or not) """
+    # Prints pool data
+    start = time.time()
+    print(f"Pool {pool_no} started")
+    for dataset_id in dataset_id_list:
+        start_file = time.time()
+        if with_print:
+            print(f"Pool Number: {pool_no}, processsing dataset {dataset_id}")
+
+        if with_logging:
+            this.logger.log(0, f"Pool Number: {pool_no}, processsing dataset {dataset_id} ")
+
+        dataset_qc_labeling(dataset_id, with_print, with_logging)
+        print(f"Processed dataset {dataset_id} in  {time.time() - start_file}")
+
+    print(f"Pool {pool_no} completed in {time.time() - start}")
+    return pool_no
+
+
+# To call these...
+# Single dataset or popup a dataset chooser
+# dataset_qc_labeling(None, with_print=True, with_logging=False)
+
+# Single dataset Fixed
+dataset_qc_labeling(447, with_print=True, with_logging=False)
+
+# Parallel processing of random 1% of the datasets
+# dataset_parallel_processing()
+
+# Launch individual pool processing
+# process_dataset_list(1, [557, 239], True, False)

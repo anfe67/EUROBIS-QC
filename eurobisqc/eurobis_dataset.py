@@ -111,6 +111,8 @@ class EurobisDataset:
     # If the records contains Latitude and Longitude they are indexed, so could speed updates up
     sql_if_lat = " and Latitude = "
     sql_if_lon = " and Longitude = "
+    sql_if_scientific_name = " and ScientificName = "
+    sql_if_event_id = " and EventID = "
 
     sql_update_end = " and %%physloc%% = "  # add at the end the record['physloc'] retrieved at the start
 
@@ -199,7 +201,7 @@ class EurobisDataset:
                     else:  # Should really never happen !!
                         self.event_recs.append(record)
 
-    def get_mof_records(self, das_prov_id):
+    def get_emof_records(self, das_prov_id):
         """ retrieves measurementorfact records for the dataset in das_id from SQL Server
         NOTE: mof records do not exist for records that have eventID and occurrenceID NULL
         :param das_prov_id"""
@@ -223,8 +225,17 @@ class EurobisDataset:
 
             for record in records:
                 self.emof_recs.append(record)
-                key = f"{record['dataprovider_id']}_{'NULL' if record['eventID'] is None else record['eventID']}_" \
-                      f"{'NULL' if record['occurrenceID'] is None else record['occurrenceID']}"
+
+                if self.darwin_core_type == self.EVENT:
+
+                    key = f"{record['dataprovider_id']}_{'NULL' if record['eventID'] is None else record['eventID']}_" \
+                          f"{'NULL' if record['occurrenceID'] is None else record['occurrenceID']}"
+                else:
+                    # Occurrence records in datasets with core = Occurrence may have other info in EventID and NULL in
+                    # eMoF record.
+                    key = f"{record['dataprovider_id']}_NULL_" \
+                          f"{'NULL' if record['occurrenceID'] is None else record['occurrenceID']}"
+
                 if key in self.emof_indices:
                     # All the records with this key shall be in a list at 'key'
                     self.emof_indices[key].append(record)
@@ -267,7 +278,7 @@ class EurobisDataset:
             """
         self.get_provider_data(das_prov_id)
         self.get_ev_occ_records(das_prov_id)
-        self.get_mof_records(das_prov_id)
+        self.get_emof_records(das_prov_id)
         self.get_areas_from_eml(self.imis_das_id)
 
     def get_areas_from_eml(self, imis_das_id):
@@ -307,11 +318,20 @@ class EurobisDataset:
                 # Compose update query
                 physloc = bytes.hex(record['physloc'])
 
+                # Note The fields other than physloc and dataprovider_id are used to optimize
+                # the update queries execution plans and thus to reduce browsing the records
+                # and using the existing indexes on the eurobis table. Observed speed improvements
+                # are between 2.5 and 5 times faster.
+
                 sql_update = f"{cls.sql_update_start}{record['qc']}{cls.sql_update_middle} {record['dataprovider_id']}"
                 if record['decimalLatitude'] is not None:
                     sql_update = f"{sql_update}{cls.sql_if_lat}{record['decimalLatitude']}"
                 if record['decimalLongitude'] is not None:
                     sql_update = f"{sql_update} {cls.sql_if_lon}{record['decimalLongitude']}"
+                if record['scientificName'] is not None:
+                    sql_update = f"{sql_update} {cls.sql_if_scientific_name}'{record['scientificName']}'"
+                if record['eventID'] is not None:
+                    sql_update = f"{sql_update} {cls.sql_if_event_id}'{record['eventID']}'"
                 sql_update = f"{sql_update} {cls.sql_update_end} 0x{physloc} "
 
                 cursor = mssql.conn.cursor()

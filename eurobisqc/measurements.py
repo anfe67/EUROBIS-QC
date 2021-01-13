@@ -139,11 +139,13 @@ def check_mtid(measurement_type_id, measurement_value):
 
     # Does the measurement contain the gender - and check validity of value
     if not found:
-        for smtid in this.sex_field_measure_type_ids:
-            if smtid in measurement_type_id:
-                for m_v in this.sex_field_values:
-                    if m_v in measurement_value:
-                        qc_mask |= qc_mask_17
+        if isinstance(measurement_value, str):
+            for smtid in this.sex_field_measure_type_ids:
+                if smtid in measurement_type_id:
+                    for m_v in this.sex_field_values:
+                        # Always use lowercase
+                        if m_v in measurement_value.lower():
+                            qc_mask |= qc_mask_17
 
     return qc_mask
 
@@ -214,17 +216,14 @@ def check_record(record):
         if measurement_value is not None:
             qc_mask |= check_mtid(record["measurementTypeID"].lower(), measurement_value)
 
-    # We do not have a ID measurement but we have a measurement type
-    elif "measurementType" in record and record["measurementType"] is not None:
-        measurement_value = None if "measurementValue" not in record else record["measurementValue"]
-        if isinstance(measurement_value, str):
-            measurement_value = None if not measurement_value.strip() else measurement_value
-        if measurement_value is not None:
-            qc_mask |= check_mt(record["measurementType"].lower(), measurement_value)
-
-    else:
-        # Nothing else to verify
-        pass
+    # ID measurement did not give any result, if we have a measurement type - we try.
+    if not qc_mask:
+        if "measurementType" in record and record["measurementType"] is not None:
+            measurement_value = None if "measurementValue" not in record else record["measurementValue"]
+            if isinstance(measurement_value, str):
+                measurement_value = None if not measurement_value.strip() else measurement_value
+            if measurement_value is not None:
+                qc_mask |= check_mt(record["measurementType"].lower(), measurement_value)
 
     return qc_mask
 
@@ -242,8 +241,10 @@ def check_sex_record(record):
     # We still have to look at sex (for occurrence records)
     if "sex" in record:
         if record["sex"] is not None:
-            if record["sex"] in this.sex_field_values:
-                qc_mask |= qc_mask_17
+            value = record['sex']
+            if isinstance(value, str):
+                if value.lower() in this.sex_field_values:
+                    qc_mask |= qc_mask_17
 
     return qc_mask
 

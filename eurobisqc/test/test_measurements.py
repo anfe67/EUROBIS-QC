@@ -68,4 +68,4 @@ class Test(TestCase):
         self.assertTrue(results == self.expected_results_sex)
 
 # TODO - Verify also sex within measurementTypeID and measurementType
-# TODO - Verify where dynamicProperties can be found in DB
+# Note: - DynamicProperties cannot be found in DB...

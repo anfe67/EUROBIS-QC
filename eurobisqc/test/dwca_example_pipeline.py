@@ -14,7 +14,7 @@ from eurobisqc import time_qc
 from eurobisqc import measurements
 
 from eurobisqc.util import extract_area
-from .util import file_chooser
+from eurobisqc.test.util import file_chooser
 from eurobisqc.util import qc_flags
 from eurobisqc.util import misc
 
@@ -47,6 +47,9 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
     # Do this once and forall
     geo_areas = extract_area.find_areas(archive.eml)
 
+    # Find out about this file:
+    archive_core_type = archive.core.type.lower()  # Can be occurrence or event
+
     # The core records are checked for lat lon in any case
     coord_in_occur = None
 
@@ -59,6 +62,10 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
                 coord_in_occur = False
 
     record_count = 0
+    # FLAG: BROKEN AT THE MOMENT, need review
+    # FLAG: THIS IS TO BE REDONE, FOLLOWING what was done for
+    # FLAG: DATASET. ALL Extensions need to be re-indexed, so that when core records
+    # FLAG: are processed, the indexes and the QC of the extensions can be easily recombined  .
 
     # Stock in this list records for lookup (to execute QCs 6 and 19)
     records_for_lookup = []
@@ -72,8 +79,10 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
 
     for coreRecord in archive.core_records():
         record_count += 1
+
         if with_print:
             print(f"---> core: {archive.core.type}")
+
         # Attempt check for lat/lon in full record
         full_core = coreRecord["full"]
 
@@ -313,8 +322,9 @@ def dwca_list_process(pool_no, dwca_files, with_print=False, with_logging=False)
     print(f"Pool {pool_no} completed in {time.time() - start}")
     return pool_no
 
-
 # dwca_parallel_processing()
 dwca_file_labeling(None, with_print=False, with_logging=False)
 # dwca_labeling(with_print=False, with_logging=False)
 # exit(0)
+
+

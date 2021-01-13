@@ -602,9 +602,24 @@ however there is not enough of them filled to get the event date. For example al
   needed. 
 - Next : Look at parallel processing: Build a Pool for parallel pipeline for num_cpu -2 (at least 2 are needed for mssql), passing 
   a slice of the datasets (would limit in the beginning). 
-- Next : Correct pipeline for DwCA, to be consistent with Database processing 
-- Next : Tests and Document, install on other PC and try to run in parallel 
-- 
+- TODO : Correct pipeline for DwCA, to be consistent with Database processing 
+- TODO : Tests and Document, install on other PC and try to run in parallel 
+
+## 13/01/2021 
+- Update query optimization, attempted to use fields that are not null and involved in indexes to speed up the 
+  record update process. Fields ALWAYS used for update query are : dataprovider_id and %%physloc%%. Fields used for update 
+  when not null are Latitude, Longitude, EventID and scientificName. 
+- Checking correctness, found a miss in the checks of eMoF, due that the eventID is often filled in datasets where 
+  the DarwinCoreType = 1. Used for something else. So, the keying mechanism for eMoF need to be adapted.
+- Also looked at sex check for occurrence records - found error and corrected, need more automated tests.   
+  
+- TODO: Implement lookup also for basic fields reqirements (whenever there is a lookup to do really). This will bring consistency 
+  and flexibility. 
+  
+- Looking at parallelization, start with a limited number of datasets, found formula to get x percent of a table at random. 
+  Same approach as for files does not seem to work, probably due to mssql or some wrong assumption. To review.
+
+- Looking at changing the example pipeline for DwCA, finding strategy to compare the results ... 
 
 
 
