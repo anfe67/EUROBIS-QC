@@ -58,7 +58,8 @@ def check_record(record):
         if aphiaid is not None:  # Verify that the aphiaid retrieved is valid
 
             taxon_record = sqlite_db_functions.get_fields_of_record('taxon', 'scientificNameID',
-                                                          record['scientificNameID'], this.taxon_fields_sought)
+                                                                    record['scientificNameID'],
+                                                                    this.taxon_fields_sought)
 
             # Have we got a record
             if taxon_record is not None:
@@ -78,7 +79,7 @@ def check_record(record):
 
             # Have something to query upon
             taxon_record = sqlite_db_functions.get_fields_of_record('taxon', 'scientificName',
-                                                          record['scientificName'], this.taxon_fields_sought)
+                                                                    record['scientificName'], this.taxon_fields_sought)
 
             # Have we got a record
             if taxon_record is not None:

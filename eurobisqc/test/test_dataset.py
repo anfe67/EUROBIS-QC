@@ -105,7 +105,8 @@ class Test(TestCase):
 
         assert (sum_len == len(data_archive.emof_recs))
 
-        test_dataset2 = 1199
+        # Second dataset where core = 1
+        test_dataset2 = 558
         data_archive2 = eurobis_dataset.EurobisDataset()
         data_archive2.load_dataset(test_dataset2)
 

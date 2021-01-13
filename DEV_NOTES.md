@@ -593,7 +593,18 @@ however there is not enough of them filled to get the event date. For example al
       - process occurrence and OR al QC together on the occurrence - Hold QC 
     - process event and OR all QC together on the event, including the eMoF 
     
-    
+## 12/01/2020 
+- Database Study as a consequence of the feedback from Bart: Attempt to use the **%%physloc%%** column. This is undocumented,
+  and risky as it could not work in future releases of MS SQL. However, as it will only be used to update existing rows, 
+  it should remain consistent at least for the time necessary to perform the QCs (on a dataset or multiple at the same time). 
+- Implemented record update, uses dataset, lat and lon (when available) that are indexed to speed it up, while the %%physloc%% 
+  is not. Updates are done by record, Commits are done in batches, tried 100 and 500, seems OK. May look for other tricks if 
+  needed. 
+- Next : Look at parallel processing: Build a Pool for parallel pipeline for num_cpu -2 (at least 2 are needed for mssql), passing 
+  a slice of the datasets (would limit in the beginning). 
+- Next : Correct pipeline for DwCA, to be consistent with Database processing 
+- Next : Tests and Document, install on other PC and try to run in parallel 
+- 
 
 
 

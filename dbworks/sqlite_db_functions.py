@@ -60,9 +60,8 @@ def get_fields_of_record(table, field_name, value, fields_sought):
     fields_sql = ""
     for idx, f in enumerate(fields_sought):
         fields_sql += f"{f} "
-        if idx < len(fields_sought)-1:
-            fields_sql +=", "
-
+        if idx < len(fields_sought) - 1:
+            fields_sql += ", "
 
     cur = this.conn.execute(f"SELECT {fields_sql} from {table} where {field_name}='{value}'")
     retrieved_record = cur.fetchone()

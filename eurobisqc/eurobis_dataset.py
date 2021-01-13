@@ -1,6 +1,8 @@
+from pyodbc import Error
 import requests
 from dbworks import mssql_db_functions as mssql
 from eurobisqc.util import extract_area
+
 
 class EurobisDataset:
     """ all the necessary to represent
@@ -8,25 +10,27 @@ class EurobisDataset:
 
     OCCURRENCE = 1
     EVENT = 2
+    LOOKUP_BATCH_SIZE = 1000
 
+    record_batch_update_count = 0
     # Query to verify that the id column exists. if no record is returned, then column does not exist
-    sql_check_id_field = "SELECT COLUMN_NAME  " \
-                         "FROM INFORMATION_SCHEMA.COLUMNS " \
-                         "WHERE TABLE_NAME = 'eurobis' " \
-                         "and COLUMN_NAME ='id' " \
-                         "ORDER BY ORDINAL_POSITION"
+    # sql_check_id_field = "SELECT COLUMN_NAME  " \
+    #                      "FROM INFORMATION_SCHEMA.COLUMNS " \
+    #                      "WHERE TABLE_NAME = 'eurobis' " \
+    #                      "and COLUMN_NAME ='id' " \
+    #                      "ORDER BY ORDINAL_POSITION"
 
     # Query to create id field - takes about 4 minutes
-    sql_create_id = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE " \
-                    "BEGIN TRANSACTION " \
-                      "DECLARE @id INT SET @id = 0 " \
-                      "UPDATE eurobis SET @id = id = @id + 1  " \
-                      "OPTION ( MAXDOP 1 ) " \
-                    "COMMIT TRANSACTION "
+    # sql_create_id = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE " \
+    #                 "BEGIN TRANSACTION " \
+    #                   "DECLARE @id INT SET @id = 0 " \
+    #                   "UPDATE eurobis SET @id = id = @id + 1  " \
+    #                   "OPTION ( MAXDOP 1 ) " \
+    #                 "COMMIT TRANSACTION "
 
     # Query to disable the triggers
     sql_disable_trigger = "disable TRIGGER [fill_field_sync_dataproviders] on [eurobis_dat].[dbo].[eurobis];"
-    sql_enable_trigger  = "enable TRIGGER [fill_field_sync_dataproviders] on [eurobis_dat].[dbo].[eurobis];"
+    sql_enable_trigger = "enable TRIGGER [fill_field_sync_dataproviders] on [eurobis_dat].[dbo].[eurobis];"
 
     # FLAG: These maps could be parametric based on the Lookup DB
     # FLAG: Prerequisite is that the columns exist in the DB and that names do not change.
@@ -46,7 +50,7 @@ class EurobisDataset:
                          'Sex': 'sex',
                          'Genus': 'genus',
                          'qc': 'qc',
-                         'id': 'id' # This need to be created before starting fetching the records
+                         '%%physloc%%': 'physloc'  # Note: Undocumented, may not work in future - use as update key
                          }  # The mapping of the interesting fields DB <--> DwCA as defined for eurobis table
 
     field_map_emof = {'dataprovider_id': 'dataprovider_id',
@@ -100,6 +104,16 @@ class EurobisDataset:
     sql_emof_start = "SELECT "
     sql_emof_end = " FROM eurobis_measurementorfact WHERE dataprovider_id="
 
+    # Important - query to update an event or occurrence record
+    sql_update_start = "update eurobis set qc = "  # add the calculated QC
+    sql_update_middle = " where dataprovider_id = "
+
+    # If the records contains Latitude and Longitude they are indexed, so could speed updates up
+    sql_if_lat = " and Latitude = "
+    sql_if_lon = " and Longitude = "
+
+    sql_update_end = " and %%physloc%% = "  # add at the end the record['physloc'] retrieved at the start
+
     def __init__(self):
         """ Initialises an empty dataset """
 
@@ -107,7 +121,7 @@ class EurobisDataset:
         self.event_recs = []  # The Event Records
         self.occurrence_recs = []  # The Occurrence Records
         self.emof_recs = []  # The MoF/eMof records
-        self.occ_indices ={}  # Key to list of occurrences for datasets where coretype = 2
+        self.occ_indices = {}  # Key to list of occurrences for datasets where coretype = 2
         self.emof_indices = {}  # Key to list of emof
         self.dataprovider_id = None  # The dataset ID from the dataproviders table
         self.imis_das_id = None  # The IMIS dataset ID for querying the eml
@@ -116,6 +130,7 @@ class EurobisDataset:
         self.areas = None  # Extract areas from EML (Bounding box do not have useful info - seek advice)
         self.provider_record = None  # Provider record extracted
         self.dataset_name = ""
+        self.records_for_lookup = []
 
     def get_provider_data(self, das_prov_id):
         if not mssql.conn:
@@ -162,28 +177,32 @@ class EurobisDataset:
             for row in cursor:
                 records.append(dict(zip(columns, row)))
 
-            for record in records:
-                if record['DarwinCoreType'] == self.OCCURRENCE:
-                    self.occurrence_recs.append(record)
-                elif record['DarwinCoreType'] == self.EVENT:
-                    self.event_recs.append(record)
-
-                    # For the datasets where the coretype is event
-                    # we calculate a key. When processing the events,
-                    # we will also process the occurrences related to this,
-                    # to be able to "or" the qc mask upward without lookups
-                    if self.darwin_core_type == self.EVENT:
-                        # Create key
-                        if record['eventID'] is not None:  # There should be none anyway
+            # We proceed differently in accordance with the type of CORE record...
+            if self.darwin_core_type == self.EVENT:
+                for record in records:
+                    if record['DarwinCoreType'] == self.OCCURRENCE:
+                        self.occurrence_recs.append(record)
+                        if record['eventID'] is not None:  # To link we need an eventID
+                            # make a key - it must be lined by the eventID
                             key = f"{record['dataprovider_id']}_{record['eventID']}"
                             if key in self.occ_indices:
                                 # All the records with this key shall be in a list at 'key'
                                 self.occ_indices[key].append(record)
                             else:
                                 self.occ_indices[key] = [record]
+                    elif record['DarwinCoreType'] == self.EVENT:
+                        self.event_recs.append(record)
+            else:  # Occurrence records (Datasets with core_type = OCCURRENCE do not have events - verified)
+                for record in records:
+                    if record['DarwinCoreType'] == self.OCCURRENCE:
+                        self.occurrence_recs.append(record)
+                    else:  # Should really never happen !!
+                        self.event_recs.append(record)
 
     def get_mof_records(self, das_prov_id):
-        """ retrieves measurementorfact records for the dataset in das_id from SQL Server """
+        """ retrieves measurementorfact records for the dataset in das_id from SQL Server
+        NOTE: mof records do not exist for records that have eventID and occurrenceID NULL
+        :param das_prov_id"""
 
         if not mssql.conn:
             mssql.open_db()
@@ -273,72 +292,35 @@ class EurobisDataset:
         else:
             self.areas = None
 
-    def retrieve_emof_for_event_rec(self, record):
-        """ To retrieve a list of all emof records
-            relative to a specific event record.
-             :param record : an event record
-             :returns TBD (list of indexes may be) """
-
-        pass
-
-    def retrieve_emof_for_occurrence(self, record):
-        """ To retrieve a list of all emof relative
-             to a specific occurrence record.
-             :param record : an event record
-             :returns TBD (list of indexes may be) """
-
-        pass
-
-    def build_emof_indices(self):
-        """ builds a dictionary that contains a list of emof records
-            for each unique 'key' combination """
-
-        pass
-
     @classmethod
-    def toggle_trigger(cls, enable):
-        """ to be called before creation and deletion of the id column
-            with param False to avoid affecting the dataproviders table and
-            with param True after creation/deletion
-            :param enable, boolean True or False """
-
+    def update_record_qc(cls, records, batch_size):
+        # Check DB connection...
         if not mssql.conn:
             mssql.open_db()
 
         if mssql.conn is None:
-            # Should find a way to exit and advice
-            pass
+            # Should find a way to exit and advice (raise an exception may be)
+            return "Fail, no connection "
         else:
-            if enable:
+            record_count = len(records)
+            for record in records:
+                # Compose update query
+                physloc = bytes.hex(record['physloc'])
+
+                sql_update = f"{cls.sql_update_start}{record['qc']}{cls.sql_update_middle} {record['dataprovider_id']}"
+                if record['decimalLatitude'] is not None:
+                    sql_update = f"{sql_update}{cls.sql_if_lat}{record['decimalLatitude']}"
+                if record['decimalLongitude'] is not None:
+                    sql_update = f"{sql_update} {cls.sql_if_lon}{record['decimalLongitude']}"
+                sql_update = f"{sql_update} {cls.sql_update_end} 0x{physloc} "
+
                 cursor = mssql.conn.cursor()
-                cursor.execute(cls.sql_enable_trigger)
-            else:
-                cursor = mssql.conn.cursor()
-                cursor.execute(cls.sql_disable_trigger)
-
-    @classmethod
-    def create_eurobis_id(cls):
-        if not mssql.conn:
-            mssql.open_db()
-
-        if mssql.conn is None:
-            # Should find a way to exit and advice
-            pass
-        else:
-            # Verify that it does not exist...
-            cursor = mssql.conn.cursor()
-            cursor.execute(cls.sql_check_id_field)
-            col = cursor.fetchone()
-
-            if col == None:  # we know we must create the column
-                cursor2 = mssql.conn.cursor()
-                cursor2.execute(cls.sql_create_id)
-
-            # Repeat check
-            cursor = mssql.conn.cursor()
-            cursor.execute(cls.sql_check_id_field)
-            col = cursor.fetchone()
-
-            if col == None:
-                raise EurobisDataset()
-
+                cursor.execute(sql_update)
+            try:
+                mssql.conn.commit()
+                print(f"Records update Count (approx): {cls.record_batch_update_count * batch_size + record_count};")
+                cls.record_batch_update_count += 1
+                # Should find a way to return with no pain...
+                return "Success"
+            except Error as e:
+                return f"Fail, batch {cls.record_batch_update_count} not updated, exception {str(e)}"
