@@ -1,11 +1,14 @@
+""" Demonstrates processing of a DwCa archive, calculating the QC for all records (Event and Occurrence=
+    and escalating the QC for the measurements to their parent records. QCs are not stored.
+    Also demonstrated processing of a list of files, that can be used for parallel processing
+    (see run_dwca_multiprocess).
+    """
+
 import os
 import sys
 import time
 import logging
 from dwcaprocessor import DwCAProcessor
-
-# sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
-# print('__file__={0:<35} | __name__={1:<20} | __package__={2:<20}'.format(__file__,__name__,str(__package__)))
 
 from eurobisqc import location
 from eurobisqc import required_fields
@@ -23,31 +26,35 @@ this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)
 
 
-# May be out of line with last discussions it is left here as an example,
-# to update time allowing.
-def dwca_file_labeling(filename, with_print=False, with_logging=True):
+# for easy record mapping
+class DwCACore:
+    def __init__(self, core_record):
+        self.core = core_record
+        self.extensions = {}
+
+
+# I use this only when printing / Logging. Due to its nature, the DwCAProcessor rescans the records
+# and loses the results of QC upon resuming from scratch. DwCAProcessor tries to optimize memory usage
+# And does not seem to provide the necessary kit to avoid searching back and forth.
+dwca_cores = []
+
+
+def dwca_file_labeling(filename, with_print=False, with_logging=False):
     """ Processes a DwCA archive if it is passed as a filename,
         shall popup a file chooser dialog if this is None
         :param filename (The DwCA zip file name)
         :param with_print (Extensive printing of the records)
         :param with_logging (every QC passed is printed)
-
-        FLAG: This is an example, the (e)MoF records do not contain QC, and their QCs should be combined
-        FLAG: and assigned to the core event or occurrence record """
+    """
 
     if filename is None:
-        # Adding a simple file chooser...
-        filename = file_chooser.get_archive_chooser()
-
-        if filename is None:
-            exit(0)
+        exit(0)
 
     archive = DwCAProcessor(filename)
 
-    # Do this once and forall
+    # Once and for all
     geo_areas = extract_area.find_areas(archive.eml)
 
-    # Find out about this file:
     archive_core_type = archive.core.type.lower()  # Can be occurrence or event
 
     # The core records are checked for lat lon in any case
@@ -62,40 +69,41 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
                 coord_in_occur = False
 
     record_count = 0
-    # FLAG: BROKEN AT THE MOMENT, need review
-    # FLAG: THIS IS TO BE REDONE, FOLLOWING what was done for
-    # FLAG: DATASET. ALL Extensions need to be re-indexed, so that when core records
-    # FLAG: are processed, the indexes and the QC of the extensions can be easily recombined  .
 
-    # Stock in this list records for lookup (to execute QCs 6 and 19)
+    # Stock in this list records for lookup to execute QCs 6 and 19
     records_for_lookup = []
 
-    # Batch lookup size (should verify)
+    # Batch lookup size (experimentally established, tried 100, 200, 500 and 1000)
     lookup_batch_size = 1000
     count_lookups = 0
 
-    # All net processing
+    # to display file processing time
     time_start = time.time()
+    records_by_key_for_ext_qc = {}
 
     for coreRecord in archive.core_records():
         record_count += 1
 
-        if with_print:
-            print(f"---> core: {archive.core.type}")
-
         # Attempt check for lat/lon in full record
         full_core = coreRecord["full"]
+        full_core["type"] = archive_core_type
+
+        dwca_core = DwCACore(full_core)
+        dwca_cores.append(dwca_core)
+
+        # All the extension records shall contribute to the core record QC
+        records_by_key_for_ext_qc[coreRecord["pk"]] = full_core
 
         # Core Record (any type)
         # Check location
-
         qc_mask = location.check_basic_record(full_core)
         if "qc" in full_core:
             full_core["qc"] = full_core["qc"] | qc_mask
         else:
             full_core["qc"] = qc_mask
-        # If locations are present and valid
-        if qc_mask & (qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask | qc_flags.QCFlag.GEO_LAT_LON_VALID):
+
+        # If locations are present and valid - QC 6 and 19 - all types
+        if qc_mask & (qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask | qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask):
             records_for_lookup.append(full_core)
             if len(records_for_lookup) >= lookup_batch_size:
                 location.check_xy(records_for_lookup)
@@ -103,8 +111,10 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
                 # Empty the list
                 records_for_lookup = []
 
-        # There are archives without Event records...
-        if archive.core.type.lower() == "event":
+        full_core["type"] = archive.core.type.lower()
+
+        if full_core["type"] == "event":
+
             # Check location in area
             if geo_areas is not None:
                 qc_mask = location.check_record_in_areas(full_core, geo_areas)
@@ -156,22 +166,31 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
             # Skip taxons and other record types
             full_core["qc"] = 0
 
-        if with_logging and full_core["qc"] > 0:
-            this.logger.error(f"Errors processing record {qc_flags.QCFlag.decode_mask(full_core['QC'])} "
-                              f"record: : {full_core}")
-
-        if with_print:
-            print(full_core)
+        extensions_to_update = {}
 
         for e in archive.extensions:
-            if with_print:
-                print("--- extension: " + e.type)
+
+            if e.type.lower() not in dwca_core.extensions:
+                dwca_core.extensions[e.type.lower()] = []
+
             if e.type.lower() in ["occurrence", "measurementorfact", "extendedmeasurementorfact"]:
                 for extensionRecord in archive.extension_records(e):
                     record_count += 1
                     full_extension = extensionRecord["full"]
+                    full_extension["fk"] = extensionRecord["fk"]
+                    full_extension["type"] = e.type.lower()
 
                     if e.type.lower() == "occurrence":
+
+                        # Redundant, it must have ID!
+                        occurrence_key = full_extension["occurrenceID"] if "occurrenceID" in full_extension else None
+
+                        if occurrence_key is not None:
+                            if occurrence_key in extensions_to_update:
+                                # This record does not yet have QC - we are starting
+                                full_extension["qc"] = extensions_to_update[occurrence_key]["qc"]
+                            else:
+                                extensions_to_update[occurrence_key] = full_extension
 
                         # QC 9 (basis of records)
                         qc_mask = required_fields.check_record_obis_format(full_extension)
@@ -188,8 +207,10 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
                         if coord_in_occur:
                             qc_mask = location.check_basic_record(full_extension)
                             full_extension["qc"] = full_extension["qc"] | qc_mask
+
                             # Also add it for the lookup if OK
-                            if not qc_mask:
+                            if qc_mask & (qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask |
+                                          qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask):
                                 records_for_lookup.append(full_extension)
                                 if len(records_for_lookup) >= lookup_batch_size:
                                     location.check_xy(records_for_lookup)
@@ -212,39 +233,99 @@ def dwca_file_labeling(filename, with_print=False, with_logging=True):
                         qc_mask = measurements.check_dyn_prop_record(full_extension)
                         full_extension["qc"] = full_extension["qc"] | qc_mask
 
+                        # This is an extension but it is also an occurrence. Update the core event record
+                        full_core["qc"] |= full_extension["qc"]
+
                     elif e.type.lower() in ["measurementorfact", "extendedmeasurementorfact"]:
+
+                        if archive.core.type.lower() == "event":
+                            occurrence_key = full_extension[
+                                "occurrenceID"] if "occurrenceID" in full_extension else None
+                        else:
+                            occurrence_key = None
+
                         full_extension = extensionRecord["full"]
                         # Check measurements
                         qc_mask = measurements.check_record(full_extension)
-                        if "qc" in full_extension:
-                            full_extension["qc"] = full_extension["qc"] | qc_mask
-                        else:
-                            full_extension["qc"] = qc_mask
+
+                        # Need tp update core record and possibly occurrence if core is event
+                        if occurrence_key is not None:
+                            # Update occurrence record
+                            if occurrence_key in extensions_to_update:
+                                extensions_to_update[occurrence_key]["qc"] |= qc_mask
+                            else:
+                                extensions_to_update[occurrence_key] = {"qc": qc_mask}
+
+                        full_core["qc"] |= qc_mask
 
                     else:
                         # Skip taxons and other types
                         pass
 
-                    if with_print:
-                        print(full_extension)
-
-                    if with_logging and full_extension["qc"] > 0:
-                        this.logger.error(
-                            f"Errors processing record {qc_flags.QCFlag.decode_mask(full_extension['QC'])} "
-                            f"record: {full_extension}")
+                    dwca_core.extensions[e.type.lower()].append(full_extension)
 
     # do I need a last lookup ?
     if len(records_for_lookup) >= 0:
         # The records will be modified with the correct QC flags so we do not care about the results
         location.check_xy(records_for_lookup)
-        count_lookups += 1
-        # Empty the list
-        print(f"Records looked up: {1000 * (count_lookups - 1) + len(records_for_lookup)}")
 
-    print(f"Filename processed: {filename}")
-    print(f"XY lookups: {count_lookups}")
-    print(f"Records processed: {record_count}")
-    print(f"Total time: {time.time() - time_start}")
+        # How do I update the event records if I passed occurrences to the lookup ? Looking them up in the reference!
+        for record in records_for_lookup:
+            if "fk" in record:
+                records_by_key_for_ext_qc[record["fk"]]["qc"] |= record["qc"]
+
+        count_lookups += 1
+
+    if with_print:
+        print(f"Filename processed: {filename}")
+        print(f"Archive core record type: {archive_core_type}")
+        print(f"XY lookups: {count_lookups}")
+        print(f"Records looked up: {1000 * (count_lookups - 1) + len(records_for_lookup)}")
+        print(f"Records processed: {record_count}")
+        print(f"Total time: {time.time() - time_start}")
+
+    if with_logging:
+        this.logger.info(f"Filename processed: {filename}")
+        this.logger.info(f"Archive core record type: {archive_core_type}")
+        this.logger.info(f"XY lookups: {count_lookups}")
+        this.logger.info(f"Records looked up: {1000 * (count_lookups - 1) + len(records_for_lookup)}")
+        this.logger.info(f"Records processed: {record_count}")
+        this.logger.info(f"Total time: {time.time() - time_start}")
+
+    # Rescan the prepared lookup for printing/logging the results
+    if with_print:
+        for print_record in dwca_cores:
+            if print_record.core["qc"] > 0:
+                print(f"--- core: {archive_core_type}")
+                print(print_record.core)
+                print(f"The core record passed quality checks: {qc_flags.QCFlag.decode_mask(print_record.core['qc'])}")
+
+            for e in print_record.extensions.keys():
+                for full_extension in print_record.extensions[e]:
+                    print(f"--- extension: {e}")
+                    if e == "occurrence":
+                        print(
+                            f"The occurrence record {full_extension}\n Passed quality checks: "
+                            f"{qc_flags.QCFlag.decode_mask(full_extension['qc'])}")
+                    else:
+                        print(full_extension)
+
+    if with_logging:
+        for print_record in dwca_cores:
+            if print_record["qc"] > 0:
+                this.logger.info(f"Core record {print_record}. \nPassed quality checks: "
+                                 f"{qc_flags.QCFlag.decode_mask(print_record['qc'])}")
+
+            for e in print_record.extensions.keys():
+
+                for full_extension in print_record.extensions[e]:
+                    this.logger.info(f"--- extension: {e}")
+                    if e == "occurrence":
+                        this.logger.info(f"The occurrence record {full_extension} passed quality checks: "
+                                         f"{qc_flags.QCFlag.decode_mask(full_extension['qc'])} ")
+                    else:
+                        if with_logging:
+                            this.logger.info(full_extension)
 
 
 def dwca_parallel_processing():
@@ -288,7 +369,7 @@ def dwca_parallel_processing():
     # Each one of the CPUs shall get a similar load...
     result_pool = []
     for i, dwca_file_list in enumerate(dwca_file_lists):
-        result_pool.append(pool.apply_async(dwca_list_process, args=(i, dwca_file_list, False, False)))
+        result_pool.append(pool.apply_async(dwca_process_filelist, args=(i, dwca_file_list, False, False)))
 
     # We are interested in waiting, not getting the results...
     for r in result_pool:
@@ -299,7 +380,7 @@ def dwca_parallel_processing():
     pool.join()
 
 
-def dwca_list_process(pool_no, dwca_files, with_print=False, with_logging=False):
+def dwca_process_filelist(pool_no, dwca_files, with_print=False, with_logging=False):
     """ Processes a list of DwCA archives, ideally to be called in parallel
         :param pool_no - Pool number to take track of the pools
         :param dwca_files (The list of files to be processed)
@@ -323,8 +404,6 @@ def dwca_list_process(pool_no, dwca_files, with_print=False, with_logging=False)
     return pool_no
 
 # dwca_parallel_processing()
-dwca_file_labeling(None, with_print=False, with_logging=False)
+# dwca_file_labeling(None, with_print=True, with_logging=False)
 # dwca_labeling(with_print=False, with_logging=False)
 # exit(0)
-
-

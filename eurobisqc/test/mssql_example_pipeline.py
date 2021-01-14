@@ -126,12 +126,7 @@ def dataset_qc_labeling(dataset_id, with_print=False, with_logging=True):
         """
 
     if dataset_id is None:
-        # Adding a simple file chooser...
-        dataset_id = dataset_chooser.get_dataset_chooser()
-
-        # No choice made...
-        if dataset_id is None:
-            exit(0)
+        exit(0)
 
     data_archive = eurobis_dataset.EurobisDataset()
     data_archive.load_dataset(dataset_id)
@@ -246,7 +241,7 @@ def dataset_parallel_processing():
 
     pool = mp.Pool(n_cpus)
 
-    # Connect to the database
+    # Connect to the database to get dataset list
     if not mssql.conn:
         mssql.open_db()
 
@@ -260,6 +255,8 @@ def dataset_parallel_processing():
         cur.execute(sql_random_percent_of_datasets)
         for row in cur:
             dataset_ids.append(row[0])
+
+    mssql.close_db()
 
     # Retrieved list, now need to split
     dataset_id_lists = misc.split_list(dataset_ids, n_cpus)  # We are OK until here.
@@ -284,6 +281,17 @@ def process_dataset_list(pool_no, dataset_id_list, with_print=False, with_loggin
     # Prints pool data
     start = time.time()
     print(f"Pool {pool_no} started")
+
+    # Connect to the database, each pool should have its own connection
+    conn = None
+    if not mssql.conn:
+        conn = mssql.open_db()
+
+    if conn is None:
+        # Should find a way to exit and advice
+        print("No connection to DB, nothing can be done! ")
+        return pool_no
+
     for dataset_id in dataset_id_list:
         start_file = time.time()
         if with_print:
@@ -299,15 +307,14 @@ def process_dataset_list(pool_no, dataset_id_list, with_print=False, with_loggin
     return pool_no
 
 
-# To call these...
-# Single dataset or popup a dataset chooser
-# dataset_qc_labeling(None, with_print=True, with_logging=False)
+# To call these with a chooser use run_mssql_pipeline
 
 # Single dataset Fixed
-dataset_qc_labeling(447, with_print=True, with_logging=False)
+# dataset_qc_labeling(447, with_print=True, with_logging=False)
 
 # Parallel processing of random 1% of the datasets
-# dataset_parallel_processing()
+dataset_parallel_processing()
 
-# Launch individual pool processing
-# process_dataset_list(1, [557, 239], True, False)
+# Launch individual pool processing, fixed datasets
+# process_dataset_list(1, [723, 239], True, False)
+

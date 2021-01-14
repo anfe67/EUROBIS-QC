@@ -1,0 +1,11 @@
+# These fields include all the mandatory
+# Fields that must be present and not null in order to pass
+# QC 1
+
+eventDate
+decimalLongitude
+decimalLatitude
+scientificName
+scientificNameID
+occurrenceStatus
+basisOfRecord

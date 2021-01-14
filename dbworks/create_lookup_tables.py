@@ -18,10 +18,16 @@ def import_files():
     resource_files = [f for f in os.listdir(this.resources_dir) if os.path.isfile(os.path.join(this.resources_dir, f))]
 
     for file_name in resource_files:
+        case_sensitive = False
+
         if 'Lookup' in file_name:
             table_name = file_name.split('Lookup')[0]
         else:
-            continue
+            if 'LookUP' not in file_name:
+                continue
+            else:
+                case_sensitive = True
+                table_name = file_name.split('LookUP')[0]
 
         # Connection to the DB is obtained upon importing the module
 
@@ -39,9 +45,10 @@ def import_files():
             for line in lines:
                 if line.strip() != "" and line.strip()[0] != '#':
                     # Add lookup value to the table
-                    q_str = f"insert into {table_name}(Value) values('{line.strip().lower()}')"
+                    if case_sensitive:
+                        q_str = f"insert into {table_name}(Value) values('{line.strip()}')"
+                    else:
+                        q_str = f"insert into {table_name}(Value) values('{line.strip().lower()}')"
                     sqlite_db_functions.conn.execute(q_str)
 
     sqlite_db_functions.conn.commit()
-
-# import_files()

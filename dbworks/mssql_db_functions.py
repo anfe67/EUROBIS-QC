@@ -41,7 +41,6 @@ this.connection_string = f'DRIVER={this.driver};' \
                          f'UID={this.username};' \
                          f'PWD={this.password}'
 
-
 def open_db():
     """ Opens a DB, the parameters are already loaded from the configuration file
         upon importing the module
@@ -55,6 +54,7 @@ def open_db():
         this.logger.error(sqlstate)
         this.conn = None
         return None
+
 
 
 def close_db():

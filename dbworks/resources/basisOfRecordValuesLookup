@@ -1,0 +1,13 @@
+# QC 10 Lookup values - shall be checked in lowercase
+# Sometimes the records have MS for material sample, so it is good to
+# have them external so that there is more flexibility and no need to change the code
+
+PreservedSpecimen
+FossilSpecimen
+LivingSpecimen
+MaterialSample
+Event
+HumanObservation
+MachineObservation
+Taxon
+Occurrence

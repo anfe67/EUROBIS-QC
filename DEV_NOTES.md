@@ -85,7 +85,7 @@ depth checks. They are not yet used in the sample pipeline.
 2) QC 8 needs clarifications. Is the taxon a marine taxon that does not exist in APHIA? If I know what to ask to the DB
    then we will have this one too, and with this taxonomy will be OK
 3) xylookup and bathymetry data for checks 6 and 18 (to see if a point is on land and if the bathymetries are compatible
-   with the event area. I have not yet looked at this aspect. # TODO, look at obis-qc
+   with the event area. I have not yet looked at this aspect. # DONE, look at obis-qc
 
 4) In what field should I dig to find Observed weight (QC # 15) - emailed to Bart
 
@@ -223,7 +223,7 @@ corrected error.
 
 - **ONGOING: Complete tests and coverage**
 - **ONGOING: Produce Installable library**
-- **TODO: Get even more DwCA files** 
+- **DONE: Get even more DwCA files** 
 
 --- 
 ## 29/12/2020 
@@ -236,8 +236,8 @@ corrected error.
 - Demonstrated querying DB and outputting Python dictionary (ready for QCs)
 - Downloaded DB, investigating import 
 
-- **ONGOING: Import DB from BAK file**
-- **TODO: Read article: https://stackoverflow.com/questions/34646655/populating-row-number-on-new-column-for-table-without-primary-key**
+- **DONE: Import DB from BAK file**
+- **DONE: Read article: https://stackoverflow.com/questions/34646655/populating-row-number-on-new-column-for-table-without-primary-key**
 - This is related to speed ups in SQL, Creating indexes from non indexed data on the fly  
 
 ---
@@ -247,7 +247,7 @@ corrected error.
 RESTORE DATABASE eurobis_dat FROM DISK = '/mnt/opt/VLIZ/eurobis_backup_2020_12_27_212114_3196520.bak' WITH MOVE 'eurobis_dat' TO '/var/opt/mssql/data/eurobis.mdf', MOVE 'eurobis_log' TO '/var/opt/mssql/data/eurobis.log', REPLACE
 ```
 - (I run inside DBeaver, using it a as a sort of SSMS under Linux)
-- **ONGOING: Study DB*** 
+- **DONE: Study DB*** 
 - Questions for Bart: 
 1. Most of the records have a qc already set of 30, but what am I not getting, since:
 ```
@@ -529,10 +529,10 @@ however there is not enough of them filled to get the event date. For example al
 - Received answer from Bart, incorporating feedback. Looked at SQL function to get ISO_8601 dates  
 - Designing query/routines for dataset extraction - would there be a convenience in using Pandas? Use SQL in any case
 - Extracted dataset records from DB based on dataproviders.id. Also implemented API to get the EML and extract areas from it  
-- TODO: Verify query returns all necessary fields for QC runs.
-- TODO: Verify the hypothesis of not really needing an ID for the eurobis table
-- TODO: Start implementing an update query for the eurobis table 
-- TODO: Start implementing a test pipeline for xyz number of files. 
+- DONE: Verify query returns all necessary fields for QC runs.
+- DONE: Verify the hypothesis of not really needing an ID for the eurobis table
+- DONE: Start implementing an update query for the eurobis table 
+- DONE: Start implementing a test pipeline for xyz number of files. 
 
 ## 07/01/2021
 
@@ -568,10 +568,10 @@ however there is not enough of them filled to get the event date. For example al
   already during dataset load)
 - Discussed way to feed back QC to the event records when CORE Type is Event (other look-up like in emof) and maybe not write the 
   QC to the occurrence records. 
-- **TODO**: Generate new version of lookupDB and publish to github
+- **ONGOING**: Generate new version of lookupDB and publish to github
 - **TODO**: Take care of the testing / coverage / package properties 
-- **TODO**: Fix example pipeline for DwCA files 
-- **TODO**: Consider implementing lookups also for QC 10 for better flexibility (question on the recommended fields)
+- **DONE**: Fix example pipeline for DwCA files 
+- **DONE**: Consider implementing lookups also for QC 10 for better flexibility (question on the recommended fields)
 
 ## 11/01/2021
 - Database study: Which understand how to process the records with no Event ID and no Occurrence ID. 
@@ -602,8 +602,8 @@ however there is not enough of them filled to get the event date. For example al
   needed. 
 - Next : Look at parallel processing: Build a Pool for parallel pipeline for num_cpu -2 (at least 2 are needed for mssql), passing 
   a slice of the datasets (would limit in the beginning). 
-- TODO : Correct pipeline for DwCA, to be consistent with Database processing 
-- TODO : Tests and Document, install on other PC and try to run in parallel 
+- DONE : Correct pipeline for DwCA, to be consistent with Database processing 
+- TODO : Tests and Document, install on other PC and try to run in parallel on MSSQL
 
 ## 13/01/2021 
 - Update query optimization, attempted to use fields that are not null and involved in indexes to speed up the 
@@ -613,7 +613,7 @@ however there is not enough of them filled to get the event date. For example al
   the DarwinCoreType = 1. Used for something else. So, the keying mechanism for eMoF need to be adapted.
 - Also looked at sex check for occurrence records - found error and corrected, need more automated tests.   
   
-- TODO: Implement lookup also for basic fields reqirements (whenever there is a lookup to do really). This will bring consistency 
+- DONE: Implement lookup also for basic fields reqirements (whenever there is a lookup to do really). This will bring consistency 
   and flexibility. 
   
 - Looking at parallelization, start with a limited number of datasets, found formula to get x percent of a table at random. 
@@ -621,8 +621,14 @@ however there is not enough of them filled to get the event date. For example al
 
 - Looking at changing the example pipeline for DwCA, finding strategy to compare the results ... 
 
+## 14/01/2021 
 
-
+- Cleaned DwCA pipeline, made external call to extract the small user interface, created structure to avoid loops
+- Checked completion time, checked also parallelism - OK 
+- Implemented lookups also for QC 1 and 10 (required fields and basis of records)  
+- TODO: Implement and check parallelism of MSSQL version - attempt is failing, (due to ODBC?) - redesign MSSQL 
+  connectivity to return a different connection per call, as in https://stackoverflow.com/questions/25851011/using-pyodbc-in-multi-processing-code
+- TODO: Test different approach than pyodbc: pymssql. 
 
 
 

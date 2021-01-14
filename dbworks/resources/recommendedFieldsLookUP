@@ -1,0 +1,6 @@
+# As in the R repository,
+# Best is that if they need to be included in QC1,
+# then they should be added to recommendedFieldsLookup
+
+minimumDepthInMeters
+maximumDepthInMeters
