@@ -3,6 +3,7 @@
     to perform basic checks (lat lon presence for instance) before calling the pxylookup
     to verify if the point is on land.
     """
+
 from eurobisqc.util import qc_flags
 from eurobisqc.util import misc
 
@@ -155,6 +156,7 @@ def check_xy(records):
         :returns qc_mask values, but QC is already inserted in records bitmasks
         however, the records shall be augmented with the QC for 2 flags:
         GEO_LAT_LON_NOT_SEA and WRONG_DEPTH_MAP """
+
 
     xy_res = misc.do_xylookup(records)
 

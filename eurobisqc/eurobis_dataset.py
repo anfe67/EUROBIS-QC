@@ -338,7 +338,7 @@ class EurobisDataset:
                 cursor.execute(sql_update)
             try:
                 mssql.conn.commit()
-                print(f"Records update Count (approx): {cls.record_batch_update_count * batch_size + record_count};")
+                print(f"Records update count: {cls.record_batch_update_count * batch_size + record_count};")
                 cls.record_batch_update_count += 1
                 # Should find a way to return with no pain...
                 return "Success"

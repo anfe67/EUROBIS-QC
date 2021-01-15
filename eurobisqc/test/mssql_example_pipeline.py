@@ -219,57 +219,6 @@ def dataset_qc_labeling(dataset_id, with_print=False, with_logging=True):
         this.logger.log(0, f"Processed dataset {data_archive.dataset_name} in: {duration} ")
 
 
-def dataset_parallel_processing():
-    """ Example of processing multiple datasets at the same time in
-            order to exploit the computing resources available """
-
-    # Now set to 1% of datasets...
-    sql_random_percent_of_datasets = "SELECT id FROM dataproviders WHERE 0.01 >= CAST(CHECKSUM(NEWID(), id) " \
-                                     "& 0x7fffffff AS float) / CAST (0x7fffffff AS int)"
-
-    dataset_ids = []
-
-    import multiprocessing as mp
-    # we dedicate to the task the total number of processors - 3 or 1 if we only have 2 cores or less.
-    # Knowing that mssql needs 2 cores at least.
-    if mp.cpu_count() > 3:
-        n_cpus = mp.cpu_count() - 3
-    else:
-        n_cpus = 1
-
-    pool = mp.Pool(n_cpus)
-
-    # Connect to the database to get dataset list
-    if not mssql.conn:
-        mssql.open_db()
-
-    if mssql.conn is None:
-        # Should find a way to exit and advice
-        print("No connection to DB, nothing can be done! ")
-        exit(0)
-    else:
-        # Fetch a random set of datasets
-        cur = mssql.conn.cursor()
-        cur.execute(sql_random_percent_of_datasets)
-        for row in cur:
-            dataset_ids.append(row[0])
-
-    mssql.close_db()
-
-    # Retrieved list, now need to split
-    dataset_id_lists = misc.split_list(dataset_ids, n_cpus)  # We are OK until here.
-
-    result_pool = []
-    for i, dataset_id_list in enumerate(dataset_id_lists):
-        result_pool.append(pool.apply_async(process_dataset_list, args=(i, dataset_id_list, False, False)))
-
-    for r in result_pool:
-        r.wait()
-
-    pool.terminate()
-    pool.join()
-
-
 def process_dataset_list(pool_no, dataset_id_list, with_print=False, with_logging=False):
     """ Processes a list of DwCA archives, ideally to be called in parallel
         :param pool_no - Pool number to take track of the pools
@@ -305,14 +254,11 @@ def process_dataset_list(pool_no, dataset_id_list, with_print=False, with_loggin
     return pool_no
 
 
-# To call these with a chooser use run_mssql_pipeline
+# To call single file labelling with a chooser use run_mssql_pipeline
 
-# Single dataset Fixed
+# Single dataset  - Fixed - need eurobis.dataprovider_id (id in dataproviders table)
 # dataset_qc_labeling(447, with_print=True, with_logging=False)
 
-# Parallel processing of random 1% of the datasets
-# dataset_parallel_processing()
-
-# Launch individual pool processing, fixed datasets
+# Launch individual processing of dataset list, datasets to be picked
 # process_dataset_list(1, [723, 239], True, False)
 

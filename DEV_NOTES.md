@@ -603,7 +603,7 @@ however there is not enough of them filled to get the event date. For example al
 - Next : Look at parallel processing: Build a Pool for parallel pipeline for num_cpu -2 (at least 2 are needed for mssql), passing 
   a slice of the datasets (would limit in the beginning). 
 - DONE : Correct pipeline for DwCA, to be consistent with Database processing 
-- TODO : Tests and Document, install on other PC and try to run in parallel on MSSQL
+- ONGOING : Tests and Document, install on other PC and try to run in parallel on MSSQL
 
 ## 13/01/2021 
 - Update query optimization, attempted to use fields that are not null and involved in indexes to speed up the 
@@ -628,7 +628,7 @@ however there is not enough of them filled to get the event date. For example al
 - Implemented lookups also for QC 1 and 10 (required fields and basis of records)  
 - TODO: Implement and check parallelism of MSSQL version - attempt is failing, (due to ODBC?) - redesign MSSQL 
   connectivity to return a different connection per call, as in https://stackoverflow.com/questions/25851011/using-pyodbc-in-multi-processing-code
-- TODO: Test different approach than pyodbc: pymssql. 
+- DONE: Test different approach than pyodbc: pymssql. 
 
 
 # 15/01/2021 
@@ -650,6 +650,41 @@ from SELECT queries and more time in proportion spent in UPDATE queries. It is s
 The driver has been made configurable from the configuration options, and for the follow-up of the development, 
 the pymssql shall be used. 
 
+- Multiprocessing for mssql: Not safe, noticed hang on call to pyxylookup (not the first time). Should make it 
+  depending on a response time (10 secs) if it does not return, then detect if it is hanging, it yes kill and relaunch. 
+  (TODO) - Notice, this is a speculation!
+```
+Pool 0 started
+Pool 0 completed in 196.1453251838684
+
+Pool 1 started
+Pool 1 completed in 94.53070735931396
+
+Pool 2 started
+Pool 2 completed in 409.71728348731995
+
+Pool 3 started
+Pool 3 completed in 183.79612970352173
+
+Pool 4 started
+----- MISSING! No feedback, only case observed when pyxylookup call was hanging -----  
+
+Processed dataset 830 in  3.203357458114624
+Processed dataset 916 in  32.88600730895996
+Processed dataset 63 in  82.72491765022278
+Processed dataset 695 in  87.85252141952515
+Processed dataset 730 in  6.66422963142395
+Processed dataset 145 in  21.06403613090515
+Processed dataset 806 in  117.63000011444092
+Processed dataset 852 in  180.58823657035828
+Processed dataset 241 in  92.34957456588745
+Processed dataset 808 in  292.08416628837585
+
+```
+  
+- TODO: Also must try the parallel processing with the pyodbc and make the pipeline parametric with respect to the dataset
+  list (can be called on a fixed dataset list, if not, use the percent, if percent not specified, then 1% (0.01))
+- TODO: Parallel processing using PYMSSQL seems to hang (may be it is pyxylookup but cannot say) - TEST & PROTECT 
 
 
 
