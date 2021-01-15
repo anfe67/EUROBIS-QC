@@ -52,7 +52,7 @@ def get_archive_chooser():
             try:
                 # Get list of files in folder
                 file_list = os.listdir(folder)
-            except:
+            except os.error:
                 file_list = []
 
             fnames = [f
@@ -68,7 +68,7 @@ def get_archive_chooser():
                     values["-FOLDER-"], values["-FILE LIST-"][0]
                 )
 
-            except:
+            except os.error:
                 pass
         elif event == "OK":
             if len(values["-FILE LIST-"]) > 0:

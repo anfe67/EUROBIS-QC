@@ -2,9 +2,7 @@ import sys
 import logging
 import time
 from _functools import reduce
-
 from eurobisqc import required_fields
-from eurobisqc.test.util import dataset_chooser
 from eurobisqc import eurobis_dataset
 from eurobisqc import location
 from eurobisqc import time_qc
@@ -313,7 +311,7 @@ def process_dataset_list(pool_no, dataset_id_list, with_print=False, with_loggin
 # dataset_qc_labeling(447, with_print=True, with_logging=False)
 
 # Parallel processing of random 1% of the datasets
-dataset_parallel_processing()
+# dataset_parallel_processing()
 
 # Launch individual pool processing, fixed datasets
 # process_dataset_list(1, [723, 239], True, False)

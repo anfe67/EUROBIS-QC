@@ -1,6 +1,5 @@
 import sys
 import os
-import pyodbc
 import atexit
 import configparser
 import logging
@@ -26,9 +25,17 @@ if "SQLSERVERDB" in config:
         this.database = config['SQLSERVERDB']['database']
         this.username = config['SQLSERVERDB']['username']
         this.password = config['SQLSERVERDB']['password']
+        this.drivermodule = config['SQLSERVERDB']['drivermodule']
+
+        if this.drivermodule == 'pymssql':
+            import pymssql as sql_driver
+        elif this.drivermodule == 'pyodbc':
+            import pyodbc as sql_driver
+
     except KeyError:
         # Some Parameters cannot be loaded or are missing - Should find clean exit strategy
-        pass
+        this.logger.error("Some MSSQL configuration parameters are missing. Needed: Driver Name, server address, port, "
+                          "database name, username, password and drivermodule (pymssql or pyodbc).")
 else:
     # Parameters cannot be loaded - Should find clean exit strategy
     pass
@@ -41,20 +48,24 @@ this.connection_string = f'DRIVER={this.driver};' \
                          f'UID={this.username};' \
                          f'PWD={this.password}'
 
+
 def open_db():
     """ Opens a DB, the parameters are already loaded from the configuration file
         upon importing the module
         """
     try:
-        this.conn = pyodbc.connect(this.connection_string)
+        if this.drivermodule == 'pymssql':
+            this.conn = sql_driver.connect(server=this.server, user=this.username, password=this.password,
+                                           database=this.database)
+        else:
+            this.conn = sql_driver.connect(this.connection_string)
         return this.conn
-    except pyodbc.Error as ex:
+    except sql_driver.Error as ex:
         # The connection is not initialized, log the exception message
         sqlstate = ex.args[1]
         this.logger.error(sqlstate)
         this.conn = None
         return None
-
 
 
 def close_db():

@@ -1,6 +1,6 @@
 # dbworks 
 
-## Purpose 1: Lookup DB
+## Purpose 1: Lookup DB for WORMS
 ### Worms
 
 To imported the WORMS database in SQLite follow the instructions in **IMPORT_WORMS.md** file.
@@ -41,18 +41,42 @@ import_files()
 
 ## Purpose 2: MSSQL Connectivity to perform data update 
 
-## MS SQL Server connectivity 
+### MS SQL Server connectivity 
 
 The package shall be used to connect to the MS SQL server containing the EUROBIS data, query the DB to obtain datasets 
 and after having run the QCs, push the bitmask back to the database. 
 
 The package contains connectivity and helper functions. The database connection parameters are in a config.ini file 
-under resources. 
+under resources.
 
-## Test 
+### Test 
 
 Testig is limited to demonstrating connectivity, querying a table and outputting all records in the form of a list of 
 Python dictionaries.
 
+## Parameters: 
+The parameters for both DB connections are stored in the config.ini file under resources. sections are SQLITEDB for the lookup DB
+and SQLSERVERDB for MSSQL. For MSSQL there is the option to select between two pyhton driver libraries. 
+Installation instructions for the ODBC drivers for the ubuntu os, that are 
+necessary to use the pyodbc module can be found here: 
+https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-ver15
 
+Installation instruction to install the pymssql pre-requisite package FreeTDS on ubuntu can be found here: 
+https://pymssql.readthedocs.io/en/dev/intro.html
 
+This is an example of a configuration file for this project: 
+```
+[SQLITEDB]
+databaseFile = database/EUROBIS_QC_LOOKUP_DB.db
+
+[SQLSERVERDB]
+driver        = ODBC Driver 17 for SQL Server
+drivermodule  = pymssql
+# drivermodule can be pymysql or pyodbc (needs to be specified).
+server        = 127.0.0.1
+port          = 1433
+database      = eurobis_dat
+username      = sa
+password      = Forbice2Napoli10
+
+```

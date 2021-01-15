@@ -16,7 +16,7 @@ The QC pipeline verifications are performed using dev_pipeline in the test direc
 ### Results with a pool of 6 on a fileset lying in a specific folder :
 
 **Pool 0: 2673.506s**
-
+```
 - 00270	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-tawitawi_reeffishes-v1.10.zip'
 - 00851	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-bayofpuck-v1.1.zip'
 - 00167	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-algae_zeebrugge_1977-1978-v1.1.zip'
@@ -24,7 +24,8 @@ The QC pipeline verifications are performed using dev_pipeline in the test direc
 - 03546	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-midex_chrome_jn-v1.1.zip'
 
 ***TOTAL: 27820***
-
+```
+```
 **Pool 1: 1336s**
 
 - 00528	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-meso_meiofauna_knokke_1969-v1.7.zip'
@@ -33,41 +34,44 @@ The QC pipeline verifications are performed using dev_pipeline in the test direc
 - 00303	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-dasshdt00000394-v1.1.zip'
 
 **TOTAL: 4774**
+```
 
 **Pool 2: FAILURE** 
-
+```
 - 13030	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-nematodesportuguesecanyons-v1.2.zip'
 - 00170	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-manuela_c7f-v1.1.zip'
 - 04267	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-zoobenthos_in_amvrakikos_wetlands-v1.4.zip'
 - NO-RET	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-macrobenthos-v12.0.zip' 
 
 **TOTAL : FAILURE - CORRECTED File contained other extensions and the extractor (dwca-processor) did not consider them worthy - got empty sets**  
-
+```
 **Pool 3: 3684**
-
+```
 - 02919	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-dasshdt00000410-v1.1.zip'
 - 02356	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-macrobenthic_community_nieuwpoort_1970-1971-v1.1.zip'
 - 00993	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-gelatinous_macrozoo_in_deepw_sevastopol-v1.1.zip'
 - 40398	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-nsbs-v1.6.zip'
 
 **TOTAL: 46666**
-
+```
 **Pool 4: 1929s**
-
+```
 - 000468	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-brachiopoda-v1.1.zip'
 - 000094	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-deepsea_crinoidea-v1.1.zip'
 - 001177	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-dasshdt00000405-v1.1.zip'
 - 253608	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-nsbp_robertson-v1.1.zip' 
 
 **TOTAL: 255347**
-
+```
 **Pool 5: 2882**
+```
 - 05115	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-dasshse00000055-v1.1.zip'
 - 03546	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-midex_chrome_jn-v1.1 (1).zip'
 - 27243	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-ibss_fish_guinea_2015-v8.0.zip'
 - 00052	'<FOLDER>/eurobisqc/test/data/handpickedFiles/dwca-7_water_birds_delta_area_1979-1987-v1.1.zip'
 
-<span style="color:red">**TOTAL: 35596**</span>
+**TOTAL: 35596**
+```
 
 <span style="color:red">**TOTAL ALL  : 378358**</span>
 

@@ -1,3 +1,5 @@
+import time
+
 import mssql_db_functions
 from unittest import TestCase
 
@@ -26,6 +28,8 @@ class Test(TestCase):
             for the moment it is only an experiment. (and the number of datasets does not match)
         """
 
+        start_time = time.time()
+
         collection = 'BayOfPuck'
 
         mssql_db_functions.open_db()
@@ -35,18 +39,21 @@ class Test(TestCase):
         event_or_occurrences = []
         for row in cursor1:
             event_or_occurrences.append(dict(zip(columns, row)))
+        # cursor1.close()
 
-        cursor2 = mssql_db_functions.conn.cursor()
-        cursor2.execute(
+        # cursor2 = mssql_db_functions.conn.cursor()
+        cursor1.execute(
             f"SELECT  eurobis_measurementorfact.* from eurobis join eurobis_measurementorfact on "
             f"eurobis.occurrenceID = "
             f"eurobis_measurementorfact.occurrenceID where eurobis.CollectionCode ='{collection}'")
 
-        columns = [column[0] for column in cursor2.description]
+        columns = [column[0] for column in cursor1.description]
         emof = []
-        for row in cursor2:
+        for row in cursor1:
             emof.append(dict(zip(columns, row)))
+        cursor1.close()
 
+        print(f"Duration: {time.time() - start_time}")
         print(f"Number of event/occurrences: {len(event_or_occurrences)}, number of emof records: {len(emof)}")
         print(event_or_occurrences[len(event_or_occurrences) - 1])
         print(emof[len(emof) - 1])

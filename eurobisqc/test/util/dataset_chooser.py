@@ -6,7 +6,7 @@ from dbworks import mssql_db_functions
 this = sys.modules[__name__]
 
 # query the dataset on entering and stores the datasets ...
-this.sql_datasets = "SELECT id, name from dataproviders;"
+this.sql_datasets = "SELECT id, displayname from dataproviders;"
 this.names = []
 this.dataset_ids = []
 this.dataset_name = None
@@ -21,9 +21,10 @@ if mssql_db_functions.conn is None:
         cursor.execute(this.sql_datasets)
         # Should extract something meaningful from the dataset...
         for row in cursor:
-            this.names.append(row[1])
-            this.dataset_ids.append(row[0])
+            this.names.append(f"{row[0]:05d} | {row[1]}")
+            # this.dataset_ids.append(row[0])
 
+        this.names.sort()
     else:
         print("No DB connection!")
         exit(0)
@@ -39,7 +40,7 @@ def get_dataset_chooser():
         ],
         [
             sg.Listbox(
-                values=this.names, enable_events=True, size=(40, 20), key="-DATASET LIST-"
+                values=this.names, enable_events=True, size=(100, 40), key="-DATASET LIST-"
             )
         ],
         [sg.Button("OK"), sg.Button("Cancel")],
@@ -61,14 +62,13 @@ def get_dataset_chooser():
 
         if event == "-DATASET LIST-":  # A dataset was chosen from the listbox
             this.dataset_name = values["-DATASET LIST-"][0]
-            index = this.names.index(this.dataset_name)
-            this.dataset_id = this.dataset_ids[index]
+            index = int(this.dataset_name[0:6])
+            this.dataset_id = index
 
         elif event == "OK":
             if len(values["-DATASET LIST-"]) > 0:
-                this.dataset_name = values["-DATASET LIST-"][0]
-                index = this.names.index(this.dataset_name)
-                this.dataset_id = this.dataset_ids[index]
+                index = int(this.dataset_name[0:6])
+                this.dataset_id = index
 
             run_loop = False
             window.Hide()

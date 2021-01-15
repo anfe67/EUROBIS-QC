@@ -32,5 +32,5 @@ CREATE INDEX "taxon_scientific_name_id" ON "taxon" (
 	"scientificNameID"	ASC
 )
 ```
-**NOTE:** This is extremely important for performance, as it can improve lookup times by a factor of 1000. 
+**NOTE:** This is extremely important for performance, as it helps improve lookup times by a factor of 1000. 
 

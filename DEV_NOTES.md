@@ -631,6 +631,32 @@ however there is not enough of them filled to get the event date. For example al
 - TODO: Test different approach than pyodbc: pymssql. 
 
 
+# 15/01/2021 
+- Installed PC for test install/verification/documentation (ubuntu 20.04) 
+- Do performance evaluation using pymssql vs pyodbc 
+- Results : 
+```
+FILE/TASK                   PYODBC            PYMSSQL    DIFF %        
+------------------------------------------------------------------
+Connect Test                 0.014s            0.011s    21%
+Assoc. Cetacea               0.99s             0.74s     25.25%
+Shark bacterioplankton     157.42s           151.54s      3.73%
+gbif_9186 (Zoological...)  217.86s           207.59s      4.71% 
+```
+
+On these small - medium sized files the pymysql provides a consistent performance advantage over pyodbc. The 
+last file consists of only occurrence records, meaning that there is less time spent on retrieving the results 
+from SELECT queries and more time in proportion spent in UPDATE queries. It is still an advantage, albeit small. 
+The driver has been made configurable from the configuration options, and for the follow-up of the development, 
+the pymssql shall be used. 
+
+
+
+
+
+
+
+
 
 
   
