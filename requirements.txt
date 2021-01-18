@@ -12,4 +12,4 @@ stopit
 git+git://github.com/iobis/pyxylookup.git
 git+git://github.com/iobis/pyworms.git
 git+git://github.com/pieterprovoost/isodateparser.git
-git+git://github.com/pieterprovoost/dwcaprocessor.git
+git+git://github.com/iobis/dwcaprocessor.git

@@ -1,23 +1,29 @@
 from setuptools import setup, find_packages
 
 # The database contains a big part of WORMS and it is BIG - not sure whether I want to distribute it.
+# In any case need to cope with it
 
 setup(name="eurobisqc",
       version="0.3.0",
       python_requires='>=3.6',
       data_files=[  # ('database', ['dbworks/database/EUROBIS_QC_LOOKUP_DB.tar.gz']),
-          ('resources', ['dbworks/resources/config.ini',
-                         'dbworks/resources/countMeasurementTypeIDLookup',
-                         'dbworks/resources/countMeasurementTypeLookup',
-                         'dbworks/resources/sampleSizeMeasurementTypeIDLookup',
-                         'dbworks/resources/sampleSizeMeasurementTypeLookup',
-                         'dbworks/resources/weightMeasurementTypeIDLookup',
-                         'dbworks/resources/weightMeasurementTypeIDLookup',
-                         'dbworks/resources/VERIFICATIONS.md']),
+          ('dbworks/resources', ['dbworks/resources/config.ini',
+                                 'dbworks/resources/countMeasurementTypeIDLookup',
+                                 'dbworks/resources/countMeasurementTypeLookup',
+                                 'dbworks/resources/sampleSizeMeasurementTypeIDLookup',
+                                 'dbworks/resources/sampleSizeMeasurementTypeLookup',
+                                 'dbworks/resources/weightMeasurementTypeIDLookup',
+                                 'dbworks/resources/weightMeasurementTypeIDLookup',
+                                 'dbworks/resources/basisOfRecordValuesLookup',
+                                 'dbworks/resources/recommendedFieldsLookUP',
+                                 'dbworks/resources/requiredFieldsLookUP',
+                                 'dbworks/resources/sexMeasurementTypeIDLookup',
+                                 'dbworks/resources/sexMeasurementTypeLookup',
+                                 'dbworks/resources/sexValuesLookup'
+                         ]),
           ('docs', ['dbworks/IMPORT_WORMS.md',
-                    'dbworks/VERIFICATIONS.md',
                     'dbworks/csvkit-readthedocs-io-en-latest.pdf',
-                    'eurobisqc/DEV_NOTES.md',
+                    'DEV_NOTES.md',
                     'eurobisqc/test/VERIFICATIONS.md',
                     ])
       ],

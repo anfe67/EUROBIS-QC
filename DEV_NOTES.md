@@ -717,9 +717,11 @@ Processed dataset 808 in  292.08416628837585
 - Cleaning and uniforming all printing and logging (using only logging on all tests - all files). DONE
 - Note - Logging may have some troubles with multiprocessing (does not really seem to affect us)
 - Possible improvements (for future): Optimization of Database update queries (using batches updates or temp queries) 
-- **TODO:** Looking at deployment on a different PC (still Linux). Do I have everything sorted out? 
+- **ONGOING:** Looking at deployment on a different PC (still Linux). Do I have everything sorted out? 
 - **TODO**: Take care of the testing / coverage / package properties -- Check for as much completeness as possible
-
+- **TODO**: Write install procedure and user "guidance" 
+  
+- With the ONGOING task found many error in the deployment/setup script, correcting. 
 
 
 
