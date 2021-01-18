@@ -10,6 +10,7 @@ this.logger = logging.getLogger(__name__)
 this.logger.setLevel(logging.DEBUG)
 this.logger.addHandler(logging.StreamHandler())
 
+
 class Test(TestCase):
     taxon_fields = []
     speciesprofile_fields = []

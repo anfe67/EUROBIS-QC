@@ -27,6 +27,7 @@ this.logger = logging.getLogger(__name__)
 this.logger.level = logging.DEBUG
 this.logger.addHandler(logging.StreamHandler())
 
+
 # for easy record mapping
 class DwCACore:
     def __init__(self, core_record):

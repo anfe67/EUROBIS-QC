@@ -10,6 +10,7 @@ this.logger = logging.getLogger(__name__)
 this.logger.setLevel(logging.DEBUG)
 this.logger.addHandler(logging.StreamHandler())
 
+
 class Test(TestCase):
     table = 'dp_countries'
 
@@ -60,6 +61,7 @@ class Test(TestCase):
         cursor1.close()
 
         this.logger.info(f"Duration: {time.time() - start_time}")
-        this.logger.info(f"Number of event/occurrences: {len(event_or_occurrences)}, number of emof records: {len(emof)}")
+        this.logger.info(
+            f"Number of event/occurrences: {len(event_or_occurrences)}, number of emof records: {len(emof)}")
         this.logger.info(event_or_occurrences[len(event_or_occurrences) - 1])
         this.logger.info(emof[len(emof) - 1])

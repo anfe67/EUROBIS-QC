@@ -1,16 +1,16 @@
-import sys
 import logging
+import sys
 import time
 from _functools import reduce
-from eurobisqc import required_fields
+
+from dbworks import mssql_db_functions as mssql
 from eurobisqc import eurobis_dataset
 from eurobisqc import location
-from eurobisqc import time_qc
 from eurobisqc import measurements
+from eurobisqc import required_fields
 from eurobisqc import taxonomy
+from eurobisqc import time_qc
 from eurobisqc.util import qc_flags
-from dbworks import mssql_db_functions as mssql
-from eurobisqc.util import misc
 
 # Use "this" trick
 this = sys.modules[__name__]
@@ -142,7 +142,6 @@ def dataset_qc_labeling(dataset_id, with_logging=True):
         this.logger.info(f"Type of core records: {'Event' if data_archive.darwin_core_type == 2 else 'Occurrence'}")
         this.logger.info(f"--------------------------------------------------")
 
-
     # Starting the QCs:
 
     # After loading, measure processing time
@@ -210,7 +209,9 @@ def dataset_qc_labeling(dataset_id, with_logging=True):
     # Dataset QC finished, taking time.
 
     if with_logging:
-        this.logger.info(f"Total net processing time for {data_archive.dataprovider_id} : {data_archive.dataset_name} in: {duration} ")
+        this.logger.info(
+            f"Total net processing time for {data_archive.dataprovider_id} : "
+            f"{data_archive.dataset_name} in: {duration} ")
 
 
 def process_dataset_list(pool_no, dataset_id_list, with_logging=False):
@@ -230,7 +231,7 @@ def process_dataset_list(pool_no, dataset_id_list, with_logging=False):
 
     if conn is None:
         # Should find a way to exit and advice
-        this.log.error("No connection to DB, nothing can be done! ")
+        this.logger.error("No connection to DB, nothing can be done! ")
         return pool_no
 
     for dataset_id in dataset_id_list:
@@ -247,7 +248,6 @@ def process_dataset_list(pool_no, dataset_id_list, with_logging=False):
         this.logger.info(f"Pool {pool_no} completed in {time.time() - start}")
     return pool_no
 
-
 # To call single file labelling with a chooser use run_mssql_pipeline
 
 # Single dataset  - Fixed - need eurobis.dataprovider_id (id in dataproviders table)
@@ -255,4 +255,3 @@ def process_dataset_list(pool_no, dataset_id_list, with_logging=False):
 
 # Launch individual processing of dataset list, datasets to be picked
 # process_dataset_list(1, [723, 239], True, False)
-

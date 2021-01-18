@@ -26,5 +26,5 @@ class Test(TestCase):
         res5 = misc.string_to_dict(self.test_s5)
         self.assertTrue(res5['conversion_fail'])
 
-        res6 = misc.string_to_dict((self.test_s6))
-        self.assertTrue(res6['Mesh size']=="300 mkm")
+        res6 = misc.string_to_dict(self.test_s6)
+        self.assertTrue(res6['Mesh size'] == "300 mkm")

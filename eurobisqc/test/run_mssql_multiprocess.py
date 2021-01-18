@@ -23,13 +23,12 @@ def do_dataset_parallel_processing(percent):
     #                                  "& 0x7fffffff AS float) / CAST (0x7fffffff AS int)"
 
     # This selects percent from SMALL datasets (less than 4000 events/occurrences)
-    sql_random_percent_of_datasets =f"select a.id, a.displayname, a.rec_count from " \
-                                    f"(select d.id, d.displayname, rec_count from dataproviders d " \
-                                    f"inner join eurobis e on e.dataprovider_id = d.id " \
-                                    f"where rec_count <= 4000 group by d.id, d.displayname, rec_count) a " \
-                                    f"where {percent} >= CAST(CHECKSUM(NEWID(), id) & 0x7fffffff AS float) " \
-                                    f"/ CAST (0x7fffffff AS int) order by id "
-
+    sql_random_percent_of_datasets = f"select a.id, a.displayname, a.rec_count from " \
+                                     f"(select d.id, d.displayname, rec_count from dataproviders d " \
+                                     f"inner join eurobis e on e.dataprovider_id = d.id " \
+                                     f"where rec_count <= 4000 group by d.id, d.displayname, rec_count) a " \
+                                     f"where {percent} >= CAST(CHECKSUM(NEWID(), id) & 0x7fffffff AS float) " \
+                                     f"/ CAST (0x7fffffff AS int) order by id "
 
     dataset_ids = []
     dataset_names = []
@@ -78,7 +77,8 @@ def do_dataset_parallel_processing(percent):
     pool.terminate()
     pool.join()
 
-    this.logger.info(f"All processes have completed after {time.time()- start_time}")
+    this.logger.info(f"All processes have completed after {time.time() - start_time}")
+
 
 # Parallel processing of random 2% of the (SMALL) datasets
 do_dataset_parallel_processing(0.02)

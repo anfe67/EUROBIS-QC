@@ -10,6 +10,7 @@ this.logger = logging.getLogger(__name__)
 this.logger.setLevel(logging.DEBUG)
 this.logger.addHandler(logging.StreamHandler())
 
+
 class TestQCFlag(TestCase):
 
     def test_encode(self):

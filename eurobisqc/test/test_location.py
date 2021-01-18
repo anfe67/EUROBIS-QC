@@ -11,6 +11,7 @@ this.logger = logging.getLogger(__name__)
 this.logger.setLevel(logging.DEBUG)
 this.logger.addHandler(logging.StreamHandler())
 
+
 class Test(TestCase):
     records = [
         {"id": 0, "decimalLongitude": 2.5, "decimalLatitude": 52.2},  # OK Record

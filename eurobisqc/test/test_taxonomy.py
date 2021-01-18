@@ -9,6 +9,7 @@ this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)
 this.logger.addHandler(logging.StreamHandler())
 
+
 class Test(TestCase):
     records = [
         {"id": 0, "scientificNameID": "urn:lsid:itis.gov:itis_tsn:28726"},  # Not in WORMS

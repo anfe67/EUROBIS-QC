@@ -6,6 +6,9 @@
 import sys
 import logging
 
+# This is to cope with possible hangs in pyxylookup (observed 3 times in a few millions calls)
+from stopit import threading_timeoutable
+
 from eurobisqc.util import qc_flags
 from eurobisqc.util import misc
 
@@ -16,9 +19,6 @@ this.logger.addHandler(logging.StreamHandler())
 
 # Define a timeout for the geo lookup calls
 this.pyxylookup_timeout = 10
-
-# This is to cope with possible hangs in pyxylookup (observed 3 times in a few millions calls)
-from stopit import threading_timeoutable
 
 qc_mask_4 = qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask
 qc_mask_5 = qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask
@@ -34,7 +34,6 @@ qc_mask_18 = qc_flags.QCFlag.MIN_MAX_DEPTH_VERIFIED.bitmask
 
 # Within the call to xylookup
 qc_mask_19 = qc_flags.QCFlag.DEPTH_MAP_VERIFIED.bitmask
-
 
 
 def check_basic_record(record):
@@ -164,12 +163,14 @@ def extract_depths(record):
             res.append(depth["float"])
     return res
 
+
 @threading_timeoutable()
 def execute_lookups(records):
     """ This is wrapped in a timeoutable call so that if there is no return in 10 seconds
         then the call is re-issued until the list of results is returned. Average lookup of
         1000 records is around 1s, so 10 is a reasonable timeout """
     return misc.do_xylookup(records)
+
 
 def check_xy(records):
     """ :param records, already QC for location
@@ -185,8 +186,6 @@ def check_xy(records):
         xy_res = execute_lookups(records, timeout=this.pyxylookup_timeout)
         if xy_res is None:
             this.logger.warning("Had to re-issue call to pyxylookup")
-
-
 
     intercept = 50
     slope = 1.1

@@ -11,6 +11,7 @@ this.logger = logging.getLogger(__name__)
 this.logger.level = logging.DEBUG
 this.logger.addHandler(logging.StreamHandler())
 
+
 class EurobisDataset:
     """ all the necessary to represent
         an archive as retrieved from the DB """

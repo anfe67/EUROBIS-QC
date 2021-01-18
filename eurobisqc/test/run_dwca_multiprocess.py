@@ -65,5 +65,6 @@ def dwca_parallel_processing(with_logging=False):
     pool.terminate()
     pool.join()
 
+
 do_logging = False
 dwca_parallel_processing(do_logging)
