@@ -3,9 +3,15 @@ from unittest import TestCase
 import sys
 import os
 import time
-from eurobisqc.util import extract_dates
+import logging
 
+from eurobisqc.util import extract_dates
 from dwcaprocessor import DwCAProcessor
+
+this = sys.modules[__name__]
+this.logger = logging.getLogger(__name__)
+this.logger.setLevel(logging.DEBUG)
+this.logger.addHandler(logging.StreamHandler())
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
@@ -29,6 +35,5 @@ class Test(TestCase):
             date_string = extract_dates.find_dates(xml_input)
         end = time.time()
 
-        print(f"Duration with xmltodict: {end - start}")
-
+        this.logger.info(f"Duration with xmltodict: {end - start}")
         self.assertIsNotNone(date_string)

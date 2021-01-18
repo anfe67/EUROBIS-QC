@@ -77,6 +77,6 @@ server        = 127.0.0.1
 port          = 1433
 database      = eurobis_dat
 username      = sa
-password      = Forbice2Napoli10
+password      = MyPassword
 
 ```

@@ -8,9 +8,11 @@ from eurobisqc.util import misc
 # Use "this" trick
 this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)
+this.logger.setLevel(logging.DEBUG)
+this.logger.addHandler(logging.StreamHandler())
 
 
-def dwca_parallel_processing(with_print=False, with_logging=False):
+def dwca_parallel_processing(with_logging=False):
     """ Example of processing multiple files at the same time in
         order to exploit the computing resources of the machine """
     import multiprocessing as mp
@@ -47,13 +49,13 @@ def dwca_parallel_processing(with_print=False, with_logging=False):
         exit(0)
 
     dwca_file_lists = misc.split_list(dwca_files, n_cpus)
-    print(dwca_file_lists)
+    this.logger.info(dwca_file_lists)
 
     # Each one of the CPUs shall get a similar load...
     result_pool = []
     for i, dwca_file_list in enumerate(dwca_file_lists):
         result_pool.append(pool.apply_async(dwca_example_pipeline.dwca_process_filelist,
-                                            args=(i, dwca_file_list, with_print, with_logging)))
+                                            args=(i, dwca_file_list, with_logging)))
 
     # We are interested in waiting, not getting the results...
     for r in result_pool:
@@ -63,7 +65,5 @@ def dwca_parallel_processing(with_print=False, with_logging=False):
     pool.terminate()
     pool.join()
 
-
-do_print = False
 do_logging = False
-dwca_parallel_processing(do_print, do_logging)
+dwca_parallel_processing(do_logging)

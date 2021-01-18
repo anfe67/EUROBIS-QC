@@ -226,6 +226,7 @@ corrected error.
 - **DONE: Get even more DwCA files** 
 
 --- 
+
 ## 29/12/2020 
 
 - Received email from Bart, link to DB and basic explainations / Data field mappings 
@@ -241,6 +242,7 @@ corrected error.
 - This is related to speed ups in SQL, Creating indexes from non indexed data on the fly  
 
 ---
+
 ## 30/12/2020 
 - Import DB with command:
 ``` 
@@ -470,10 +472,13 @@ StillImage,             6481
 T,                      9454
 
 ```
+---
 
 ## 31/12/2021
 
 - QC logic is all inverse, QC bits are 1 if the QC is "passed" meaning they are quality stamps, not error flags.
+
+---
 
 ## 03/01/2021
 
@@ -484,7 +489,9 @@ T,                      9454
   records have minimumDepthInMeters and maximumDepthinMeters. Need to map to a SQL table to SQL view in the 
   QC pipeline with "proper names" OR make names dynamic (such as lower case check for smaller field name)? 
   Look at the mapping provided by Bart.
-  
+
+---
+
 ## 04/01/2021
 
 - Resuming corrections : Tests for measurement checks - improved code as well
@@ -508,6 +515,7 @@ UPDATE cte
     SET Id = RowId
     
 ```
+---
 
 ## 05/01/2021
 
@@ -524,6 +532,8 @@ however there is not enough of them filled to get the event date. For example al
 - started implementation of retrieval of provider data from SQL 
 - Must complete by adding other SQL for records, call to EML service and extraction of dates and areas from EML
 
+---
+
 ## 06/01/2021 
 
 - Received answer from Bart, incorporating feedback. Looked at SQL function to get ISO_8601 dates  
@@ -533,6 +543,8 @@ however there is not enough of them filled to get the event date. For example al
 - DONE: Verify the hypothesis of not really needing an ID for the eurobis table
 - DONE: Start implementing an update query for the eurobis table 
 - DONE: Start implementing a test pipeline for xyz number of files. 
+
+---
 
 ## 07/01/2021
 
@@ -553,6 +565,8 @@ however there is not enough of them filled to get the event date. For example al
    - update events in DB table (strategy to be figured out)
    - update occurrences in DB table (strategy to be figured out)
 
+---
+
 ## 08/01/2021
 
 - Re-building QC pipeline for datasets: Preparing batches for pyxylookups - per event type (as they are now split) - or find 
@@ -569,9 +583,10 @@ however there is not enough of them filled to get the event date. For example al
 - Discussed way to feed back QC to the event records when CORE Type is Event (other look-up like in emof) and maybe not write the 
   QC to the occurrence records. 
 - **ONGOING**: Generate new version of lookupDB and publish to github
-- **TODO**: Take care of the testing / coverage / package properties 
 - **DONE**: Fix example pipeline for DwCA files 
 - **DONE**: Consider implementing lookups also for QC 10 for better flexibility (question on the recommended fields)
+
+---
 
 ## 11/01/2021
 - Database study: Which understand how to process the records with no Event ID and no Occurrence ID. 
@@ -591,8 +606,10 @@ however there is not enough of them filled to get the event date. For example al
     - For each occurrence: 
       - Process eMoF for that occurrence (if any) 
       - process occurrence and OR al QC together on the occurrence - Hold QC 
-    - process event and OR all QC together on the event, including the eMoF 
-    
+    - process event and OR all QC together on the event, including the eMoF
+  
+---
+
 ## 12/01/2020 
 - Database Study as a consequence of the feedback from Bart: Attempt to use the **%%physloc%%** column. This is undocumented,
   and risky as it could not work in future releases of MS SQL. However, as it will only be used to update existing rows, 
@@ -604,6 +621,8 @@ however there is not enough of them filled to get the event date. For example al
   a slice of the datasets (would limit in the beginning). 
 - DONE : Correct pipeline for DwCA, to be consistent with Database processing 
 - ONGOING : Tests and Document, install on other PC and try to run in parallel on MSSQL
+
+---
 
 ## 13/01/2021 
 - Update query optimization, attempted to use fields that are not null and involved in indexes to speed up the 
@@ -621,15 +640,18 @@ however there is not enough of them filled to get the event date. For example al
 
 - Looking at changing the example pipeline for DwCA, finding strategy to compare the results ... 
 
+---
+
 ## 14/01/2021 
 
 - Cleaned DwCA pipeline, made external call to extract the small user interface, created structure to avoid loops
 - Checked completion time, checked also parallelism - OK 
 - Implemented lookups also for QC 1 and 10 (required fields and basis of records)  
-- TODO: Implement and check parallelism of MSSQL version - attempt is failing, (due to ODBC?) - redesign MSSQL 
+- DONE: Implement and check parallelism of MSSQL version - attempt is failing, (due to ODBC?) - redesign MSSQL 
   connectivity to return a different connection per call, as in https://stackoverflow.com/questions/25851011/using-pyodbc-in-multi-processing-code
 - DONE: Test different approach than pyodbc: pymssql. 
 
+---
 
 # 15/01/2021 
 - Installed PC for test install/verification/documentation (ubuntu 20.04) 
@@ -652,7 +674,7 @@ the pymssql shall be used.
 
 - Multiprocessing for mssql: Not safe, noticed hang on call to pyxylookup (not the first time). Should make it 
   depending on a response time (10 secs) if it does not return, then detect if it is hanging, it yes kill and relaunch. 
-  (TODO) - Notice, this is a speculation!
+  (DONE) - Notice, this is a speculation!
 ```
 Pool 0 started
 Pool 0 completed in 196.1453251838684
@@ -682,9 +704,22 @@ Processed dataset 808 in  292.08416628837585
 
 ```
   
-- TODO: Also must try the parallel processing with the pyodbc and make the pipeline parametric with respect to the dataset
+- DONE: Also must try the parallel processing with the pyodbc and make the pipeline parametric with respect to the dataset
   list (can be called on a fixed dataset list, if not, use the percent, if percent not specified, then 1% (0.01))
-- TODO: Parallel processing using PYMSSQL seems to hang (may be it is pyxylookup but cannot say) - TEST & PROTECT 
+- DONE: Parallel processing using PYMSSQL seems to hang (may be it is pyxylookup but cannot say) - TEST & PROTECT - 
+  in fact this may be to a non-return of REST API pyxylookup. Should wrap it in something like (stopit)
+- DONE: Make uniform and consistent logging across all files  
+
+---
+
+## 18/01/2021 
+
+- Cleaning and uniforming all printing and logging (using only logging on all tests - all files). DONE
+- Note - Logging may have some troubles with multiprocessing (does not really seem to affect us)
+- Possible improvements (for future): Optimization of Database update queries (using batches updates or temp queries) 
+- **TODO:** Looking at deployment on a different PC (still Linux). Do I have everything sorted out? 
+- **TODO**: Take care of the testing / coverage / package properties -- Check for as much completeness as possible
+
 
 
 

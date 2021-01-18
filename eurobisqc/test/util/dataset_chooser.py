@@ -1,9 +1,17 @@
+""" This module, through the get_dataset_chooser method, connects to the EUROBIS MS SQL DB and fetches the
+    list of dataproviders from the dataproviders table. They are then presented in a list sorted by dataprovider id """
+
 import sys
+import logging
+
 import PySimpleGUI as sg
 
 from dbworks import mssql_db_functions
 
 this = sys.modules[__name__]
+this.logger = logging.getLogger(__name__)
+this.logger.setLevel(logging.DEBUG)
+this.logger.addHandler(logging.StreamHandler())
 
 # query the dataset on entering and stores the datasets ...
 this.sql_datasets = "SELECT id, displayname from dataproviders;"
@@ -26,7 +34,7 @@ if mssql_db_functions.conn is None:
 
         this.names.sort()
     else:
-        print("No DB connection!")
+        this.logger.error("No DB connection!")
         exit(0)
 
 
@@ -81,7 +89,3 @@ def get_dataset_chooser():
 
     window.Close()
     return this.dataset_id
-
-# get_dataset_chooser()
-# print(this.dataset_name)
-# print(this.dataset_id)

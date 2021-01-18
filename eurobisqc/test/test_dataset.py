@@ -1,7 +1,14 @@
+import sys
+import logging
 from unittest import TestCase
 
 from eurobisqc import eurobis_dataset
 from dbworks import mssql_db_functions
+
+this = sys.modules[__name__]
+this.logger = logging.getLogger(__name__)
+this.logger.level = logging.DEBUG
+this.logger.addHandler(logging.StreamHandler())
 
 
 class Test(TestCase):
@@ -68,7 +75,7 @@ class Test(TestCase):
         data_archive.get_provider_data(self.test_dataset)
         data_archive.get_areas_from_eml(data_archive.imis_das_id)
 
-        print(data_archive.areas)
+        this.logger.info(data_archive.areas)
 
     def test_get_eml_negative(self):
         """ Verify that the solution can handle cases when EML data
@@ -79,12 +86,12 @@ class Test(TestCase):
         data_archive.get_areas_from_eml(fake_imis_das_id)
 
         # Negative
-        print(
+        this.logger.info(
             f"Found {'No interesting' if data_archive.areas is None else len(data_archive.areas)} "
             f"areas in IMIS Dataset N,{fake_imis_das_id}")
         # Positive
         data_archive.get_areas_from_eml(self.test_imis_no)
-        print(
+        this.logger.info(
             f"Found {'No interesting' if data_archive.areas is None else len(data_archive.areas)} "
             f"areas in IMIS Dataset N,{self.test_imis_no}")
         # NOTE: API not OK at the moment, it returns the globe as an area, which is wrong.

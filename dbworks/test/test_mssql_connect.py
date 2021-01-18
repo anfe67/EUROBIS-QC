@@ -1,8 +1,14 @@
+import sys
+import logging
 import time
 
 import mssql_db_functions
 from unittest import TestCase
 
+this = sys.modules[__name__]
+this.logger = logging.getLogger(__name__)
+this.logger.setLevel(logging.DEBUG)
+this.logger.addHandler(logging.StreamHandler())
 
 class Test(TestCase):
     table = 'dp_countries'
@@ -20,7 +26,7 @@ class Test(TestCase):
         for row in cursor:
             results.append(dict(zip(columns, row)))
 
-        print(results)
+        this.logger.info(results)
 
     def test_retrieve_sample_dataset(self):
         """ simple example to retrieve a dataset of only occurrences and measurementorfact records
@@ -53,7 +59,7 @@ class Test(TestCase):
             emof.append(dict(zip(columns, row)))
         cursor1.close()
 
-        print(f"Duration: {time.time() - start_time}")
-        print(f"Number of event/occurrences: {len(event_or_occurrences)}, number of emof records: {len(emof)}")
-        print(event_or_occurrences[len(event_or_occurrences) - 1])
-        print(emof[len(emof) - 1])
+        this.logger.info(f"Duration: {time.time() - start_time}")
+        this.logger.info(f"Number of event/occurrences: {len(event_or_occurrences)}, number of emof records: {len(emof)}")
+        this.logger.info(event_or_occurrences[len(event_or_occurrences) - 1])
+        this.logger.info(emof[len(emof) - 1])

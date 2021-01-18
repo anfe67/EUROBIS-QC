@@ -1,8 +1,15 @@
-from pyodbc import Error
+import sys
+import logging
 import requests
+from pyodbc import Error
 from dbworks import mssql_db_functions as mssql
 from eurobisqc.util import extract_area
 
+this = sys.modules[__name__]
+# This is not multiprocess "safe" output can be garbled...
+this.logger = logging.getLogger(__name__)
+this.logger.level = logging.DEBUG
+this.logger.addHandler(logging.StreamHandler())
 
 class EurobisDataset:
     """ all the necessary to represent
@@ -338,7 +345,7 @@ class EurobisDataset:
                 cursor.execute(sql_update)
             try:
                 mssql.conn.commit()
-                print(f"Records update count: {cls.record_batch_update_count * batch_size + record_count};")
+                this.logger.debug(f"Records update count: {cls.record_batch_update_count * batch_size + record_count};")
                 cls.record_batch_update_count += 1
                 # Should find a way to return with no pain...
                 return "Success"

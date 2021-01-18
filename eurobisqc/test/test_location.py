@@ -1,9 +1,15 @@
+import sys
+import logging
 from unittest import TestCase
 
 import qc_flags
 from eurobisqc import location
 from eurobisqc.util.qc_flags import QCFlag
 
+this = sys.modules[__name__]
+this.logger = logging.getLogger(__name__)
+this.logger.setLevel(logging.DEBUG)
+this.logger.addHandler(logging.StreamHandler())
 
 class Test(TestCase):
     records = [
@@ -59,7 +65,7 @@ class Test(TestCase):
 
         # This should call the pyxylookup and change the records, also assessing the
         results = location.check_xy(self.records)
-        print(results)
+        this.logger.info(results)
 
         assert (results == [QCFlag.GEO_LAT_LON_ON_SEA.bitmask,
                             0,
@@ -101,8 +107,8 @@ class Test(TestCase):
         # timing and calling the service
         start = time()
         results = location.check_xy(rand_records)
-        print(f"Time elapsed: {time() - start}")
-        print(results)
+        this.logger.info(f"Time elapsed: {time() - start}")
+        this.logger.info(results)
 
     def test_areas(self):
         """ Tests to verify LAT/LON in areas """

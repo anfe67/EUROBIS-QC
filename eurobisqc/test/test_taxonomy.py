@@ -1,7 +1,13 @@
+import sys
+import logging
+
 from unittest import TestCase
 from eurobisqc import taxonomy
 from eurobisqc.util.qc_flags import QCFlag
 
+this = sys.modules[__name__]
+this.logger = logging.getLogger(__name__)
+this.logger.addHandler(logging.StreamHandler())
 
 class Test(TestCase):
     records = [
@@ -14,7 +20,7 @@ class Test(TestCase):
 
     def test_check_taxa(self):
         results = taxonomy.check(self.records)
-        print(results)
+        this.logger.info(results)
         check = [0,
                  QCFlag.TAXONOMY_APHIAID_PRESENT.bitmask |
                  QCFlag.TAXONOMY_RANK_OK.bitmask,

@@ -8,6 +8,7 @@ class Test(TestCase):
     test_s3 = "ObservedWeightInGrams=0.00052"
     test_s4 = ""
     test_s5 = "::"
+    test_s6 = '"Net type: Bogorov-Rass_Net mouth opening: 0.8 m_Mesh size: 300 mkm"'  # Separators '_'
 
     def test_string_to_dict(self):
         res1 = misc.string_to_dict(self.test_s1)
@@ -24,3 +25,6 @@ class Test(TestCase):
 
         res5 = misc.string_to_dict(self.test_s5)
         self.assertTrue(res5['conversion_fail'])
+
+        res6 = misc.string_to_dict((self.test_s6))
+        self.assertTrue(res6['Mesh size']=="300 mkm")

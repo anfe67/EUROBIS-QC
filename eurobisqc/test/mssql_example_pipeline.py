@@ -15,6 +15,9 @@ from eurobisqc.util import misc
 # Use "this" trick
 this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)
+this.logger.level = logging.DEBUG
+this.logger.addHandler(logging.StreamHandler())
+
 this.count_pyxylookups = 0
 
 
@@ -36,7 +39,7 @@ def qc_event(record, data_archive):
         if len(data_archive.records_for_lookup) >= data_archive.LOOKUP_BATCH_SIZE:
             location.check_xy(data_archive.records_for_lookup)
             this.count_pyxylookups += 1
-            print(f"Lookups: {this.count_pyxylookups}")
+            this.logger.debug(f"Lookups: {this.count_pyxylookups}")
             # Empty the list
             data_archive.records_for_lookup = []
 
@@ -71,7 +74,7 @@ def qc_occurrence(record, data_archive):
         if len(data_archive.records_for_lookup) >= data_archive.LOOKUP_BATCH_SIZE:
             location.check_xy(data_archive.records_for_lookup)
             this.count_pyxylookups += 1
-            print(f"Lookups: {this.count_pyxylookups}")
+            this.logger.debug(f"Lookups: {this.count_pyxylookups}")
             # Empty the list
             data_archive.records_for_lookup = []
 
@@ -115,11 +118,10 @@ def qc_emof(record, data_archive):
     return qc_em
 
 
-def dataset_qc_labeling(dataset_id, with_print=False, with_logging=True):
+def dataset_qc_labeling(dataset_id, with_logging=True):
     """ Processes an eurobis dataset if it is passed as a dataset_id,
         shall popup a file chooser dialog if this is None
         :param dataset_id (The dataset identifier from the dataproviderstable)
-        :param with_print (Extensive printing of the records)
         :param with_logging (every QC passed is printed)
         """
 
@@ -129,23 +131,17 @@ def dataset_qc_labeling(dataset_id, with_print=False, with_logging=True):
     data_archive = eurobis_dataset.EurobisDataset()
     data_archive.load_dataset(dataset_id)
 
-    if with_print:
-        print(f"Loaded dataset {data_archive.dataset_name}, id = {data_archive.dataprovider_id}")
-        print(f"Number of event records: {len(data_archive.event_recs)}")
-        print(f"Number of occurrence records: {len(data_archive.occurrence_recs)}")
-        print(f"Number of emof records: {len(data_archive.emof_recs)}")
-        print(f"Interesting areas: {data_archive.areas}")
-        print(f"Imis dataset ID: {data_archive.imis_das_id}")
-        print(f"Type of core records: {'Event' if data_archive.darwin_core_type == 2 else 'Occurrence'}")
-
     if with_logging:
-        this.logger.log(0, f"Loaded dataset {data_archive.dataset_name}, id = {data_archive.dataprovider_id} ")
-        this.logger.log(0, f"Number of event records: {len(data_archive.event_recs)}")
-        this.logger.log(0, f"Number of occurrence records: {len(data_archive.occurrence_recs)}")
-        this.logger.log(0, f"Number of emof records: {len(data_archive.emof_recs)}")
-        this.logger.log(0, f"Interesting areas: {data_archive.areas}")
-        this.logger.log(0, f"Imis dataset ID: {data_archive.imis_das_id}")
-        this.logger.log(0, f"Type of core records: {'Event' if data_archive.darwin_core_type == 2 else 'Occurrence'}")
+        this.logger.info(f"--------------------------------------------------")
+        this.logger.info(f"Loaded dataset {data_archive.dataset_name}, id = {data_archive.dataprovider_id} ")
+        this.logger.info(f"Number of event records: {len(data_archive.event_recs)}")
+        this.logger.info(f"Number of occurrence records: {len(data_archive.occurrence_recs)}")
+        this.logger.info(f"Number of emof records: {len(data_archive.emof_recs)}")
+        this.logger.info(f"Interesting areas: {data_archive.areas}")
+        this.logger.info(f"Imis dataset ID: {data_archive.imis_das_id}")
+        this.logger.info(f"Type of core records: {'Event' if data_archive.darwin_core_type == 2 else 'Occurrence'}")
+        this.logger.info(f"--------------------------------------------------")
+
 
     # Starting the QCs:
 
@@ -179,7 +175,7 @@ def dataset_qc_labeling(dataset_id, with_print=False, with_logging=True):
     if len(data_archive.records_for_lookup):
         location.check_xy(data_archive.records_for_lookup)
         this.count_pyxylookups += 1
-        print(f"Lookups: {this.count_pyxylookups}")
+        this.logger.debug(f"Lookups: {this.count_pyxylookups}")
         # Empty the list
         data_archive.records_for_lookup = []
 
@@ -212,22 +208,20 @@ def dataset_qc_labeling(dataset_id, with_print=False, with_logging=True):
 
     duration = time.time() - time_start
     # Dataset QC finished, taking time.
-    if with_print:
-        print(f"All records have been QCd")
-        print(f"Total net processing time for {data_archive.dataset_name}: {duration}")
+
     if with_logging:
-        this.logger.log(0, f"Processed dataset {data_archive.dataset_name} in: {duration} ")
+        this.logger.info(f"Total net processing time for {data_archive.dataprovider_id} : {data_archive.dataset_name} in: {duration} ")
 
 
-def process_dataset_list(pool_no, dataset_id_list, with_print=False, with_logging=False):
+def process_dataset_list(pool_no, dataset_id_list, with_logging=False):
     """ Processes a list of DwCA archives, ideally to be called in parallel
         :param pool_no - Pool number to take track of the pools
         :param dataset_id_list (The list of datasets to be processed)
-        :param with_print (Printouts enabled or not)
         :param with_logging (Logging enabled or not) """
     # Prints pool data
     start = time.time()
-    print(f"Pool {pool_no} started")
+    if with_logging:
+        this.logger.info(f"Pool {pool_no} started")
 
     # Connect to the database, each pool should have its own connection
     conn = None
@@ -236,28 +230,28 @@ def process_dataset_list(pool_no, dataset_id_list, with_print=False, with_loggin
 
     if conn is None:
         # Should find a way to exit and advice
-        print("No connection to DB, nothing can be done! ")
+        this.log.error("No connection to DB, nothing can be done! ")
         return pool_no
 
     for dataset_id in dataset_id_list:
         start_file = time.time()
-        if with_print:
-            print(f"Pool Number: {pool_no}, processsing dataset {dataset_id}")
 
         if with_logging:
-            this.logger.log(0, f"Pool Number: {pool_no}, processsing dataset {dataset_id} ")
+            this.logger.info(f"Pool Number: {pool_no}, processsing dataset {dataset_id} ")
 
-        dataset_qc_labeling(dataset_id, with_print, with_logging)
-        print(f"Processed dataset {dataset_id} in  {time.time() - start_file}")
+        dataset_qc_labeling(dataset_id, with_logging)
+        if with_logging:
+            this.logger.info(f"Processed dataset {dataset_id} in  {time.time() - start_file}")
 
-    print(f"Pool {pool_no} completed in {time.time() - start}")
+    if with_logging:
+        this.logger.info(f"Pool {pool_no} completed in {time.time() - start}")
     return pool_no
 
 
 # To call single file labelling with a chooser use run_mssql_pipeline
 
 # Single dataset  - Fixed - need eurobis.dataprovider_id (id in dataproviders table)
-# dataset_qc_labeling(447, with_print=True, with_logging=False)
+# dataset_qc_labeling(447, with_logging=True)
 
 # Launch individual processing of dataset list, datasets to be picked
 # process_dataset_list(1, [723, 239], True, False)

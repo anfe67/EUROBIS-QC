@@ -3,11 +3,17 @@ from unittest import TestCase
 import sys
 import os
 import time
-from eurobisqc.util import extract_area
+import logging
 
+from eurobisqc.util import extract_area
 from dwcaprocessor import DwCAProcessor
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
+
+this = sys.modules[__name__]
+this.logger = logging.getLogger(__name__)
+this.logger.setLevel(logging.DEBUG)
+this.logger.addHandler(logging.StreamHandler())
 
 
 class Test(TestCase):
@@ -26,7 +32,7 @@ class Test(TestCase):
             areas = extract_area.find_areas(xml_input)
         end = time.time()
 
-        print(f"Duration with xmltodict: {end - start}")
+        this.logger.info(f"Duration with xmltodict: {end - start}")
         # Not complete, should verify areas content
 
         self.assertIsNotNone(areas)
@@ -38,4 +44,4 @@ class Test(TestCase):
         self.assertTrue(areas[0]["south"] == 41.624)
         self.assertTrue(areas[0]["north"] == 46.218)
 
-        print(areas)
+        this.logger.info(areas)

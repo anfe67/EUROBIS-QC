@@ -1,5 +1,9 @@
+""" This module is a simple graphical file chooser used to pick a directory where
+    a set of DwCA files is stored, nothing more """
+
 import os.path
 import sys
+
 import PySimpleGUI as sg
 
 this = sys.modules[__name__]

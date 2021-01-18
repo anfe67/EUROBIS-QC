@@ -1,7 +1,14 @@
+import sys
+import logging
+
 import time
 from unittest import TestCase
 from dbworks import sqlite_db_functions
 
+this = sys.modules[__name__]
+this.logger = logging.getLogger(__name__)
+this.logger.setLevel(logging.DEBUG)
+this.logger.addHandler(logging.StreamHandler())
 
 class Test(TestCase):
     taxon_fields = []
@@ -45,20 +52,20 @@ class Test(TestCase):
             record = None
             if taxon is not None:
                 record = dict(zip(fields, taxon))
-            print(record)
-        print("************ WITH INDEX ************")
-        print(f" ----> {time.time() - start}")
-        print("************************************")
+            this.logger.info(record)
+        this.logger.info("************ WITH INDEX ************")
+        this.logger.info(f" ----> {time.time() - start}")
+        this.logger.info("************************************")
 
         # Just querying, no zipping
         start = time.time()
         for sn_id in self.sample_sn_ids:
             cur = self.conn.execute(f"SELECT * from taxon where scientificNameID='{sn_id}'")
             taxon = cur.fetchone()
-            print(taxon)
-        print("************ WITHOUT ZIPPING ************")
-        print(f" ----> {time.time() - start}")
-        print("*****************************************")
+            this.logger.info(taxon)
+        this.logger.info("************ WITHOUT ZIPPING ************")
+        this.logger.info(f" ----> {time.time() - start}")
+        this.logger.info("*****************************************")
 
         # Querying for scientificName
         start = time.time()
@@ -70,11 +77,11 @@ class Test(TestCase):
             record = None
             if taxon is not None:
                 record = dict(zip(fields, taxon))
-            print(record)
+            this.logger.info(record)
 
-        print("************ WITHOUT INDEX ************")
-        print(f" ----> {time.time() - start}")
-        print("***************************************")
+        this.logger.info("************ WITHOUT INDEX ************")
+        this.logger.info(f" ----> {time.time() - start}")
+        this.logger.info("***************************************")
 
         # Querying for speciesprofile
         for sn_id in self.sample_sn_ids:
@@ -84,7 +91,7 @@ class Test(TestCase):
             record = None
             if speciesprofile is not None:
                 record = dict(zip(fields, speciesprofile))
-            print(record)
+            this.logger.info(record)
 
     def test_get_record(self):
 

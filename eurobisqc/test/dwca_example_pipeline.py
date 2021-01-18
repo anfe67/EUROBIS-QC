@@ -24,7 +24,8 @@ from eurobisqc.util import misc
 # Use "this" trick
 this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)
-
+this.logger.level = logging.DEBUG
+this.logger.addHandler(logging.StreamHandler())
 
 # for easy record mapping
 class DwCACore:
@@ -39,11 +40,10 @@ class DwCACore:
 dwca_cores = []
 
 
-def dwca_file_labeling(filename, with_print=False, with_logging=False):
+def dwca_file_labeling(filename, with_logging=False):
     """ Processes a DwCA archive if it is passed as a filename,
         shall popup a file chooser dialog if this is None
         :param filename (The DwCA zip file name)
-        :param with_print (Extensive printing of the records)
         :param with_logging (every QC passed is printed)
     """
 
@@ -276,14 +276,6 @@ def dwca_file_labeling(filename, with_print=False, with_logging=False):
 
         count_lookups += 1
 
-    if with_print:
-        print(f"Filename processed: {filename}")
-        print(f"Archive core record type: {archive_core_type}")
-        print(f"XY lookups: {count_lookups}")
-        print(f"Records looked up: {1000 * (count_lookups - 1) + len(records_for_lookup)}")
-        print(f"Records processed: {record_count}")
-        print(f"Total time: {time.time() - time_start}")
-
     if with_logging:
         this.logger.info(f"Filename processed: {filename}")
         this.logger.info(f"Archive core record type: {archive_core_type}")
@@ -292,24 +284,7 @@ def dwca_file_labeling(filename, with_print=False, with_logging=False):
         this.logger.info(f"Records processed: {record_count}")
         this.logger.info(f"Total time: {time.time() - time_start}")
 
-    # Rescan the prepared lookup for printing/logging the results
-    if with_print:
-        for print_record in dwca_cores:
-            if print_record.core["qc"] > 0:
-                print(f"--- core: {archive_core_type}")
-                print(print_record.core)
-                print(f"The core record passed quality checks: {qc_flags.QCFlag.decode_mask(print_record.core['qc'])}")
-
-            for e in print_record.extensions.keys():
-                for full_extension in print_record.extensions[e]:
-                    print(f"--- extension: {e}")
-                    if e == "occurrence":
-                        print(
-                            f"The occurrence record {full_extension}\n Passed quality checks: "
-                            f"{qc_flags.QCFlag.decode_mask(full_extension['qc'])}")
-                    else:
-                        print(full_extension)
-
+    # Rescan the prepared lookup for logging the results
     if with_logging:
         for print_record in dwca_cores:
             if print_record["qc"] > 0:
@@ -364,7 +339,7 @@ def dwca_parallel_processing():
         exit(0)
 
     dwca_file_lists = misc.split_list(dwca_files, n_cpus)
-    print(dwca_file_lists)
+    this.logger.info(f"Files to process: {dwca_file_lists}")
 
     # Each one of the CPUs shall get a similar load...
     result_pool = []
@@ -380,30 +355,29 @@ def dwca_parallel_processing():
     pool.join()
 
 
-def dwca_process_filelist(pool_no, dwca_files, with_print=False, with_logging=False):
+def dwca_process_filelist(pool_no, dwca_files, with_logging=False):
     """ Processes a list of DwCA archives, ideally to be called in parallel
         :param pool_no - Pool number to take track of the pools
         :param dwca_files (The list of files to be processed)
-        :param with_print (Extensive printouts of records being treated9
         :param with_logging (Logs on screen every QC failed) """
 
-    # Prints pool data
+    # Logs pool data
     start = time.time()
-    print(f"Pool {pool_no} started")
+    this.logger.info(f"Pool {pool_no} started")
+
     for dwca_file in dwca_files:
         start_file = time.time()
-        print(f"Pool Number: {pool_no}, processsing {dwca_file} ")
 
         if with_logging:
-            this.logger.log(0, f"Processing DwCA file {dwca_file} ")
+            this.logger.log(0, f"Pool Number: {pool_no}, processsing {dwca_file} ")
 
-        dwca_file_labeling(dwca_file, with_print, with_logging)
-        print(f"Processed {dwca_file} in  {time.time() - start_file}")
+        dwca_file_labeling(dwca_file, with_logging)
+        this.logger.info(f"Processed {dwca_file} in  {time.time() - start_file}")
 
-    print(f"Pool {pool_no} completed in {time.time() - start}")
+    this.logger.info(f"Pool {pool_no} completed in {time.time() - start}")
     return pool_no
 
 # dwca_parallel_processing()
-# dwca_file_labeling(None, with_print=True, with_logging=False)
-# dwca_labeling(with_print=False, with_logging=False)
+# dwca_file_labeling(None, with_logging=True)
+# dwca_labeling( with_logging=False)
 # exit(0)

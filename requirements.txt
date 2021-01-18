@@ -8,6 +8,7 @@ msgpack~=1.0.0
 xmltodict~=0.12.0
 PySimpleGUI~=4.32.1
 pandas~=1.1.4
+stopit
 git+git://github.com/iobis/pyxylookup.git
 git+git://github.com/iobis/pyworms.git
 git+git://github.com/pieterprovoost/isodateparser.git

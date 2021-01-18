@@ -1,8 +1,16 @@
+import sys
 import time
+import logging
 
 from dbworks import mssql_db_functions as mssql
 from eurobisqc.util import misc
 from eurobisqc.test.mssql_example_pipeline import process_dataset_list
+
+this = sys.modules[__name__]
+this.logger = logging.getLogger(__name__)
+this.logger.level = logging.DEBUG
+this.logger.addHandler(logging.StreamHandler())
+
 
 def do_dataset_parallel_processing(percent):
     """ Example of processing multiple datasets at the same time in
@@ -10,7 +18,7 @@ def do_dataset_parallel_processing(percent):
 
     start_time = time.time()
 
-    # Now set to 1% of datasets...
+    # Now set to a percent of datasets...
     # sql_random_percent_of_datasets = f"SELECT id FROM dataproviders WHERE {percent} >= CAST(CHECKSUM(NEWID(), id) " \
     #                                  "& 0x7fffffff AS float) / CAST (0x7fffffff AS int)"
 
@@ -42,7 +50,7 @@ def do_dataset_parallel_processing(percent):
 
     if mssql.conn is None:
         # Should find a way to exit and advice
-        print("No connection to DB, nothing can be done! ")
+        this.logger.error("No connection to DB, nothing can be done! ")
         exit(0)
     else:
         # Fetch a random set of datasets
@@ -61,8 +69,8 @@ def do_dataset_parallel_processing(percent):
 
     result_pool = []
     for i, dataset_id_list in enumerate(dataset_id_lists):
-        print(f"Pool {i} will process {dataset_names_lists[i]} - (#, name, records)")
-        result_pool.append(pool.apply_async(process_dataset_list, args=(i, dataset_id_list, False, False)))
+        this.logger.info(f"Pool {i} will process {dataset_names_lists[i]} - (#, name, records)")
+        result_pool.append(pool.apply_async(process_dataset_list, args=(i, dataset_id_list, True)))
 
     for r in result_pool:
         r.wait()
@@ -70,7 +78,7 @@ def do_dataset_parallel_processing(percent):
     pool.terminate()
     pool.join()
 
-    print(f"All processes have completed after {time.time()- start_time}")
+    this.logger.info(f"All processes have completed after {time.time()- start_time}")
 
 # Parallel processing of random 2% of the (SMALL) datasets
 do_dataset_parallel_processing(0.02)

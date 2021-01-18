@@ -55,7 +55,7 @@ def parse_lsid(s):
 
 
 def string_to_dict(dyn_prop_string):
-    """ Very simplistic helper function
+    """ Very simplistic helper function for dynamic properties
         :param: s - String of keys:values
         can take the form of a JSON,
         can have : or = as key-value separator

@@ -1,13 +1,21 @@
+import sys
+import logging
+
 from unittest import TestCase
 from eurobisqc.util.qc_flags import QCFlag
 
+this = sys.modules[__name__]
+this.logger = logging.getLogger(__name__)
+
+this.logger.setLevel(logging.DEBUG)
+this.logger.addHandler(logging.StreamHandler())
 
 class TestQCFlag(TestCase):
 
     def test_encode(self):
         for qc_flag in QCFlag:
             try:
-                print(qc_flag.encode(qc_flag.qc_number))
+                this.logger.info(qc_flag.encode(qc_flag.qc_number))
             except ValueError:
                 self.fail()
 
@@ -15,7 +23,7 @@ class TestQCFlag(TestCase):
         i = 0
         for qc_flag in QCFlag:
             try:
-                print(qc_flag.decode_message(i))
+                this.logger.info(qc_flag.decode_message(i))
                 i += 1
             except TypeError:
                 self.fail()
@@ -24,7 +32,7 @@ class TestQCFlag(TestCase):
         i = 0
         for qc_flag in QCFlag:
             try:
-                print(qc_flag.decode_name(i))
+                this.logger.info(qc_flag.decode_name(i))
                 i += 1
             except TypeError:
                 self.fail()
@@ -33,7 +41,7 @@ class TestQCFlag(TestCase):
         test_mask = 1048575
         try:
             flags = QCFlag.decode_mask(test_mask)
-            print(flags)
+            this.logger.info(flags)
         except (ValueError, TypeError):
             self.fail()
 
