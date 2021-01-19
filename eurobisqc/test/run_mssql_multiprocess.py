@@ -11,7 +11,6 @@ this.logger = logging.getLogger(__name__)
 this.logger.level = logging.DEBUG
 this.logger.addHandler(logging.StreamHandler())
 
-
 def do_dataset_parallel_processing(percent):
     """ Example of processing multiple datasets at the same time in
             order to exploit the computing resources available """
@@ -36,8 +35,11 @@ def do_dataset_parallel_processing(percent):
     import multiprocessing as mp
     # we dedicate to the task the total number of processors - 3 or 1 if we only have 2 cores or less.
     # Knowing that mssql needs 2 cores at least.
-    if mp.cpu_count() > 3:
-        n_cpus = mp.cpu_count() - 3
+
+    reserve_cpus = 1 + (0 if not mssql.server_local else 2)
+
+    if mp.cpu_count() > reserve_cpus:
+        n_cpus = mp.cpu_count() - reserve_cpus
     else:
         n_cpus = 1
 

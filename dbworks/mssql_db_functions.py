@@ -1,3 +1,4 @@
+from distutils.util import strtobool
 import sys
 import os
 import atexit
@@ -16,6 +17,7 @@ this.username = None
 this.password = None
 this.port = None
 this.server = None
+this.server_local = True
 
 this.logger = logging.getLogger(__name__)
 
@@ -28,19 +30,25 @@ if "SQLSERVERDB" in config:
         this.username = config['SQLSERVERDB']['username']
         this.password = config['SQLSERVERDB']['password']
         this.drivermodule = config['SQLSERVERDB']['drivermodule']
+        # Used in multiprocess examples
+        this.server_local = bool(strtobool(config['SQLSERVERDB']['server_local']))
 
         if this.drivermodule == 'pymssql':
             import pymssql as db_driver
         elif this.drivermodule == 'pyodbc':
             import pyodbc as db_driver
 
-    except KeyError:
+    except (KeyError, ValueError) :
         # Some Parameters cannot be loaded or are missing - Should find clean exit strategy
         this.logger.error("Some MSSQL configuration parameters are missing. Needed: Driver Name, server address, port, "
-                          "database name, username, password and drivermodule (pymssql or pyodbc).")
+                          "database name, username, password and drivermodule (pymssql or pyodbc) "
+                          "and server_local (True or False).")
+        exit(1)
 else:
-    # Parameters cannot be loaded - Should find clean exit strategy
-    pass
+    this.logger.error("The SQLSERVERDB section is not in the config file. Please add it if you what to "
+                      "connect to teh MS SQL eurobis Database.")
+    # Parameters cannot be loaded - no point in continuing
+    exit(1)
 
 # Build a connection string
 this.connection_string = f'DRIVER={this.driver};' \
