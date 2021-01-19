@@ -8,16 +8,14 @@ with ZipFile('dbworks/database/eurobis_lookup_db.zip', 'r') as zipObj:
    zipObj.extractall()
 
 # It should be a tar.gz, so further decompress
-fname = 'dbworks/database/eurobis.tar.gz'
+fname = 'eurobis.tar.gz'
 
 if fname.endswith('tar.gz'):
     tar = tarfile.open(fname, 'r:gz')
     tar.extractall()
     tar.close()
 
-# Remove the leftovers
-os.remove('dbworks/database/eurobis_lookup_db.zip')
-os.remove('dbworks/database/eurobis.tar.gz')
+
 
 # The database contains a big part of WORMS and it is BIG - not sure whether I want to distribute it.
 # In any case need to cope with it
@@ -25,7 +23,7 @@ os.remove('dbworks/database/eurobis.tar.gz')
 setup(name="eurobisqc",
       version="0.4.0",
       python_requires='>=3.6',
-      data_files=[ ('dbworks/database', ['dbworks/database/EUROBIS_QC_LOOKUP_DB.db']),
+      data_files=[ ('dbworks/database', ['EUROBIS_QC_LOOKUP_DB.db']),
           ('dbworks/resources', ['dbworks/resources/config.ini',
                                  'dbworks/resources/countMeasurementTypeIDLookup',
                                  'dbworks/resources/countMeasurementTypeLookup',
@@ -59,3 +57,7 @@ setup(name="eurobisqc",
       packages=find_packages(),
       tests_require=['nose>=1.0', 'coverage'],
       zip_safe=False)
+
+# Remove the leftovers
+#os.remove('dbworks/database/eurobis_lookup_db.zip')
+os.remove('eurobis.tar.gz')
