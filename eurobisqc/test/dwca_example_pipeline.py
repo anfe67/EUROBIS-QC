@@ -288,9 +288,9 @@ def dwca_file_labeling(filename, with_logging=False):
     # Rescan the prepared lookup for logging the results
     if with_logging:
         for print_record in dwca_cores:
-            if print_record["qc"] > 0:
-                this.logger.info(f"Core record {print_record}. \nPassed quality checks: "
-                                 f"{qc_flags.QCFlag.decode_mask(print_record['qc'])}")
+            if print_record.core["qc"] > 0:
+                this.logger.info(f"Core record {print_record.core}. \nPassed quality checks: "
+                                 f"{qc_flags.QCFlag.decode_mask(print_record.core['qc'])}")
 
             for e in print_record.extensions.keys():
 
