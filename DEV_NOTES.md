@@ -719,7 +719,7 @@ Processed dataset 808 in  292.08416628837585
 - Possible improvements (for future): Optimization of Database update queries (using batches updates or temp queries) 
 - **ONGOING:** Looking at deployment on a different PC (still Linux). Do I have everything sorted out? 
 - **TODO**: Take care of the testing / coverage / package properties -- Check for as much completeness as possible
-- **ONGOING**: Write install procedure and user "guidance" 
+- **ONGOING**: Write install procedure and user instructions 
   
 - With the ONGOING task found many error in the deployment/setup script, correcting. 
 
@@ -727,6 +727,12 @@ Processed dataset 808 in  292.08416628837585
 ## 19/01/2021
 - First run from a different PC, in parallel with run from dev PC. 
 - Starting the installation notes.  
+- Added the configuration parameter to specify whether the MS SQL server is local, 
+  used to decide the number of CPUs to allocate to the multiprocessing examples 
+- Testing 
+
+
+
 
 
 
