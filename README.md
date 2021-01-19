@@ -11,7 +11,7 @@ dwca-processor: https://github.com/iobis/dwca-processor
 
 And other libraries, almost all from Pieter Provoost. 
 
-## QC System architecture 
+## QC System architecture
 
 The QC for the the eMoF/MoF records are exclusively based on lookups from a locally available SQLITE database. 
 This also contains a copy of the WORMS database for lookup of the aphia ids. 
