@@ -719,11 +719,14 @@ Processed dataset 808 in  292.08416628837585
 - Possible improvements (for future): Optimization of Database update queries (using batches updates or temp queries) 
 - **ONGOING:** Looking at deployment on a different PC (still Linux). Do I have everything sorted out? 
 - **TODO**: Take care of the testing / coverage / package properties -- Check for as much completeness as possible
-- **TODO**: Write install procedure and user "guidance" 
+- **ONGOING**: Write install procedure and user "guidance" 
   
 - With the ONGOING task found many error in the deployment/setup script, correcting. 
 
 
+## 19/01/2021
+- First run from a different PC, in parallel with run from dev PC. 
+- Starting the installation notes.  
 
 
 
