@@ -723,6 +723,7 @@ Processed dataset 808 in  292.08416628837585
   
 - With the ONGOING task found many error in the deployment/setup script, correcting. 
 
+---
 
 ## 19/01/2021
 - First run from a different PC, in parallel with run from dev PC. 
@@ -731,6 +732,13 @@ Processed dataset 808 in  292.08416628837585
   used to decide the number of CPUs to allocate to the multiprocessing examples 
 - Testing 
 
+## 20/01/2021
+- Build a "pipeline" that allows easily to select a set of datasets from the database and perform QC -
+  using multiprocessing. Once done, run it on the entire DB, using two PCs (4 atom cores, 5 i7 cores)
+  - DONE - ready to run on the entire DB. 
+- TODO: Request from Bart: 
+  "Demo" test: Select a random record from a random dataset, all subrecords and perform QC on it 
+  (Show steps).
 
 
 

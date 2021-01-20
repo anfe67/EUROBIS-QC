@@ -38,7 +38,7 @@ if "SQLSERVERDB" in config:
         elif this.drivermodule == 'pyodbc':
             import pyodbc as db_driver
 
-    except (KeyError, ValueError) :
+    except (KeyError, ValueError):
         # Some Parameters cannot be loaded or are missing - Should find clean exit strategy
         this.logger.error("Some MSSQL configuration parameters are missing. Needed: Driver Name, server address, port, "
                           "database name, username, password and drivermodule (pymssql or pyodbc) "
@@ -80,9 +80,13 @@ def open_db():
 
 def close_db():
     """ Closes the DB after use, automatically called upon module exit """
-
-    this.conn.close()
-    this.conn = None
+    try :
+        if this.conn is not None:
+            this.conn.close()
+    except :
+        pass
+    finally:
+        this.conn = None
 
 
 @atexit.register

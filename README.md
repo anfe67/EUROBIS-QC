@@ -43,26 +43,26 @@ The class at the core of the system is the Enum QFlag, in eurobisqc.util.qc_flag
 and utilities to combine/encode/decode QC flags:
 
 ```python
-    REQUIRED_FIELDS_PRESENT = ("All the required fields are present", 1)  # In required_fields
-    TAXONOMY_APHIAID_PRESENT = ("AphiaID found", 2)  # In taxonomy_db
-    TAXONOMY_RANK_OK = ("Taxon level more detailed than Genus", 3)  # In taxonomy_db
-    GEO_LAT_LON_PRESENT = ("Lat and Lon present and not equal to None", 4)  # In location
-    GEO_LAT_LON_VALID = ("Lat or Lon present and valid (-90 to 90 and -180 to 180)", 5)  # In location
-    GEO_LAT_LON_ON_SEA = ("Lat - Lon on sea / coastline", 6)  # In location
-    DATE_TIME_OK = ("Year or Start Year or End Year complete and valid", 7)  # In time_qc
-    TAXON_APHIAID_NOT_EXISTING = ("Marine Taxon not existing in APHIA", 8)  # FLAG - NOT IMPLEMENTED
-    GEO_COORD_AREA = ("Coordinates in one of the specified areas", 9)  # In location
-    OBIS_DATAFORMAT_OK = ("Valid codes found in basisOfRecord", 10)  # in required_fields
-    VALID_DATE_1 = ("Valid sampling date", 11)  # In time_qc
-    VALID_DATE_2 = ("Start sampling date before End date - dates consistent", 12)  # In time_qc
-    VALID_DATE_3 = ("Sampling time valid / timezone completed", 13)  # In time_qc
-    OBSERVED_COUNT_PRESENT = ("Observed individual count found", 14)  # In measurements
-    OBSERVED_WEIGTH_PRESENT = ("Observed weigth found", 15)  # In measurements
-    SAMPLE_SIZE_PRESENT = ("Observed individual count > 0 sample size present", 16)  # In measurements
-    SEX_PRESENT = ("Sex observation found", 17)  # In measurements
-    MIN_MAX_DEPTH_VERIFIED = ("Depths consistent", 18)  # in location
-    DEPTH_MAP_VERIFIED = ("Depth coherent with depth map", 19)  # In location
-    DEPTH_FOR_SPECIES_OK = ("Depth coherent with species depth range", 20)  # FLAG - NOT IMPLEMENTED
+REQUIRED_FIELDS_PRESENT = ("All the required fields are present", 1)  # In required_fields
+TAXONOMY_APHIAID_PRESENT = ("AphiaID found", 2)  # In taxonomy_db
+TAXONOMY_RANK_OK = ("Taxon level more detailed than Genus", 3)  # In taxonomy_db
+GEO_LAT_LON_PRESENT = ("Lat and Lon present and not equal to None", 4)  # In location
+GEO_LAT_LON_VALID = ("Lat or Lon present and valid (-90 to 90 and -180 to 180)", 5)  # In location
+GEO_LAT_LON_ON_SEA = ("Lat - Lon on sea / coastline", 6)  # In location
+DATE_TIME_OK = ("Year or Start Year or End Year complete and valid", 7)  # In time_qc
+TAXON_APHIAID_NOT_EXISTING = ("Marine Taxon not existing in APHIA", 8)  # FLAG - NOT IMPLEMENTED
+GEO_COORD_AREA = ("Coordinates in one of the specified areas", 9)  # In location
+OBIS_DATAFORMAT_OK = ("Valid codes found in basisOfRecord", 10)  # in required_fields
+VALID_DATE_1 = ("Valid sampling date", 11)  # In time_qc
+VALID_DATE_2 = ("Start sampling date before End date - dates consistent", 12)  # In time_qc
+VALID_DATE_3 = ("Sampling time valid / timezone completed", 13)  # In time_qc
+OBSERVED_COUNT_PRESENT = ("Observed individual count found", 14)  # In measurements
+OBSERVED_WEIGTH_PRESENT = ("Observed weigth found", 15)  # In measurements
+SAMPLE_SIZE_PRESENT = ("Observed individual count > 0 sample size present", 16)  # In measurements
+SEX_PRESENT = ("Sex observation found", 17)  # In measurements
+MIN_MAX_DEPTH_VERIFIED = ("Depths consistent", 18)  # in location
+DEPTH_MAP_VERIFIED = ("Depth coherent with depth map", 19)  # In location
+DEPTH_FOR_SPECIES_OK = ("Depth coherent with species depth range", 20)  # FLAG - NOT IMPLEMENTED
 
 ```
 

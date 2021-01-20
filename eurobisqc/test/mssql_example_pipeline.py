@@ -226,6 +226,9 @@ def process_dataset_list(pool_no, dataset_id_list, with_logging=False):
 
     # Connect to the database, each pool should have its own connection
     conn = None
+
+    mssql.close_db()
+    # Make sure db connection is ours
     if not mssql.conn:
         conn = mssql.open_db()
 

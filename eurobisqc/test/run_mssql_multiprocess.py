@@ -1,6 +1,7 @@
 import sys
 import time
 import logging
+import multiprocessing as mp
 
 from dbworks import mssql_db_functions as mssql
 from eurobisqc.util import misc
@@ -11,9 +12,11 @@ this.logger = logging.getLogger(__name__)
 this.logger.level = logging.DEBUG
 this.logger.addHandler(logging.StreamHandler())
 
-def do_dataset_parallel_processing(percent):
+
+def do_db_multi_random_percent(percent):
     """ Example of processing multiple datasets at the same time in
-            order to exploit the computing resources available """
+        order to exploit the computing resources (cores) performs a random
+        selection of 2% of available datasets having less than 4000 records """
 
     start_time = time.time()
 
@@ -32,10 +35,8 @@ def do_dataset_parallel_processing(percent):
     dataset_ids = []
     dataset_names = []
 
-    import multiprocessing as mp
     # we dedicate to the task the total number of processors - 3 or 1 if we only have 2 cores or less.
     # Knowing that mssql needs 2 cores at least.
-
     reserve_cpus = 1 + (0 if not mssql.server_local else 2)
 
     if mp.cpu_count() > reserve_cpus:
@@ -70,7 +71,7 @@ def do_dataset_parallel_processing(percent):
 
     result_pool = []
     for i, dataset_id_list in enumerate(dataset_id_lists):
-        this.logger.info(f"Pool {i} will process {dataset_names_lists[i]} - (#, name, records)")
+        this.logger.info(f"Pool {i} will process {dataset_names_lists[i]} ")
         result_pool.append(pool.apply_async(process_dataset_list, args=(i, dataset_id_list, True)))
 
     for r in result_pool:
@@ -79,8 +80,44 @@ def do_dataset_parallel_processing(percent):
     pool.terminate()
     pool.join()
 
-    this.logger.info(f"All processes have completed after {time.time() - start_time}")
+    this.logger.info(f"Started at: {start_time}. All processes have completed after {time.time() - start_time}")
+
+
+def do_db_multi_selection(dataset_ids, dataset_names):
+    """ Performs multiprocessing of a selection of known dataset ids with corresponding names
+        Using this one the entire dataset can be run partitioning it by hand on different
+        computers """
+
+    start_time = time.time()
+
+    # we dedicate to the task the total number of processors - 3 or 1 if we only have 2 cores or less.
+    # Knowing that mssql needs 2 cores at least.
+    reserve_cpus = 1 + (0 if not mssql.server_local else 2)
+
+    if mp.cpu_count() > reserve_cpus:
+        n_cpus = mp.cpu_count() - reserve_cpus
+    else:
+        n_cpus = 1
+
+    pool = mp.Pool(n_cpus)
+
+    # Retrieved list, now need to split
+    dataset_id_lists = misc.split_list(dataset_ids, n_cpus)  # We are OK until here.
+    dataset_names_lists = misc.split_list(dataset_names, n_cpus)
+
+    result_pool = []
+    for i, dataset_id_list in enumerate(dataset_id_lists):
+        this.logger.info(f"Pool {i} will process {dataset_names_lists[i]}")
+        result_pool.append(pool.apply_async(process_dataset_list, args=(i, dataset_id_list, True)))
+
+    for r in result_pool:
+        r.wait()
+
+    pool.terminate()
+    pool.join()
+
+    this.logger.info(f"Started at: {start_time}. All processes have completed after {time.time() - start_time}")
 
 
 # Parallel processing of random 2% of the (SMALL) datasets
-do_dataset_parallel_processing(0.02)
+# call do_dataset_parallel_processing(0.02)

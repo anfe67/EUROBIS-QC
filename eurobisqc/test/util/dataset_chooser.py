@@ -19,6 +19,8 @@ this.names = []
 this.dataset_ids = []
 this.dataset_name = None
 this.dataset_id = None
+this.sel_dataset_names = []
+this.sel_dataset_ids = []
 
 if mssql_db_functions.conn is None:
 
@@ -48,7 +50,10 @@ def get_dataset_chooser():
         ],
         [
             sg.Listbox(
-                values=this.names, enable_events=True, size=(100, 40), key="-DATASET LIST-"
+                values=this.names,
+                enable_events=True,
+                size=(100, 40), key="-DATASET LIST-",
+                select_mode=sg.LISTBOX_SELECT_MODE_EXTENDED
             )
         ],
         [sg.Button("OK"), sg.Button("Cancel")],
@@ -69,14 +74,35 @@ def get_dataset_chooser():
         event, values = window.read()
 
         if event == "-DATASET LIST-":  # A dataset was chosen from the listbox
-            this.dataset_name = values["-DATASET LIST-"][0]
-            index = int(this.dataset_name[0:6])
-            this.dataset_id = index
+
+            if len(values["-DATASET LIST-"]) > 0:
+                # First selected Dataset if one exists
+                this.dataset_name = values["-DATASET LIST-"][0]
+                index = int(this.dataset_name[0:6])
+                this.dataset_id = index
+
+                this.sel_dataset_ids = []
+                this.sel_dataset_names = []
+
+                if len(values["-DATASET LIST-"]) > 1:
+                    for sel in values["-DATASET LIST-"]:
+                        this.sel_dataset_ids.append(int(sel[0:6]))
+                        this.sel_dataset_names.append(sel[7:])
 
         elif event == "OK":
             if len(values["-DATASET LIST-"]) > 0:
+                # First selected Dataset if one exists
+                this.dataset_name = values["-DATASET LIST-"][0]
                 index = int(this.dataset_name[0:6])
                 this.dataset_id = index
+
+                this.sel_dataset_ids = []
+                this.sel_dataset_names = []
+
+                if len(values["-DATASET LIST-"]) > 1:
+                    for sel in values["-DATASET LIST-"]:
+                        this.sel_dataset_ids.append(int(sel[0:6]))
+                        this.sel_dataset_names.append(sel[7:])
 
             run_loop = False
             window.Hide()
@@ -88,4 +114,7 @@ def get_dataset_chooser():
             run_loop = False
 
     window.Close()
-    return this.dataset_id
+    if len(this.sel_dataset_ids):
+        return this.sel_dataset_ids, this.sel_dataset_names
+    else:
+        return this.dataset_id
