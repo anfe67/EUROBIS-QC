@@ -80,11 +80,9 @@ def open_db():
 
 def close_db():
     """ Closes the DB after use, automatically called upon module exit """
-    try :
+    try:
         if this.conn is not None:
             this.conn.close()
-    except :
-        pass
     finally:
         this.conn = None
 

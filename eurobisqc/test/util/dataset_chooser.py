@@ -14,7 +14,13 @@ this.logger.setLevel(logging.DEBUG)
 this.logger.addHandler(logging.StreamHandler())
 
 # query the dataset on entering and stores the datasets ...
-this.sql_datasets = "SELECT id, displayname from dataproviders;"
+this.sql_datasets1 = "SELECT id, displayname from dataproviders;"
+
+# Alternate query: This query selects datasets containinng records with 0 or
+this.sql_datasets2 = "select d.id, d.displayname, d.rec_count  " \
+                     "from eurobis e inner join dataproviders d on e.dataprovider_id = d.id " \
+                     "where e.qc = 0 or e.qc is NULL group by d.id, d.displayname, d.rec_count"
+
 this.names = []
 this.dataset_ids = []
 this.dataset_name = None
@@ -22,22 +28,29 @@ this.dataset_id = None
 this.sel_dataset_names = []
 this.sel_dataset_ids = []
 
-if mssql_db_functions.conn is None:
+this.exit = False
 
-    this.conn = mssql_db_functions.open_db()
+
+def grab_datasets(sql_string):
+    if mssql_db_functions.conn is None:
+        this.conn = mssql_db_functions.open_db()
 
     if this.conn is not None:
         cursor = this.conn.cursor()
-        cursor.execute(this.sql_datasets)
+        cursor.execute(sql_string)
         # Should extract something meaningful from the dataset...
         for row in cursor:
             this.names.append(f"{row[0]:05d} | {row[1]}")
             # this.dataset_ids.append(row[0])
 
         this.names.sort()
+        return this.names
     else:
         this.logger.error("No DB connection!")
         exit(0)
+
+
+grab_datasets(this.sql_datasets1)
 
 
 def get_dataset_chooser():
@@ -48,6 +61,8 @@ def get_dataset_chooser():
         [
             sg.Text("DwCA datasets"),
         ],
+        [sg.Radio('Get all datasets', "RADIO", default=True, size=(10, 1), key="RADIO1"),
+         sg.Radio('Datasets with records not labeled', "RADIO", key="RADIO2"), sg.Button("Reload List")],
         [
             sg.Listbox(
                 values=this.names,
@@ -65,7 +80,7 @@ def get_dataset_chooser():
         ]
     ]
 
-    window = sg.Window("Dataset Chooser", layout)
+    window = sg.Window("Dataset Chooser", layout).Finalize()
 
     run_loop = True
 
@@ -107,13 +122,24 @@ def get_dataset_chooser():
             run_loop = False
             window.Hide()
         elif event == "Exit" or event == "Cancel":
+            this.exit = True
             run_loop = False
             window.Hide()
+        elif event == "Reload List":
+            this.names = []
+            if values['RADIO1']:
+                this.names = grab_datasets(this.sql_datasets1)
+            else:
+                this.names = grab_datasets(this.sql_datasets2)
+
+            window.FindElement('-DATASET LIST-').Update(values=this.names)
 
         elif event == sg.WIN_CLOSED:
             run_loop = False
 
     window.Close()
+    if this.exit:
+        sys.exit(0)
     if len(this.sel_dataset_ids):
         return this.sel_dataset_ids, this.sel_dataset_names
     else:

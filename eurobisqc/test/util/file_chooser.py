@@ -23,9 +23,7 @@ def get_archive_chooser():
             sg.FolderBrowse(),
         ],
         [
-            sg.Listbox(
-                values=[], enable_events=True, size=(40, 20), key="-FILE LIST-"
-            )
+            sg.Listbox(values=[], enable_events=True, size=(40, 20), key="-FILE LIST-")
         ],
     ]
 
@@ -64,7 +62,8 @@ def get_archive_chooser():
                       if os.path.isfile(os.path.join(folder, f))
                       and f.lower().endswith(".zip")
                       ]
-            window["-FILE LIST-"].update(fnames)
+
+            window.FindElement("-FILE LIST-").Update(values=fnames)
 
         elif event == "-FILE LIST-":  # A file was chosen from the listbox
             try:
