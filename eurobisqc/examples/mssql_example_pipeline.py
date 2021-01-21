@@ -185,7 +185,8 @@ def dataset_qc_labeling(dataset_id, with_logging=True):
         # pass batches of 100 records to the update method
         process_batch.append(record)
         if idx % process_batch_size == 0:
-            eurobis_dataset.EurobisDataset.update_record_qc(process_batch, process_batch_size, data_archive.dataprovider_id)
+            eurobis_dataset.EurobisDataset.update_record_qc(process_batch, process_batch_size,
+                                                            data_archive.dataprovider_id)
             process_batch = []
 
     # Leftovers
@@ -199,7 +200,8 @@ def dataset_qc_labeling(dataset_id, with_logging=True):
         # pass batches of 100 records to the update method
         process_batch.append(record)
         if idx % process_batch_size == 0:
-            eurobis_dataset.EurobisDataset.update_record_qc(process_batch, process_batch_size, data_archive.dataprovider_id)
+            eurobis_dataset.EurobisDataset.update_record_qc(process_batch, process_batch_size,
+                                                            data_archive.dataprovider_id)
             process_batch = []
     # Leftovers
     if len(process_batch):
@@ -212,6 +214,7 @@ def dataset_qc_labeling(dataset_id, with_logging=True):
         this.logger.info(
             f"Total net processing time for {data_archive.dataprovider_id} : "
             f"{data_archive.dataset_name} in: {duration} ")
+
 
 def process_dataset_list(pool_no, dataset_id_list, with_logging=False):
     """ Processes a list of DwCA archives, ideally to be called in parallel

@@ -169,7 +169,6 @@ class EurobisDataset:
             # Should see if more is needed
             mssql.close_db()
 
-
     def get_ev_occ_records(self, das_prov_id):
         """ retrieves event and occurrence records for the dataset in das_id from SQL Server"""
         if not mssql.conn:
@@ -253,7 +252,6 @@ class EurobisDataset:
                 else:
                     self.emof_indices[key] = [record]
             mssql.close_db()
-
 
     def query_builder_eve_occur(self, dataprovider_id):
         """ Builds the SQL query string to retrieve all event, occur records for a dataset
@@ -352,7 +350,8 @@ class EurobisDataset:
                 cursor.execute(sql_update)
             try:
                 mssql.conn.commit()
-                this.logger.debug(f"Records update count: {cls.record_batch_update_count * batch_size + record_count} of dataset {ds_id};")
+                this.logger.debug(
+                    f"Records update count: {cls.record_batch_update_count * batch_size + record_count} of dataset {ds_id};")
                 cls.record_batch_update_count += 1
                 # Should find a way to return with no pain...
                 return "Success"
