@@ -5,7 +5,7 @@ import multiprocessing as mp
 
 from dbworks import mssql_db_functions as mssql
 from eurobisqc.util import misc
-from eurobisqc.test.mssql_example_pipeline import process_dataset_list
+from examples.mssql_example_pipeline import process_dataset_list
 
 this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)

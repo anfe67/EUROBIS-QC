@@ -167,6 +167,8 @@ class EurobisDataset:
             self.darwin_core_type = self.provider_record['core']
             self.dataset_name = self.provider_record['name']
             # Should see if more is needed
+            mssql.close_db()
+
 
     def get_ev_occ_records(self, das_prov_id):
         """ retrieves event and occurrence records for the dataset in das_id from SQL Server"""
@@ -208,6 +210,7 @@ class EurobisDataset:
                         self.occurrence_recs.append(record)
                     else:  # Should really never happen !!
                         self.event_recs.append(record)
+            mssql.close_db()
 
     def get_emof_records(self, das_prov_id):
         """ retrieves measurementorfact records for the dataset in das_id from SQL Server
@@ -249,6 +252,8 @@ class EurobisDataset:
                     self.emof_indices[key].append(record)
                 else:
                     self.emof_indices[key] = [record]
+            mssql.close_db()
+
 
     def query_builder_eve_occur(self, dataprovider_id):
         """ Builds the SQL query string to retrieve all event, occur records for a dataset
@@ -289,6 +294,7 @@ class EurobisDataset:
         self.get_emof_records(das_prov_id)
         self.get_areas_from_eml(self.imis_das_id)
 
+    # TODO: Protect calls as for the call to pyxylookup
     def get_areas_from_eml(self, imis_das_id):
         """ Given a IMIS Dataset ID, queries the IMIS web servce for  """
 
@@ -312,7 +318,7 @@ class EurobisDataset:
             self.areas = None
 
     @classmethod
-    def update_record_qc(cls, records, batch_size):
+    def update_record_qc(cls, records, batch_size, ds_id):
         # Check DB connection...
         if not mssql.conn:
             mssql.open_db()
@@ -346,7 +352,7 @@ class EurobisDataset:
                 cursor.execute(sql_update)
             try:
                 mssql.conn.commit()
-                this.logger.debug(f"Records update count: {cls.record_batch_update_count * batch_size + record_count};")
+                this.logger.debug(f"Records update count: {cls.record_batch_update_count * batch_size + record_count} of dataset {ds_id};")
                 cls.record_batch_update_count += 1
                 # Should find a way to return with no pain...
                 return "Success"
