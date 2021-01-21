@@ -740,6 +740,9 @@ Processed dataset 808 in  292.08416628837585
   "Demo" test: Select a random record from a random dataset, all subrecords and perform QC on it 
   (Show steps).
 
+## 21/01/2021
+- Worked at the pipeline, testing. DB performances decrease over time, need to find a better way (however it does not fail)
+- Reorganizing examples, looking for opportunities for optimization. 
 
 
 
