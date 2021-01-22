@@ -135,6 +135,12 @@ def split_list(a, n):
     result = list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
     return result
 
+def is_clean_for_sql(str):
+    """ Avoid to manipulate strings that may make a sql update query fail """
+    if "'" in str or '"' in str:
+        return False
+    else:
+        return True
 
 # Use existing SQL function instead as per answer by Bart
 # def build_event_date(end_year,

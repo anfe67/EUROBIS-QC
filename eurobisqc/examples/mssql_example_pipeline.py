@@ -170,11 +170,20 @@ def dataset_qc_labeling(dataset_id, with_logging=True):
             # The QC is either 0 or a QC mask
             qc_occurrence(occ_record, data_archive)
 
-    # Are there any lookups left to do (any record type)?
+    # Are there any lookups left to do (any record type) (this should be escalated to the event)?
     if len(data_archive.records_for_lookup):
         location.check_xy(data_archive.records_for_lookup)
         this.count_pyxylookups += 1
         this.logger.debug(f"Lookups: {this.count_pyxylookups}")
+
+        # Must propagate the QC of these records (in case)
+        if data_archive.darwin_core_type == data_archive.EVENT:
+            for looked_up_record in data_archive.records_for_lookup:
+                if looked_up_record["DarwinCoreType"] == data_archive.OCCURRENCE:
+                    key = f"{looked_up_record['dataprovider_id']}_{looked_up_record['eventID']}"
+                    if key in data_archive.event_indices:
+                        data_archive.event_indices[key][0]["qc"] |= looked_up_record["qc"]
+
         # Empty the list
         data_archive.records_for_lookup = []
 

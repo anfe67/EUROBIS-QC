@@ -28,7 +28,6 @@ class Test(TestCase):
         # All fields with lowercase value for BasisOfRecord
     ]
 
-    # TODO: Recalculate assertions
     def test_check_record(self):
         self.assertTrue(required_fields.check_record_required(self.records[0]) == 0)
         self.assertTrue(required_fields.check_record_required(self.records[1]) ==

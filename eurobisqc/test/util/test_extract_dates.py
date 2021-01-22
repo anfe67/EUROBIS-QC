@@ -16,7 +16,6 @@ this.logger.addHandler(logging.StreamHandler())
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 
-# TODO: Test with more datasets
 class Test(TestCase):
 
     def test_find_times(self):

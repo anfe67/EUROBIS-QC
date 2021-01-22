@@ -67,5 +67,4 @@ class Test(TestCase):
         results = measurements.check_sex(self.records[15:])
         self.assertTrue(results == self.expected_results_sex)
 
-# TODO - Verify also sex within measurementTypeID and measurementType
 # Note: - DynamicProperties cannot be found in DB...

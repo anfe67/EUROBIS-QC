@@ -13,7 +13,7 @@ class QCFlag(Enum):
     GEO_LAT_LON_VALID = ("Lat or Lon present and valid (-90 to 90 and -180 to 180)", 5)  # In location
     GEO_LAT_LON_ON_SEA = ("Lat - Lon on sea / coastline", 6)  # In location
     DATE_TIME_OK = ("Year or Start Year or End Year complete and valid", 7)  # In time_qc
-    TAXON_APHIAID_NOT_EXISTING = ("Marine Taxon not existing in APHIA", 8)  # FLAG - Probably not doing it
+    TAXON_APHIAID_NOT_EXISTING = ("Marine Taxon not existing in APHIA", 8)  # FLAG - Not implemented
     GEO_COORD_AREA = ("Coordinates in one of the specified areas", 9)  # In location
     OBIS_DATAFORMAT_OK = ("Valid codes found in basisOfRecord", 10)  # in required_fields
     VALID_DATE_1 = ("Valid sampling date", 11)  # In time_qc
@@ -25,7 +25,7 @@ class QCFlag(Enum):
     SEX_PRESENT = ("Sex observation found", 17)  # In measurements
     MIN_MAX_DEPTH_VERIFIED = ("Depths consistent", 18)  # in location
     DEPTH_MAP_VERIFIED = ("Depth coherent with depth map", 19)  # In location
-    DEPTH_FOR_SPECIES_OK = ("Depth coherent with species depth range", 20)  # FLAG - Probably not doing it
+    DEPTH_FOR_SPECIES_OK = ("Depth coherent with species depth range", 20)  # FLAG - Not implemented
 
     def __init__(self, message, qc_number):
 
@@ -66,7 +66,6 @@ class QCFlag(Enum):
             if qc_flag.bitmask == position:
                 return QCFlag(qc_flag).name
 
-    # TODO: NOT WORKING !
     @classmethod
     def decode_mask(cls, mask):
         """ Finds out all flags in a bitmask and return them as a list of QC_Flags names
@@ -77,6 +76,24 @@ class QCFlag(Enum):
         for qc_flag in QCFlag:
             if (1 << (qc_flag.qc_number - 1)) & mask:
                 qc_flags.append(QCFlag(qc_flag).name)
+                sum_all_flags += 1 << qc_flag.bitmask
+
+        # I may get a mask which I cannot fully interpret, in that case I add an INVALID to the list
+        if mask > sum_all_flags:
+            qc_flags.append('INVALID')
+
+        return qc_flags
+
+    @classmethod
+    def decode_numbers(cls, mask):
+        """ Finds out all flags in a bitmask and return them as a list of QC_Flags names
+            adds an INVALID string at the end if the mask is too big """
+
+        qc_flags = []
+        sum_all_flags = 0
+        for qc_flag in QCFlag:
+            if (1 << (qc_flag.qc_number - 1)) & mask:
+                qc_flags.append(qc_flag.qc_number)
                 sum_all_flags += 1 << qc_flag.bitmask
 
         # I may get a mask which I cannot fully interpret, in that case I add an INVALID to the list

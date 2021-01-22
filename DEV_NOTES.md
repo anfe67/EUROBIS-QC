@@ -736,16 +736,19 @@ Processed dataset 808 in  292.08416628837585
 - Build a "pipeline" that allows easily to select a set of datasets from the database and perform QC -
   using multiprocessing. Once done, run it on the entire DB, using two PCs (4 atom cores, 5 i7 cores)
   - DONE - ready to run on the entire DB. 
-- TODO: Request from Bart: 
-  "Demo" test: Select a random record from a random dataset, all subrecords and perform QC on it 
-  (Show steps).
+
 
 ## 21/01/2021
 - Worked at the pipeline, testing. DB performances decrease over time, need to find a better way (however it does not fail)
 - Reorganizing examples, looking for opportunities for optimization. 
 
-
-
+## 22/01/2021
+- Testing 
+- DONE: Request from Bart: 
+  "Demo" test: Select a random record from a random dataset, all subrecords and perform QC on it 
+  (Show all intermediate steps/dependent records)
+- For EVENT based datasets, redesign the concept of required fields (must be the COMBINATION of all dependent fields that 
+  satisfies the REQUIRED FIELDS criteria).   
 
 
 

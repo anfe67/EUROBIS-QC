@@ -2,7 +2,7 @@ import xmltodict
 from eurobisqc.util import misc
 
 
-# FLAG: Future possible improvement, evaluate expanding the area to match GPS average precision
+# FLAG:Possible improvement is to evaluate expanding the area to match GPS average precision
 
 def find_areas(xml_input):
     """ This may be not generic enough, must verify within the eml.xml specs

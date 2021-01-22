@@ -121,7 +121,6 @@ class Test(TestCase):
             if location.check_basic_record(record):
                 area_check_records.append(record)
 
-        # TODO - RE-ASSESS records to check
         res_2 = location.check_in_areas(area_check_records, self.more_areas)
 
         assert (res_1 == QCFlag.GEO_COORD_AREA.bitmask)

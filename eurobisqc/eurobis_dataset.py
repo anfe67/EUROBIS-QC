@@ -2,8 +2,12 @@ import sys
 import logging
 import requests
 from pyodbc import Error
+# This is to cope with possible hangs in iMIS API call (never observed but inserted for consistency)
+from stopit import threading_timeoutable
+
 from dbworks import mssql_db_functions as mssql
 from eurobisqc.util import extract_area
+from eurobisqc.util import misc
 
 this = sys.modules[__name__]
 # This is not multiprocess "safe" output can be garbled...
@@ -11,6 +15,8 @@ this.logger = logging.getLogger(__name__)
 this.logger.level = logging.DEBUG
 this.logger.addHandler(logging.StreamHandler())
 
+# Allow 15 seconds for the IMIS call to return when fetching the areas
+this.imis_timeout = 20
 
 class EurobisDataset:
     """ all the necessary to represent
@@ -131,6 +137,7 @@ class EurobisDataset:
         self.event_recs = []  # The Event Records
         self.occurrence_recs = []  # The Occurrence Records
         self.emof_recs = []  # The MoF/eMof records
+        self.event_indices ={} # To push back quality of pylook-up left overs
         self.occ_indices = {}  # Key to list of occurrences for datasets where coretype = 2
         self.emof_indices = {}  # Key to list of emof
         self.dataprovider_id = None  # The dataset ID from the dataproviders table
@@ -203,6 +210,11 @@ class EurobisDataset:
                                 self.occ_indices[key] = [record]
                     elif record['DarwinCoreType'] == self.EVENT:
                         self.event_recs.append(record)
+                        # If coretype is event, then eventid is the key - only used to reverse lookup.
+                        key = f"{record['dataprovider_id']}_{record['eventID']}"
+                        self.event_indices[key] = [record]
+
+
             else:  # Occurrence records (Datasets with core_type = OCCURRENCE do not have events - verified)
                 for record in records:
                     if record['DarwinCoreType'] == self.OCCURRENCE:
@@ -283,6 +295,8 @@ class EurobisDataset:
 
         return sql_string
 
+
+
     def load_dataset(self, das_prov_id):
         """ given a dataset id from the dataprovider
             loads an entire dataset in RAM for processing
@@ -290,9 +304,22 @@ class EurobisDataset:
         self.get_provider_data(das_prov_id)
         self.get_ev_occ_records(das_prov_id)
         self.get_emof_records(das_prov_id)
-        self.get_areas_from_eml(self.imis_das_id)
 
-    # TODO: Protect calls as for the call to pyxylookup
+        area_res = None
+
+        while area_res is None:
+            area_res = self.do_get_areas(self.imis_das_id, timeout=this.imis_timeout)
+            this.logger.warning("Had to re-issue call to IMIS")
+
+
+    @threading_timeoutable()
+    def do_get_areas(self, imis_das_id):
+        """ This is wrapped in a timeoutable call so that if there is no return in 10 seconds
+            then the call is re-issued until the list of results is returned. Average lookup of
+            1000 records is around 1s, so 10 is a reasonable timeout """
+        return self.get_areas_from_eml(imis_das_id)
+
+
     def get_areas_from_eml(self, imis_das_id):
         """ Given a IMIS Dataset ID, queries the IMIS web servce for  """
 
@@ -314,6 +341,9 @@ class EurobisDataset:
             self.areas = extract_area.find_areas(eml)
         else:
             self.areas = None
+
+        # To know when I am returning from it normally or after a timeout
+        return True
 
     @classmethod
     def update_record_qc(cls, records, batch_size, ds_id):
@@ -340,9 +370,9 @@ class EurobisDataset:
                     sql_update = f"{sql_update}{cls.sql_if_lat}{record['decimalLatitude']}"
                 if record['decimalLongitude'] is not None:
                     sql_update = f"{sql_update} {cls.sql_if_lon}{record['decimalLongitude']}"
-                if record['scientificName'] is not None:
+                if record['scientificName'] is not None and misc.is_clean_for_sql(record['scientificName']):
                     sql_update = f"{sql_update} {cls.sql_if_scientific_name}'{record['scientificName']}'"
-                if record['eventID'] is not None:
+                if record['eventID'] is not None and misc.is_clean_for_sql(record['eventID']):
                     sql_update = f"{sql_update} {cls.sql_if_event_id}'{record['eventID']}'"
                 sql_update = f"{sql_update} {cls.sql_update_end} 0x{physloc} "
 
@@ -353,7 +383,6 @@ class EurobisDataset:
                 this.logger.debug(
                     f"Records update count: {cls.record_batch_update_count * batch_size + record_count} of dataset {ds_id};")
                 cls.record_batch_update_count += 1
-                # Should find a way to return with no pain...
                 return "Success"
             except Error as e:
                 return f"Fail, batch {cls.record_batch_update_count} not updated, exception {str(e)}"
