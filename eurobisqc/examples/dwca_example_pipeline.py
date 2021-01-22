@@ -41,7 +41,7 @@ class DwCACore:
 dwca_cores = []
 
 
-def dwca_file_labeling(filename, with_logging=False):
+def dwca_file_qc(filename, with_logging=False):
     """ Processes a DwCA archive if it is passed as a filename,
         shall popup a file chooser dialog if this is None
         :param filename (The DwCA zip file name)
@@ -265,6 +265,8 @@ def dwca_file_labeling(filename, with_logging=False):
 
                     dwca_core.extensions[e.type.lower()].append(full_extension)
 
+
+
     # do I need a last lookup ?
     if len(records_for_lookup) >= 0:
         # The records will be modified with the correct QC flags so we do not care about the results
@@ -372,7 +374,7 @@ def dwca_process_filelist(pool_no, dwca_files, with_logging=False):
         if with_logging:
             this.logger.log(0, f"Pool Number: {pool_no}, processsing {dwca_file} ")
 
-        dwca_file_labeling(dwca_file, with_logging)
+        dwca_file_qc(dwca_file, with_logging)
         this.logger.info(f"Processed {dwca_file} in  {time.time() - start_file}")
 
     this.logger.info(f"Pool {pool_no} completed in {time.time() - start}")

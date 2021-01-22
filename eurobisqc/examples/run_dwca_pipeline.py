@@ -10,4 +10,4 @@ filename = file_chooser.get_archive_chooser()
 if filename is None:
     exit(0)
 
-dwca_example_pipeline.dwca_file_labeling(filename, with_logging)
+dwca_example_pipeline.dwca_file_qc(filename, with_logging)

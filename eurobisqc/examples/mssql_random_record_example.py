@@ -5,6 +5,7 @@ import time
 import logging
 from random import randint
 
+from eurobisqc import required_fields
 from dbworks import mssql_db_functions as mssql
 from eurobisqc import eurobis_dataset
 from eurobisqc.examples import mssql_example_pipeline
@@ -77,6 +78,13 @@ def select_random_ds(with_logging = True):
                 occ_record['qc'] |= qc_occ  # also give to occurrence record
                 qc_ev |= qc_occ
             record['qc'] |= qc_ev
+
+            # Needs to propagate the REQUIRED FIELDS CHECK for the event and its occurrences
+            qc_req_agg = []
+            qc_req_agg.append(record)
+            qc_req_agg.extend(data_archive.occ_indices[key])
+            record["qc"] |= required_fields.check_aggregate(qc_req_agg)
+            qc_ev |= record["qc"]
 
         # Are there any lookups left to do (any record type)?
         if len(data_archive.records_for_lookup):
