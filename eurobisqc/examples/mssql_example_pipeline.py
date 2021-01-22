@@ -166,11 +166,9 @@ def dataset_qc_labeling(dataset_id, with_logging=True):
                 record['qc'] |= qc_ev
 
                 # Needs to propagate the REQUIRED FIELDS CHECK for the event and its occurrences
-                qc_req_agg = []
-                qc_req_agg.append(record)
+                qc_req_agg = [record]
                 qc_req_agg.extend(data_archive.occ_indices[key])
                 record["qc"] |= required_fields.check_aggregate(qc_req_agg)
-
 
     else:  # Only occurrence and emof records
         for occ_record in data_archive.occurrence_recs:

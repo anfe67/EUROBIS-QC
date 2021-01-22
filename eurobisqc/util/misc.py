@@ -135,9 +135,10 @@ def split_list(a, n):
     result = list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
     return result
 
-def is_clean_for_sql(str):
+
+def is_clean_for_sql(field):
     """ Avoid to manipulate strings that may make a sql update query fail """
-    if "'" in str or '"' in str:
+    if "'" in str or '"' in field:
         return False
     else:
         return True

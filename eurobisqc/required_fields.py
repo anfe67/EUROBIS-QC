@@ -1,8 +1,7 @@
 import sys
 
-from eurobisqc.util import qc_flags
 from dbworks import sqlite_db_functions
-import numpy as np
+from eurobisqc.util import qc_flags
 
 this = sys.modules[__name__]
 
@@ -144,6 +143,7 @@ def check(records):
 
     return [check_record_required(record) | check_record_obis_format(record) for record in records]
 
+
 def check_aggregate(records):
     """ Event record depend on their occurrence records to verify that all the required fields are present
         this is the full set of event + occurrences of which the non-none fields, part of the required fields set
@@ -160,7 +160,7 @@ def check_aggregate(records):
 
         # May be it can be done differently (faster)
         present_required_fields = present_fields.intersection(this.required_fields)
-        for required_field in this.required_fields:
+        for required_field in present_required_fields:
             if record[required_field] is not None:
                 qc_required_fields[required_field] = 1
 

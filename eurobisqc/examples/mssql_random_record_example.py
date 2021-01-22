@@ -1,16 +1,15 @@
 """ Module to demonstrate QC labeling of a random record """
 
-import sys
-import time
 import logging
+import sys
 from random import randint
 
-from eurobisqc import required_fields
 from dbworks import mssql_db_functions as mssql
 from eurobisqc import eurobis_dataset
+from eurobisqc import location
+from eurobisqc import required_fields
 from eurobisqc.examples import mssql_example_pipeline
 from eurobisqc.util.qc_flags import QCFlag
-from eurobisqc import location
 
 this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)
@@ -18,9 +17,10 @@ this.logger.level = logging.DEBUG
 this.logger.addHandler(logging.StreamHandler())
 
 
-def select_random_ds(with_logging = True):
+def select_random_ds(with_logging=True):
     """ select a random dataset, then a random core event from it and perform QC """
 
+    # To select a specific type of record,
     # This selects 1 dataset with  less than 10000 events/occurrences reported in the dataproviders table
     sql_random_dataset = f"SELECT TOP 1  d.id, count(e.dataprovider_id) FROM  dataproviders d " \
                          f" inner join eurobis e on d.id = e.dataprovider_id group by d.id " \
@@ -63,7 +63,7 @@ def select_random_ds(with_logging = True):
     # Proceed top-down as in pipeline ...
     if data_archive.darwin_core_type == data_archive.EVENT:
         # select random core event:
-        record_idx = randint(0, len(data_archive.event_recs)-1)
+        record_idx = randint(0, len(data_archive.event_recs) - 1)
         record = data_archive.event_recs[record_idx]
 
         # Perform basic QC:
@@ -80,8 +80,7 @@ def select_random_ds(with_logging = True):
             record['qc'] |= qc_ev
 
             # Needs to propagate the REQUIRED FIELDS CHECK for the event and its occurrences
-            qc_req_agg = []
-            qc_req_agg.append(record)
+            qc_req_agg = [record]
             qc_req_agg.extend(data_archive.occ_indices[key])
             record["qc"] |= required_fields.check_aggregate(qc_req_agg)
             qc_ev |= record["qc"]
@@ -110,16 +109,21 @@ def select_random_ds(with_logging = True):
                 this.logger.info(f"QC NUMBERS: -------------> {QCFlag.decode_numbers(occ_record['qc'])}")
                 this.logger.info(f"QC FLAG NAMES: ----------> {QCFlag.decode_mask(occ_record['qc'])}")
                 this.logger.info(f"--------------------------------------------------")
-                key_o =  f"{record['dataprovider_id']}_{'NULL' if record['eventID'] is None else record['eventID']}_" \
-                         f"{'NULL' if record['occurrenceID'] is None else record['occurrenceID']}"
+                key_o = f"{record['dataprovider_id']}_{'NULL' if record['eventID'] is None else record['eventID']}_" \
+                        f"{'NULL' if record['occurrenceID'] is None else record['occurrenceID']}"
                 if key_o in data_archive.emof_indices:
                     for emof in data_archive.emof_indices[key_o]:
                         this.logger.info(f"eMoF Record: {emof}")
                         this.logger.info(f"--------------------------------------------------")
 
+        if key in data_archive.emof_indices:
+            for emof in data_archive.emof_indices[key]:
+                this.logger.info(f"eMoF Record: {emof}")
+                this.logger.info(f"--------------------------------------------------")
+
     else:
         # The QC is either 0 or a QC mask
-        record_idx = randint(0, len(data_archive.occurrence_recs)-1)
+        record_idx = randint(0, len(data_archive.occurrence_recs) - 1)
         record = data_archive.occurrence_recs[record_idx]
         qc_occ = mssql_example_pipeline.qc_occurrence(record, data_archive)
 
@@ -141,10 +145,11 @@ def select_random_ds(with_logging = True):
         this.logger.info(f"--------------------------------------------------")
 
         key_o = f"{record['dataprovider_id']}_NULL_" \
-              f"{'NULL' if record['occurrenceID'] is None else record['occurrenceID']}"
+                f"{'NULL' if record['occurrenceID'] is None else record['occurrenceID']}"
         if key_o in data_archive.emof_indices:
             for emof in data_archive.emof_indices[key_o]:
                 this.logger.info(f"eMoF Record: {emof}")
                 this.logger.info(f"--------------------------------------------------")
+
 
 select_random_ds()

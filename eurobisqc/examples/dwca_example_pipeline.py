@@ -265,8 +265,6 @@ def dwca_file_qc(filename, with_logging=False):
 
                     dwca_core.extensions[e.type.lower()].append(full_extension)
 
-
-
     # do I need a last lookup ?
     if len(records_for_lookup) >= 0:
         # The records will be modified with the correct QC flags so we do not care about the results

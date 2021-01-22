@@ -28,8 +28,8 @@ class Test(TestCase):
     ]
 
     expected_results = [0,
-                        qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask,
-                        qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask,
+                        qc_flags.QCFlag.OBSERVED_WEIGHT_PRESENT.bitmask,
+                        qc_flags.QCFlag.OBSERVED_WEIGHT_PRESENT.bitmask,
                         0,
                         0,
                         0,
@@ -39,9 +39,9 @@ class Test(TestCase):
                         qc_flags.QCFlag.SAMPLE_SIZE_PRESENT.bitmask,
                         qc_flags.QCFlag.OBSERVED_COUNT_PRESENT.bitmask,
                         ]
-    expected_results_dyn_prop = [qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask,
+    expected_results_dyn_prop = [qc_flags.QCFlag.OBSERVED_WEIGHT_PRESENT.bitmask,
                                  0,
-                                 qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask,
+                                 qc_flags.QCFlag.OBSERVED_WEIGHT_PRESENT.bitmask,
                                  0  # Verify should be weight
                                  ]
 

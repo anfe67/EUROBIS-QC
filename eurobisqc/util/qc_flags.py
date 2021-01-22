@@ -20,7 +20,7 @@ class QCFlag(Enum):
     VALID_DATE_2 = ("Start sampling date before End date - dates consistent", 12)  # In time_qc
     VALID_DATE_3 = ("Sampling time valid / timezone completed", 13)  # In time_qc
     OBSERVED_COUNT_PRESENT = ("Observed individual count found", 14)  # In measurements
-    OBSERVED_WEIGTH_PRESENT = ("Observed weigth found", 15)  # In measurements
+    OBSERVED_WEIGHT_PRESENT = ("Observed weigth found", 15)  # In measurements
     SAMPLE_SIZE_PRESENT = ("Observed individual count > 0 sample size present", 16)  # In measurements
     SEX_PRESENT = ("Sex observation found", 17)  # In measurements
     MIN_MAX_DEPTH_VERIFIED = ("Depths consistent", 18)  # in location

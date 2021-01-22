@@ -18,6 +18,7 @@ this.logger.addHandler(logging.StreamHandler())
 # Allow 15 seconds for the IMIS call to return when fetching the areas
 this.imis_timeout = 20
 
+
 class EurobisDataset:
     """ all the necessary to represent
         an archive as retrieved from the DB """
@@ -137,7 +138,7 @@ class EurobisDataset:
         self.event_recs = []  # The Event Records
         self.occurrence_recs = []  # The Occurrence Records
         self.emof_recs = []  # The MoF/eMof records
-        self.event_indices ={} # To push back quality of pylook-up left overs
+        self.event_indices = {}  # To push back quality of pylook-up left overs
         self.occ_indices = {}  # Key to list of occurrences for datasets where coretype = 2
         self.emof_indices = {}  # Key to list of emof
         self.dataprovider_id = None  # The dataset ID from the dataproviders table
@@ -213,7 +214,6 @@ class EurobisDataset:
                         # If coretype is event, then eventid is the key - only used to reverse lookup.
                         key = f"{record['dataprovider_id']}_{record['eventID']}"
                         self.event_indices[key] = [record]
-
 
             else:  # Occurrence records (Datasets with core_type = OCCURRENCE do not have events - verified)
                 for record in records:
@@ -295,8 +295,6 @@ class EurobisDataset:
 
         return sql_string
 
-
-
     def load_dataset(self, das_prov_id):
         """ given a dataset id from the dataprovider
             loads an entire dataset in RAM for processing
@@ -311,14 +309,12 @@ class EurobisDataset:
             area_res = self.do_get_areas(self.imis_das_id, timeout=this.imis_timeout)
             this.logger.warning("Had to re-issue call to IMIS")
 
-
     @threading_timeoutable()
     def do_get_areas(self, imis_das_id):
         """ This is wrapped in a timeoutable call so that if there is no return in 10 seconds
             then the call is re-issued until the list of results is returned. Average lookup of
             1000 records is around 1s, so 10 is a reasonable timeout """
         return self.get_areas_from_eml(imis_das_id)
-
 
     def get_areas_from_eml(self, imis_das_id):
         """ Given a IMIS Dataset ID, queries the IMIS web servce for  """
@@ -381,7 +377,8 @@ class EurobisDataset:
             try:
                 mssql.conn.commit()
                 this.logger.debug(
-                    f"Records update count: {cls.record_batch_update_count * batch_size + record_count} of dataset {ds_id};")
+                    f"Records update count: {cls.record_batch_update_count * batch_size + record_count} "
+                    f"of dataset {ds_id};")
                 cls.record_batch_update_count += 1
                 return "Success"
             except Error as e:

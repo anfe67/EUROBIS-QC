@@ -737,10 +737,13 @@ Processed dataset 808 in  292.08416628837585
   using multiprocessing. Once done, run it on the entire DB, using two PCs (4 atom cores, 5 i7 cores)
   - DONE - ready to run on the entire DB. 
 
+---
 
 ## 21/01/2021
 - Worked at the pipeline, testing. DB performances decrease over time, need to find a better way (however it does not fail)
 - Reorganizing examples, looking for opportunities for optimization. 
+
+--- 
 
 ## 22/01/2021
 - Testing 
@@ -748,7 +751,13 @@ Processed dataset 808 in  292.08416628837585
   "Demo" test: Select a random record from a random dataset, all subrecords and perform QC on it 
   (Show all intermediate steps/dependent records)
 - For EVENT based datasets, redesign the concept of required fields (must be the COMBINATION of all dependent fields that 
-  satisfies the REQUIRED FIELDS criteria).   
+  satisfies the REQUIRED FIELDS criteria). 
+
+- From discussing with Bart: In case of datasets with core record type = EVENT, 
+  attempt to make the aggregation of measurements from the occurrence records to the event record 
+  depending upon a parameter: OR, AND or PERCENTAGE. 
+  
+- Attempt to run on the biggest datasets.
 
 
 

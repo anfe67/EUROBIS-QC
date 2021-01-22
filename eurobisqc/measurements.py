@@ -6,9 +6,11 @@ from eurobisqc.util import misc
 from dbworks import sqlite_db_functions
 
 qc_mask_14 = qc_flags.QCFlag.OBSERVED_COUNT_PRESENT.bitmask
-qc_mask_15 = qc_flags.QCFlag.OBSERVED_WEIGTH_PRESENT.bitmask
+qc_mask_15 = qc_flags.QCFlag.OBSERVED_WEIGHT_PRESENT.bitmask
 qc_mask_16 = qc_flags.QCFlag.SAMPLE_SIZE_PRESENT.bitmask
 qc_mask_17 = qc_flags.QCFlag.SEX_PRESENT.bitmask
+
+# Introduce parameters for aggregation of measurements (or | and | percentage)
 
 this = sys.modules[__name__]
 
