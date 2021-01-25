@@ -8,7 +8,7 @@ from dbworks import mssql_db_functions as mssql
 from eurobisqc import eurobis_dataset
 from eurobisqc import location
 from eurobisqc import required_fields
-from eurobisqc.examples import mssql_example_pipeline
+from eurobisqc.examples import mssql_pipeline
 from eurobisqc.util.qc_flags import QCFlag
 
 this = sys.modules[__name__]
@@ -23,11 +23,14 @@ def select_random_ds(with_logging=True):
     # To select a specific type of record,
     # This selects 1 dataset with  less than 10000 events/occurrences reported in the dataproviders table
     sql_random_dataset = f"SELECT TOP 1  d.id, count(e.dataprovider_id) FROM  dataproviders d " \
-                         f" inner join eurobis e on d.id = e.dataprovider_id group by d.id " \
+                         f" inner join eurobis e on d.id = e.dataprovider_id where d.core = 2 group by d.id " \
                          f" having count(e.dataprovider_id) < 10000 ORDER BY NEWID()"
+
+    pyxy_count_lookups = 0
 
     # Go and get the id!
     dataset_id = None
+
     # Connect to the database to get dataset list
     if not mssql.conn:
         mssql.open_db()
@@ -66,38 +69,46 @@ def select_random_ds(with_logging=True):
         record_idx = randint(0, len(data_archive.event_recs) - 1)
         record = data_archive.event_recs[record_idx]
 
+        # make sure we start at "Empty"
+        record["qc"] = None
+
+        pyxy_count_lookups = 0
+
         # Perform basic QC:
-        qc_ev = mssql_example_pipeline.qc_event(record, data_archive)
+        qc_ev = mssql_pipeline.qc_event(record, data_archive, pyxy_count_lookups)
+        record["qc"] |= qc_ev  # Make sure it is stamped
 
         # Generate key and lookup occurrences...
         key = f"{record['dataprovider_id']}_{record['eventID']}"
         if key in data_archive.occ_indices:
             for occ_record in data_archive.occ_indices[key]:
                 # qc_occurrence sall also take care of emof for occurrence
-                qc_occ = mssql_example_pipeline.qc_occurrence(occ_record, data_archive)
+                qc_occ = mssql_pipeline.qc_occurrence(occ_record, data_archive, pyxy_count_lookups)
+                qc_occ |= required_fields.check_ev_occ_required(record, occ_record, False)
                 occ_record['qc'] |= qc_occ  # also give to occurrence record
-                qc_ev |= qc_occ
-            record['qc'] |= qc_ev
+                occ_record['qc'] |= qc_ev  # Inherits the event QC (email 24/01/2021)
 
+            # No longer true as per email 24/01/2021
             # Needs to propagate the REQUIRED FIELDS CHECK for the event and its occurrences
-            qc_req_agg = [record]
-            qc_req_agg.extend(data_archive.occ_indices[key])
-            record["qc"] |= required_fields.check_aggregate(qc_req_agg)
-            qc_ev |= record["qc"]
+            # qc_req_agg = [record]
+            # qc_req_agg.extend(data_archive.occ_indices[key])
+            # record["qc"] |= required_fields.check_aggregate(qc_req_agg)
+            # qc_ev |= record["qc"]
 
-        # Are there any lookups left to do (any record type)?
+        # Are there any lookups left to do (any record type)
         if len(data_archive.records_for_lookup):
             location.check_xy(data_archive.records_for_lookup)
-            # Grab the QCs and then empty the list
-            for lookup_record in data_archive.records_for_lookup:
-                record["qc"] |= lookup_record["qc"]
-                qc_ev |= lookup_record["qc"]
-            # Empty the lookup "table"
-            data_archive.records_for_lookup = []
+
+            # Need to propagate the (new) QC of the events down to the occurrences records
+            for looked_up_record in data_archive.records_for_lookup:
+                if looked_up_record["DarwinCoreType"] == data_archive.EVENT:
+                    key = f"{looked_up_record['dataprovider_id']}_{looked_up_record['eventID']}"
+                    for occ_record in data_archive.occ_indices[key]:
+                        occ_record["qc"] |= looked_up_record["qc"]
 
         this.logger.info(f"Calculated quality mask: {qc_ev}, consisting of:")
-        this.logger.info(f"QC NUMBERS: -------------> {QCFlag.decode_numbers(qc_ev)}")
-        this.logger.info(f"QC FLAG NAMES: ----------> {QCFlag.decode_mask(qc_ev)}")
+        this.logger.info(f"QC NUMBERS: -------------> {QCFlag.decode_numbers(record['qc'])}")
+        this.logger.info(f"QC FLAG NAMES: ----------> {QCFlag.decode_mask(record['qc'])}")
         this.logger.info(f"--------------------------------------------------")
         this.logger.info(f"Event Record: {record}")
         this.logger.info(f"--------------------------------------------------")
@@ -109,8 +120,9 @@ def select_random_ds(with_logging=True):
                 this.logger.info(f"QC NUMBERS: -------------> {QCFlag.decode_numbers(occ_record['qc'])}")
                 this.logger.info(f"QC FLAG NAMES: ----------> {QCFlag.decode_mask(occ_record['qc'])}")
                 this.logger.info(f"--------------------------------------------------")
-                key_o = f"{record['dataprovider_id']}_{'NULL' if record['eventID'] is None else record['eventID']}_" \
-                        f"{'NULL' if record['occurrenceID'] is None else record['occurrenceID']}"
+                key_o = f"{occ_record['dataprovider_id']}_" \
+                        f"{'NULL' if occ_record['eventID'] is None else occ_record['eventID']}_" \
+                        f"{'NULL' if occ_record['occurrenceID'] is None else occ_record['occurrenceID']}"
                 if key_o in data_archive.emof_indices:
                     for emof in data_archive.emof_indices[key_o]:
                         this.logger.info(f"eMoF Record: {emof}")
@@ -118,14 +130,14 @@ def select_random_ds(with_logging=True):
 
         if key in data_archive.emof_indices:
             for emof in data_archive.emof_indices[key]:
-                this.logger.info(f"eMoF Record: {emof}")
+                this.logger.info(f"eMoF Record for event: {emof}")
                 this.logger.info(f"--------------------------------------------------")
 
     else:
         # The QC is either 0 or a QC mask
         record_idx = randint(0, len(data_archive.occurrence_recs) - 1)
         record = data_archive.occurrence_recs[record_idx]
-        qc_occ = mssql_example_pipeline.qc_occurrence(record, data_archive)
+        qc_occ = mssql_pipeline.qc_occurrence(record, data_archive, pyxy_count_lookups)
 
         # Are there any lookups left to do (any record type)?
         if len(data_archive.records_for_lookup):

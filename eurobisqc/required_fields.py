@@ -68,35 +68,46 @@ def check_record_required(record, option=False):
         initialize_lookups()
 
     # Field names are checked in lowercase (case insensitive)
-    present_fields = set(record.keys())  # set(record.keys())
-
-    # May be it can be done differently (faster)
-    present_required_fields = present_fields.intersection(this.required_fields)
+    present_required_fields = {key for key in record if key in this.required_fields and record[key] is not None}
 
     if len(present_required_fields) == len(this.required_fields):
-        # Looking at the checks from obis-qc, verify that fields are present but also that they are not None
-        count = 0
-        for required_field in this.required_fields:
-            count += 1
-            if record[required_field] is None:
-                break  # No need to proceed
+        qc_mask |= qc_mask_1
 
-        if count == len(this.required_fields):
-            qc_mask |= qc_mask_1
-    # else:
-    #     qc_mask |= qc_mask_1
     # An option to be pedantic and require presence of the optional fields
     if option:
-        present_optional_fields = present_fields.intersection(this.recommended_fields)
+        present_optional_fields = {key for key in record if key in this.recommended_fields and record[key] is not None}
         if len(present_optional_fields) == len(this.recommended_fields):
-            count = 0
-            for optional_field in this.recommended_fields:
-                count += 1
-                if record[optional_field] is None:
-                    break  # No need to proceed
+            qc_mask |= qc_mask_1
 
-            if count == len(this.recommended_fields):
-                qc_mask |= qc_mask_1
+    return qc_mask
+
+
+def check_ev_occ_required(ev_record, occ_record, option=False):
+    """ Occurrence records push down to occurrence records the
+        value of QC and may not have all required fields because they are in the event """
+
+    qc_mask = 0
+
+    # It shall be done only once on the first entry
+    if not this.lookups_loaded:
+        initialize_lookups()
+
+    present_ev_fields = {key for key in ev_record.keys() if ev_record[key] is not None}
+    present_occ_fields = {key for key in occ_record.keys() if occ_record[key] is not None}
+
+    present_required_fields = present_occ_fields.union(present_ev_fields).intersection(this.required_fields)
+    if len(present_required_fields) == len(this.required_fields):
+        qc_mask |= qc_mask_1
+
+    # An option to be pedantic and require presence of the optional fields
+    if option:
+        present_op_ev_fields = {key for key in ev_record.keys() if ev_record[key] is not None}
+        present_op_occ_fields = {key for key in occ_record.keys() if occ_record[key] is not None}
+
+        present_optional_fields = present_op_occ_fields.union(present_op_ev_fields).intersection(
+            this.recommended_fields)
+        if len(present_optional_fields) == len(this.recommended_fields):
+            qc_mask |= qc_mask_1
 
     return qc_mask
 
@@ -144,6 +155,7 @@ def check(records):
     return [check_record_required(record) | check_record_obis_format(record) for record in records]
 
 
+# No longer true after email 24/01/2021
 def check_aggregate(records):
     """ Event record depend on their occurrence records to verify that all the required fields are present
         this is the full set of event + occurrences of which the non-none fields, part of the required fields set

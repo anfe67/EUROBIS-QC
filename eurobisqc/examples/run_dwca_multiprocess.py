@@ -1,7 +1,7 @@
 import sys
 import os
 import logging
-import dwca_example_pipeline
+import dwca_pipeline
 from eurobisqc.test.util import file_chooser
 from eurobisqc.util import misc
 
@@ -54,7 +54,7 @@ def dwca_parallel_processing(with_logging=False):
     # Each one of the CPUs shall get a similar load...
     result_pool = []
     for i, dwca_file_list in enumerate(dwca_file_lists):
-        result_pool.append(pool.apply_async(dwca_example_pipeline.dwca_process_filelist,
+        result_pool.append(pool.apply_async(dwca_pipeline.dwca_process_filelist,
                                             args=(i, dwca_file_list, with_logging)))
 
     # We are interested in waiting, not getting the results...

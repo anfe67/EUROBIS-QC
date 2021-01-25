@@ -5,7 +5,8 @@ import multiprocessing as mp
 
 from dbworks import mssql_db_functions as mssql
 from eurobisqc.util import misc
-from eurobisqc.examples.mssql_example_pipeline import process_dataset_list
+from eurobisqc.examples.mssql_pipeline import process_dataset_list
+from eurobisqc import eurobis_dataset
 
 this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)
@@ -72,7 +73,7 @@ def do_db_multi_random_percent(percent):
     result_pool = []
     for i, dataset_id_list in enumerate(dataset_id_lists):
         this.logger.info(f"Pool {i} will process {dataset_names_lists[i]} ")
-        result_pool.append(pool.apply_async(process_dataset_list, args=(i, dataset_id_list, True)))
+        result_pool.append(pool.apply_async(process_dataset_list, args=(i, dataset_id_list, True, True)))
 
     for r in result_pool:
         r.wait()
@@ -105,16 +106,22 @@ def do_db_multi_selection(dataset_ids, dataset_names):
     dataset_id_lists = misc.split_list(dataset_ids, n_cpus)  # We are OK until here.
     dataset_names_lists = misc.split_list(dataset_names, n_cpus)
 
+    # Disable the qc index...
+    eurobis_dataset.EurobisDataset.disable_qc_index()
+
     result_pool = []
     for i, dataset_id_list in enumerate(dataset_id_lists):
         this.logger.info(f"Pool {i} will process {dataset_names_lists[i]}")
-        result_pool.append(pool.apply_async(process_dataset_list, args=(i, dataset_id_list, True)))
+        result_pool.append(pool.apply_async(process_dataset_list, args=(i, dataset_id_list, True, True)))
 
     for r in result_pool:
         r.wait()
 
     pool.terminate()
     pool.join()
+
+    # Rebuild the QC index
+    eurobis_dataset.EurobisDataset.rebuild_qc_index()
 
     this.logger.info(f"Started at: {start_time}. All processes have completed after {time.time() - start_time}")
 

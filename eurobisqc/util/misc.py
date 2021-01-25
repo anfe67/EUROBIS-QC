@@ -136,9 +136,13 @@ def split_list(a, n):
     return result
 
 
+def split_in_chunks(a_list, a_size):
+    return [a_list[offs:offs + a_size] for offs in range(0, len(a_list), a_size)]
+
+
 def is_clean_for_sql(field):
     """ Avoid to manipulate strings that may make a sql update query fail """
-    if "'" in str or '"' in field:
+    if "'" in field or '"' in field:
         return False
     else:
         return True

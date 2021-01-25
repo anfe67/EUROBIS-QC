@@ -26,22 +26,9 @@ class EurobisDataset:
     OCCURRENCE = 1
     EVENT = 2
     LOOKUP_BATCH_SIZE = 1000
+    INDEX_TRESHOLD = 300000
 
     record_batch_update_count = 0
-    # Query to verify that the id column exists. if no record is returned, then column does not exist
-    # sql_check_id_field = "SELECT COLUMN_NAME  " \
-    #                      "FROM INFORMATION_SCHEMA.COLUMNS " \
-    #                      "WHERE TABLE_NAME = 'eurobis' " \
-    #                      "and COLUMN_NAME ='id' " \
-    #                      "ORDER BY ORDINAL_POSITION"
-
-    # Query to create id field - takes about 4 minutes
-    # sql_create_id = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE " \
-    #                 "BEGIN TRANSACTION " \
-    #                   "DECLARE @id INT SET @id = 0 " \
-    #                   "UPDATE eurobis SET @id = id = @id + 1  " \
-    #                   "OPTION ( MAXDOP 1 ) " \
-    #                 "COMMIT TRANSACTION "
 
     # Query to disable the triggers
     sql_disable_trigger = "disable TRIGGER [fill_field_sync_dataproviders] on [eurobis_dat].[dbo].[eurobis];"
@@ -50,6 +37,7 @@ class EurobisDataset:
     # FLAG: These maps could be parametric based on the Lookup DB
     # FLAG: Prerequisite is that the columns exist in the DB and that names do not change.
     # FLAG: Pipeline has been verified for the columns listed below
+
     field_map_eurobis = {'dataprovider_id': 'dataprovider_id',
                          'occurrenceID': 'occurrenceID',
                          'eventID': 'eventID',
@@ -79,7 +67,7 @@ class EurobisDataset:
     sql_eurobis_start = "SELECT "
     sql_eurobis_end = " FROM eurobis WHERE dataprovider_id="
 
-    # I hate this one... we should do a SQL SP instead with parameter dataprovider_id
+    # May be we should do a SQL SP instead with parameter dataprovider_id
     sql_eurobis_eventdate = \
         """ 
     COALESCE(dbo.ipt_date_iso8601(StartYearCollected,
@@ -126,7 +114,8 @@ class EurobisDataset:
     # If the records contains Latitude and Longitude they are indexed, so could speed updates up
     sql_if_lat = " and Latitude = "
     sql_if_lon = " and Longitude = "
-    sql_if_scientific_name = " and ScientificName = "
+    sql_if_scientific_name = " and ScientificName = "  # This do not provide benefits
+    sql_if_scientific_name_id = "and aphia_id = "      # This does not provide benefits
     sql_if_event_id = " and EventID = "
 
     sql_update_end = " and %%physloc%% = "  # add at the end the record['physloc'] retrieved at the start
@@ -342,7 +331,65 @@ class EurobisDataset:
         return True
 
     @classmethod
-    def update_record_qc(cls, records, batch_size, ds_id):
+    def disable_qc_index(cls):
+        """ Disable non-clustered index on QC
+            important - this depends on the index name """
+        # Check DB connection...
+        if not mssql.conn:
+            mssql.open_db()
+
+        if mssql.conn is None:
+            # Should find a way to exit and advice (raise an exception may be)
+            return "Fail, no connection "
+        else:
+            try:
+                sql_disable_index = "ALTER INDEX IX_eurobis_qc ON dbo.eurobis DISABLE;"
+                cursor = mssql.conn.cursor()
+                cursor.execute(sql_disable_index)
+                mssql.conn.commit()
+                this.logger.debug(
+                    f"Non clustered index on qc disabled")
+                return "Success"
+            except Error as e:
+                return f"Failed to disable clustered index: {e}"
+
+    @classmethod
+    def rebuild_qc_index(cls):
+        """ Rebuild non-clustered index on QC
+            important - this depends on the index name """
+        # Check DB connection...
+        if not mssql.conn:
+            mssql.open_db()
+
+        if mssql.conn is None:
+            # Should find a way to exit and advice (raise an exception may be)
+            return "Fail, no connection "
+        else:
+            try:
+                sql_disable_index = "ALTER INDEX IX_eurobis_qc ON dbo.eurobis REBUILD;"
+                cursor = mssql.conn.cursor()
+                cursor.execute(sql_disable_index)
+                mssql.conn.commit()
+                this.logger.debug(
+                    f"Non clustered index on qc rebuilt")
+                return "Success"
+            except Error as e:
+                return f"Failed to rebuild clustered index: {e}"
+
+    @classmethod
+    def update_record_qc(cls, records, batch_update_count, batch_size, ds_id, record_type):
+        """ Shall update a batch of records from a dataset
+            update queries shall be built record by record and sent to the DB in batches for execution
+            :param records : A list of the records being updated
+            :param batch_update_count: The dataset's batch number
+            :param batch_size : Here only used to report the status of the update
+            :param ds_id: dataset being processed
+            :param record_type : For query optimization, occurrence and event records may be treated differently
+            also used for printing
+            NOTE: Special methods are provided to DISABLE the index on QC and REBUILD it after the updates.
+            These improve vastly the query run time.
+            """
+
         # Check DB connection...
         if not mssql.conn:
             mssql.open_db()
@@ -352,6 +399,7 @@ class EurobisDataset:
             return "Fail, no connection "
         else:
             record_count = len(records)
+            sql_update = f"BEGIN TRAN; \n"
             for record in records:
                 # Compose update query
                 physloc = bytes.hex(record['physloc'])
@@ -361,25 +409,27 @@ class EurobisDataset:
                 # and using the existing indexes on the eurobis table. Observed speed improvements
                 # are between 2.5 and 5 times faster.
 
-                sql_update = f"{cls.sql_update_start}{record['qc']}{cls.sql_update_middle} {record['dataprovider_id']}"
+                sql_update += f"{cls.sql_update_start}{record['qc']}{cls.sql_update_middle} {record['dataprovider_id']}"
                 if record['decimalLatitude'] is not None:
                     sql_update = f"{sql_update}{cls.sql_if_lat}{record['decimalLatitude']}"
                 if record['decimalLongitude'] is not None:
                     sql_update = f"{sql_update} {cls.sql_if_lon}{record['decimalLongitude']}"
-                if record['scientificName'] is not None and misc.is_clean_for_sql(record['scientificName']):
-                    sql_update = f"{sql_update} {cls.sql_if_scientific_name}'{record['scientificName']}'"
-                if record['eventID'] is not None and misc.is_clean_for_sql(record['eventID']):
-                    sql_update = f"{sql_update} {cls.sql_if_event_id}'{record['eventID']}'"
-                sql_update = f"{sql_update} {cls.sql_update_end} 0x{physloc} "
+                if record_type == EurobisDataset.EVENT:
+                    if record['eventID'] is not None and misc.is_clean_for_sql(record['eventID']):
+                        sql_update = f"{sql_update} {cls.sql_if_event_id}'{record['eventID']}'"
 
+                sql_update = f"{sql_update} {cls.sql_update_end} 0x{physloc} \n"
+
+            try:
+                sql_update += f"COMMIT TRAN;\n"
                 cursor = mssql.conn.cursor()
                 cursor.execute(sql_update)
-            try:
                 mssql.conn.commit()
+                rec_type = "EVENT" if record_type == EurobisDataset.EVENT else "OCCURRENCE"
                 this.logger.debug(
-                    f"Records update count: {cls.record_batch_update_count * batch_size + record_count} "
+                    f"{rec_type} records update count: {batch_update_count * batch_size + record_count}  "
                     f"of dataset {ds_id};")
-                cls.record_batch_update_count += 1
+                batch_update_count += 1
                 return "Success"
             except Error as e:
-                return f"Fail, batch {cls.record_batch_update_count} not updated, exception {str(e)}"
+                return f"Fail, batch {batch_update_count} not updated, exception {str(e)}"

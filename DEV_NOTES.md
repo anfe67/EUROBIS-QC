@@ -757,7 +757,52 @@ Processed dataset 808 in  292.08416628837585
   attempt to make the aggregation of measurements from the occurrence records to the event record 
   depending upon a parameter: OR, AND or PERCENTAGE. 
   
-- Attempt to run on the biggest datasets.
+- Attempt to run on the biggest datasets - completed 
+
+# 23-24/02/2021
+- Attempting optimization and running on big datasets 
+
+# 25/02/2021 
+- Technique to disable/rebuild index on QC - implemented, results are inconsistent. 
+- Tested on Dataset ID 1062 
+``` 
+--------------------------------------------------
+Loaded dataset pohjedatabase, id = 1062 
+Number of event records: 31012
+Number of occurrence records: 91121
+Number of emof records: 269799
+Interesting areas: None
+Imis dataset ID: 5725
+Type of core records: Event
+--------------------------------------------------
+Index Disabled: 
+
+Total net processing time for 1062 : pohjedatabase in: 494.4684865474701 
+
+Index Enabled: 
+
+Total net processing time for 1062 : pohjedatabase in: 435.1352186203003 
+
+New Query for Occurrence, including aphia_id Index Disabled: 
+
+ - Dreadful (stopped)! 
+
+New Query include only dataprovider id and physloc, Index Enabled:
+Total net processing time for 1062 : pohjedatabase in: 442.73728132247925 
+
+New Query, include only dataprovider id and physloc, Index Disabled:
+
+ - Dreadful (stopped)!
+
+```
+- Re-introduced old queries and made the index disabling optional, only left it in the 
+  multiple dataset processing / multiprocessing (parameter).
+- Code cleanup and rationalization
+- Single record tests   
+- Email to Bart 
+
+
+
 
 
 
