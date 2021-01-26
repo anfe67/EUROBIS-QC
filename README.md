@@ -1,8 +1,9 @@
 # EUROBIS-QC
 
 ## Background
-This project consists in the implementation of a series of Quality Control checks on marine biodiversity records 
-(implemented as Python dictionaries). The records are either stored in DwCA archives or in a MS SQL database. 
+This project consists in the implementation of a series of Quality Checks (QC) on marine biodiversity records 
+(implemented as Python dictionaries). The records are either stored in zipped DwCA archive files 
+or in a MS SQL database. 
 
 Based on:
 
@@ -31,7 +32,7 @@ The EUROBIS-QC system relies on:
 - SQLITE Database Lookups   
 - External REST API Calls
 
-The bulk of the QC logic is in the **eurobisqc** package. The QCs rely on local logic (for instance to verify presence
+The bulk of the QC calculations happen in the **eurobisqc** package. The QCs rely on local logic (for instance to verify presence
 and validity of latitude and longitude, min/max depth or validity of dates), or on calls to external 
 REST APIs (for instance the pyxylookup API to verify that a point is at sea and which is the point's depth). 
 
@@ -49,11 +50,11 @@ These calls are performed for batches of 1000 (and leftovers) points for better 
 
 Another API which is called to obtain the geographical areas in which the dataset has been collected, is the IMIS 
 database. The geographical retrieval of the area through IMIS is specific to the datasets and it has been implemented
-in the EurobisDataset (eurobis_dataset.py). For the DwCA files, the same information is extracted from the file's 
-eml, which is extracted by DWCAProcessor. 
+in the EurobisDataset (eurobis_dataset.py). For the DwCA files, the same information is extracted from the DwCA file's 
+eml.xml, which is extracted and held by DWCAProcessor structures. 
 
-External API calls are protected, they run within a "timeoutable" thread, which returns None in case of failure. In those
-cases, the API calls are simply re-issued.
+External API calls are protected as they run within a "timeoutable" thread, which returns None in case of failure. In those
+cases, the API calls are simply re-issued after the timeout period has expired.
 
 #### Examples provided   
 
@@ -78,26 +79,26 @@ The class at the core of the system is the Enum QFlag, in eurobisqc.util.qc_flag
 and utilities to combine/encode/decode QC flags:
 
 ```python
-REQUIRED_FIELDS_PRESENT = ("All the required fields are present", 1)  # In required_fields
-TAXONOMY_APHIAID_PRESENT = ("AphiaID found", 2)  # In taxonomy_db
-TAXONOMY_RANK_OK = ("Taxon level more detailed than Genus", 3)  # In taxonomy_db
-GEO_LAT_LON_PRESENT = ("Lat and Lon present and not equal to None", 4)  # In location
-GEO_LAT_LON_VALID = ("Lat or Lon present and valid (-90 to 90 and -180 to 180)", 5)  # In location
-GEO_LAT_LON_ON_SEA = ("Lat - Lon on sea / coastline", 6)  # In location
-DATE_TIME_OK = ("Year or Start Year or End Year complete and valid", 7)  # In time_qc
-TAXON_APHIAID_NOT_EXISTING = ("Marine Taxon not existing in APHIA", 8)  # FLAG - NOT IMPLEMENTED
-GEO_COORD_AREA = ("Coordinates in one of the specified areas", 9)  # In location
-OBIS_DATAFORMAT_OK = ("Valid codes found in basisOfRecord", 10)  # in required_fields
-VALID_DATE_1 = ("Valid sampling date", 11)  # In time_qc
-VALID_DATE_2 = ("Start sampling date before End date - dates consistent", 12)  # In time_qc
-VALID_DATE_3 = ("Sampling time valid / timezone completed", 13)  # In time_qc
-OBSERVED_COUNT_PRESENT = ("Observed individual count found", 14)  # In measurements
-OBSERVED_WEIGTH_PRESENT = ("Observed weigth found", 15)  # In measurements
-SAMPLE_SIZE_PRESENT = ("Observed individual count > 0 sample size present", 16)  # In measurements
-SEX_PRESENT = ("Sex observation found", 17)  # In measurements
-MIN_MAX_DEPTH_VERIFIED = ("Depths consistent", 18)  # in location
-DEPTH_MAP_VERIFIED = ("Depth coherent with depth map", 19)  # In location
-DEPTH_FOR_SPECIES_OK = ("Depth coherent with species depth range", 20)  # FLAG - NOT IMPLEMENTED
+REQUIRED_FIELDS_PRESENT = ("All the required fields are present", 1) 
+TAXONOMY_APHIAID_PRESENT = ("AphiaID found", 2) 
+TAXONOMY_RANK_OK = ("Taxon level more detailed than Genus", 3)
+GEO_LAT_LON_PRESENT = ("Lat and Lon present and not equal to None", 4)
+GEO_LAT_LON_VALID = ("Lat or Lon present and valid (-90 to 90 and -180 to 180)", 5) 
+GEO_LAT_LON_ON_SEA = ("Lat - Lon on sea / coastline", 6) 
+DATE_TIME_OK = ("Year or Start Year or End Year complete and valid", 7) 
+TAXON_APHIAID_NOT_EXISTING = ("Marine Taxon not existing in APHIA", 8)  # NOT IMPLEMENTED
+GEO_COORD_AREA = ("Coordinates in one of the specified areas", 9) 
+OBIS_DATAFORMAT_OK = ("Valid codes found in basisOfRecord", 10) 
+VALID_DATE_1 = ("Valid sampling date", 11)  
+VALID_DATE_2 = ("Start sampling date before End date - dates consistent", 12) 
+VALID_DATE_3 = ("Sampling time valid / timezone completed", 13)  
+OBSERVED_COUNT_PRESENT = ("Observed individual count found", 14) 
+OBSERVED_WEIGTH_PRESENT = ("Observed weigth found", 15) 
+SAMPLE_SIZE_PRESENT = ("Observed individual count > 0 sample size present", 16) 
+SEX_PRESENT = ("Sex observation found", 17) 
+MIN_MAX_DEPTH_VERIFIED = ("Depths consistent", 18) 
+DEPTH_MAP_VERIFIED = ("Depth coherent with depth map", 19) 
+DEPTH_FOR_SPECIES_OK = ("Depth coherent with species depth range", 20)  # NOT IMPLEMENTED
 
 ```
 As a reference, this article can be used: https://academic.oup.com/database/article-pdf/doi/10.1093/database/bau125/16975803/bau125.pdf 
@@ -123,7 +124,7 @@ and builds also the necessary indexes, in one pass. The EUROBIS database contain
 records and occurrence type records. 
 It is important to notice that this **is not** a generator, all the dataset records are actually loaded in memory. 
 Different strategies may be implemented, but this has not been part of the effort, as PCs with 8 G of RAM can deal 
-with aany of the datasets currenly present in the database, and a PC with 4G or RAM has been successfully tested with a 
+with any of the datasets currently present in the database, and a PC with 4G or RAM has been successfully tested with a 
 dataset of 1M records. 
 
 QC Procedures are located in the files:
@@ -212,9 +213,13 @@ Create a directory where you want to install the project and make a virtual envi
 inside the cloned repository. Then activate it : 
 ```commandline
 mkdir EUROBISQC
-python3 -m venv eurobis-qc-venv 
+cd EUROBISQC
+python -m venv eurobis-qc-venv  
 source ./eurobis-qc-venv/bin/activate 
 ```
+
+Note: These are only one possibility, directory names and position/name of the virtual environment can be selected at 
+leisure. 
 
 #### Customize the configuration 
 Edit the config.ini file contained in dbworks/resources/config.ini, by filling the following fields as in the 
@@ -240,7 +245,7 @@ The configuration of the lookup DB does not change and a sample, which has been 
 been provided. Instructions to modify the lookup database can be found in the specific documentation. 
 
 #### Local Installation
-Once all the configuration is performed, the project can be installing by running the setup file, in the eurobis-qc
+Once all the configuration is performed, the project can be installed by running the setup file, in the eurobis-qc
 directory: 
 
 ```commandline
@@ -252,9 +257,9 @@ python setup.py install
 To verify that the installation is working, you can run the command: 
 
 ```commandline
-python eurobisqc/examples/run_dwca_pipeline.py from 
+python eurobisqc/examples/run_dwca_pipeline.py 
 ```
-a terminal, on the command line. This will launch a dialog box, from which you can select the directory under test/data. 
+from a terminal, on the command line. This will launch a dialog box, from which you can select the directory under test/data. 
 The list of selected dwca archives shall be loaded and you can select one and click OK to process it : 
 
 ![image](resources/screenshot_example1.png)
@@ -276,7 +281,7 @@ We start from a system connected to the internet, with the following installed a
 - pip 
 - git 
 
-The first things do are to upgrade pip, then to install is the virtual environment support. From a command line: 
+The first things to do are to upgrade pip, then to install the virtual environment support. From a command line: 
 
 ```commandline
 python -m pip install --upgrade pip
@@ -312,20 +317,21 @@ pip install -r requirements.txt
 ```
 
 On Windows, failures have been experienced while installing the github repositories. In that case, 
-the github repositories shall be cloned and 
+the github repositories shall be cloned and installed by hand on a terminal window, with the virtual environment 
+activated, as explained later: 
 
+The command: 
 ```commandline
 python setup.py install 
 ```
-
 shall be run for each of them to install the libraries in the virtual environment. The repositories that can 
-give troubles and can be installed from the cloned repository are follows : 
+give troubles and can be installed from the cloned repository are as follows : 
 
 ```commandline
 git clone https://github.com/pieterprovoost/csvreader.git
 git clone https://github.com/iobis/dwca-processor.git
 git clone https://github.com/iobis/pyxylookup.git
-got clone https://github.com/iobis/pyworms.git     **NOTE: Should not be necessary** 
+git clone https://github.com/iobis/pyworms.git     **NOTE: Should not be necessary** 
 ```
 
 #### Configuration 
@@ -335,11 +341,10 @@ the Lookup database provided in double compressed form under
 ```
 ...\eurobis-qc\dbworks\database
 ```
-Must be decompressed with a tool of choice until the file  EUROBIS_QC_LOOKUP_DB.db is present in the same directory. 
+must be decompressed with a tool of choice until the file  EUROBIS_QC_LOOKUP_DB.db is present in the same directory. 
 
 The main difference between the Linux install and the Windows install is that the Linux configuration files are **in the 
 virtual environments, where the packages are installed**, while in Windows they are in the **git clone** directory
-
 
 #### Verification 
 

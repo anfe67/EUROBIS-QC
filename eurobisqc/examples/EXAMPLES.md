@@ -41,13 +41,40 @@ Another example is provided in **run_dwca_multiprocess.py**, in this one a folde
 
 The Dataset processing work on the EUROBIS database and **DO** update the QC bitmasks of the datasets being updated. (In fact, the biggest time eater is the database update).
 
-The core of the processing (processes one dataset) is **dataset_qc_labeling** mssql_example_pipeline. Everything necessary to process a dataset or to process a list of datasets in a multiprocessing fashion as explained above.
+The core of the processing (processes one dataset) is **dataset_qc_labeling** in mssql_example_pipeline.py. 
+Everything necessary to process a dataset or to process a list of datasets in a multiprocessing fashion as explained above.
 
-The starting point is a dataset id, starting from that several characteristics of the dataset are retrieved. The core of the dataset processing is a class called **EurobisDataset** contained in **eurobis_dataset.py**. It tries to reproduce the same capabilities of the DwCAProcessor seen above, but starting from a dataset stored across several tables in a MS SQL database. However, no optimization techniques are used to limit memory usage (like processing the records in pages of XXX records at the time).
+The starting point for **dataset_qc_labeling** is a dataset id, from which the records and the characteristics of the dataset 
+are retrieved. 
+The core of the dataset processing is a class called **EurobisDataset** contained in **eurobis_dataset.py**. 
+It reproduces the same capabilities of the DwCAProcessor seen above, but starting from a dataset stored across several tables 
+in a MS SQL database. However, no optimization techniques are used to limit memory usage 
+(like processing the records in pages of XXX records at the time).
 
 ### Running Dataset Processing
-**run_mssql_pipeline** runs a graphical dataset chooser that reports the id and display name for the full list of datasets contained in the database or in alternative, the list of datasets that contain at least a record with label 0 or NULL. Therefore to perform re-labeling of a dataset it is sufficient to set one of this dataset's records QC mask to NULL or 0. If a single dataset is selected, then the simple dataset labelling function **dataset_qc_labeling** is called. As the listbox is capable of multiple selections, if this is the case, then the **do_db_multi_selection** function is called, which performs multiprocessing in the same way described above, with the exception that a boolean parameter **server_local** in the section **[SQLSERVERDB]**, configurable in "dbworks/resources/config.ini" when set to **True** reserves two additional cores to be used by the MS SQL Server (in practice the Pool will consist of two processes less if this parameter is set to True. However the MS SQL Server will try to use anyway all cores, so in fact a better choice is to run the processing on a different machine than the database server. 
+**run_mssql_pipeline** runs a graphical dataset chooser that reports the id and display name for the full list of 
+datasets contained in the database or in alternative, the list of datasets that contain at least a record with label 0 or NULL. 
+Therefore to perform re-labeling of a dataset it is sufficient to set one of this dataset's records QC mask to NULL or 0. 
+If a single dataset is selected, then the simple dataset labelling function **dataset_qc_labeling** is called. 
+As the listbox is capable of multiple selections, if this is the case, then the **do_db_multi_selection** function is called, 
+which performs multiprocessing in the same way described above, with the exception that a boolean parameter **server_local** 
+in the section **[SQLSERVERDB]**, configurable in "dbworks/resources/config.ini" when set to **True** reserves 
+two additional cores to be used by the MS SQL Server (in practice the Pool will consist of two processes less if this parameter 
+is set to True. 
+However the MS SQL Server will try to use anyway all cores, so in fact a better choice is to run the processing on 
+a different machine than the database server. 
+**mssql_random_record** contains a reproduction to a call to **dataset_qc_labeling** but with important differences: 
+1. The dataset is selected at random within all datasets having less than 10000 records 
+2. From this dataset, it chooses a random **core** event and all dependant records, and calculates the QC.  
+
 
 ### Considerations
+
+1) DwCA archive do NOT contain a QC flag, so their QC processing is useful only during the processing of the file. 
+2) The 18 basic QCs are all used by the above explained examples and they have been extensively tested. 
+3) The QC "pipelines" proposed are examples based on the discussions and emails between AF/SaFITS and BV/VLIZ. 
+Alternative ways of processing the records may be implemented based on these examples. 
+   
+
 
 ---

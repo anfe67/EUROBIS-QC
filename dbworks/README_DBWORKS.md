@@ -64,7 +64,7 @@ https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-micro
 Installation instruction to install the pymssql pre-requisite package FreeTDS on ubuntu can be found here: 
 https://pymssql.readthedocs.io/en/dev/intro.html
 
-This is an example of a configuration file for this project: 
+This is an example of a configuration file for this project, where all variables have been enclosed in "<>": 
 ```
 [SQLITEDB]
 databaseFile = database/EUROBIS_QC_LOOKUP_DB.db
@@ -73,10 +73,10 @@ databaseFile = database/EUROBIS_QC_LOOKUP_DB.db
 driver        = ODBC Driver 17 for SQL Server
 drivermodule  = pymssql
 # drivermodule can be pymysql or pyodbc (needs to be specified).
-server        = 127.0.0.1
-port          = 1433
+server        = <MyServerIP>
+port          = <MyServerPort>
 database      = eurobis_dat
-username      = sa
-password      = MyPassword
+username      = <MyUser>
+password      = <MyPassword>
 
 ```
