@@ -22,8 +22,9 @@ def select_random_ds(with_logging=True):
 
     # To select a specific type of record,
     # This selects 1 dataset with  less than 10000 events/occurrences reported in the dataproviders table
+    # To select Event based data sets, add this between e.dataprovider_id and group_by: where d.core = 2
     sql_random_dataset = f"SELECT TOP 1  d.id, count(e.dataprovider_id) FROM  dataproviders d " \
-                         f" inner join eurobis e on d.id = e.dataprovider_id where d.core = 2 group by d.id " \
+                         f" inner join eurobis e on d.id = e.dataprovider_id  group by d.id " \
                          f" having count(e.dataprovider_id) < 10000 ORDER BY NEWID()"
 
     pyxy_count_lookups = 0

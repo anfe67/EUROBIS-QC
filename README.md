@@ -1,39 +1,74 @@
 # EUROBIS-QC
 
 ## Background
-Implementation of a seiries of Quality Control checks on EUROBIS DwC-A records (dictionaries).
+This project consists in the implementation of a series of Quality Control checks on marine biodiversity records 
+(implemented as Python dictionaries). The records are either stored in DwCA archives or in a MS SQL database. 
 
 Based on:
 
-obistools: https://github.com/iobis/obistools
-obis-qc: https://github.com/iobis/obis-qc
-dwca-processor: https://github.com/iobis/dwca-processor
+```
+obistools:       https://github.com/iobis/obistools
+obis-qc:         https://github.com/iobis/obis-qc
+dwca-processor:  https://github.com/iobis/dwca-processor
+pyxylookup:      https://github.com/iobis/pyxylookup
+isodateparser:   https://github.com/pieterprovoost/isodateparser
+```
+And other libraries, almost all from Iobis (https://github.com/iobis) and authored by Pieter Provoost. 
 
-And other libraries, almost all from Pieter Provoost. 
+### Requirements 
+A modern PC, 8G of RAM, better if OS is Linux because all the development has been performed under Ubuntu 20.04 using Pycharm. 
+Pycharm is not needed in order to run the examples provided with system, and all the examples except the biggest 
+dataset currently available run fine on an modest Atom based PC (2009, 4G RAM). 
 
 ## QC System architecture
 
-The QC for the the eMoF/MoF records are exclusively based on lookups from a locally available SQLITE database. 
-This also contains a copy of the WORMS database for lookup of the aphia ids. 
+The diagram below can help figure out at a glance the main architectural components of the EUROBIS-QC system.
+![image](resources/Architecture.png)
+
+The EUROBIS-QC system relies on: 
+
+- Local Logic
+- SQLITE Database Lookups   
+- External REST API Calls
+
+The bulk of the QC logic is in the **eurobisqc** package. The QCs rely on local logic (for instance to verify presence
+and validity of latitude and longitude, min/max depth or validity of dates), or on calls to external 
+REST APIs (for instance the pyxylookup API to verify that a point is at sea and which is the point's depth). 
+
+A number of QCs are implemented by mean of lookup into a locally available SQLITE database. The lookup tables 
+can be easily modified by acting on a set of configuration files and quickly regenerated, including index creation.  
+This SQLITE database contains a copy of the WORMS database for the Taxonomy QCs, most noticeably to lookup 
+the aphia ids and to establish the rank of the aphia ids.
+
+All Database Logic is in the **dbworks** package. This includes the SQLITE for lookups and the MS SQL logic to access
+the eurobis datasets on which to calculate the QC values. 
 
 Furthermore, the verification of the record's Lat/Lon to ascertain that a point is at sea and that the reported 
 depth is coherent with the depth map of the point is performed through calls to the pyxylookup service. 
-These calls are performed for batches of 1000 (and leftovers) points for better network usage.  
+These calls are performed for batches of 1000 (and leftovers) points for better network usage.
 
-#### Main system components   
+Another API which is called to obtain the geographical areas in which the dataset has been collected, is the IMIS 
+database. The geographical retrieval of the area through IMIS is specific to the datasets and it has been implemented
+in the EurobisDataset (eurobis_dataset.py). For the DwCA files, the same information is extracted from the file's 
+eml, which is extracted by DWCAProcessor. 
 
-The diagram below can help figure out at a glance the main architectural components of the EUROBIS-QC concept.
-![image](resources/Architecture.png)
+External API calls are protected, they run within a "timeoutable" thread, which returns None in case of failure. In those
+cases, the API calls are simply re-issued.
 
+#### Examples provided   
 
 The QCs works on Events/Occurrence records from DwCA files as well as on records stored in a MSSQL database. 
-The examples provided, all found under /eurobisqc/test, are explicatory of the ways to process:
+A set of small DwCA archives are provided under eurobisqc/test/data. 
+
+The examples provided, all found under /eurobisqc/examples, can be used to process:
 
 - a single DwCA file (QCs are not stored) (run_dwca_pipeline.py)
 - a set of DwCA files contained in a directory using multiprocessing (run_dwca_multiprocess.py)
-- a dataset contained in the eurobis database (run_mssql_pipeline.py) - **UPDATING** the database
-- a random number of datasets (2% selected among those with less than 2500 records) from the database **UPDATING** the
+- one or more datasets contained in the eurobis database (run_mssql_pipeline.py) - **UPDATES** the database
+- a random number of datasets (2% selected among those with less than 2500 records) from the database **UPDATES** the
   database
+- the calculation of a random record from a random data set, having less than 10000 records, 
+  printing all explanatory info: (mssql_random_record.py)  
 
 #### QC applied to records 
 QC is calculated on Event Records and Occurrence records, as follows: 
@@ -65,26 +100,99 @@ DEPTH_MAP_VERIFIED = ("Depth coherent with depth map", 19)  # In location
 DEPTH_FOR_SPECIES_OK = ("Depth coherent with species depth range", 20)  # FLAG - NOT IMPLEMENTED
 
 ```
+As a reference, this article can be used: https://academic.oup.com/database/article-pdf/doi/10.1093/database/bau125/16975803/bau125.pdf 
 
-It has been agreed to not implement QCs 8 and 20 for the moment, so there is no QC procedure that deals with these two.  
+It has been agreed to not implement QCs 8 and 20 for the moment, so there is no QC procedure that deals with these two.
+Also Outliers analysis is not part of this implementation. 
+
+### QC Procedures description: 
+
+All QCs are performed on a record (Python dictionary) or a set of, responding to the specifications provided in the 
+three references below.
+
+- **Occurrence**: https://rs.gbif.org/core/dwc_occurrence_2020-07-15.xml
+- **Event**: https://rs.gbif.org/core/dwc_event_2016_06_21.xml
+- **eMoF**: https://rs.gbif.org/extension/obis/extended_measurement_or_fact.xml
+
+Such records can come directly from  DwCA archives or from an object of class EurobisDataset, which has been built to 
+mirror the functionality of DWCAProcessor but reading from the MSSQL Database EUROBIS instead of DwCA files. 
+The EurobisDataset class contains a method called 
+load_dataset(dataprovider_id) which loads all the records of a dataset in memory, provides to the fields 
+"reconciliation" so that records from DWCAProcessor and EurobisDataset will look exactly the same to the QC procedures
+and builds also the necessary indexes, in one pass. The EUROBIS database contains a single table for both event type 
+records and occurrence type records. 
+It is important to notice that this **is not** a generator, all the dataset records are actually loaded in memory. 
+Different strategies may be implemented, but this has not been part of the effort, as PCs with 8 G of RAM can deal 
+with aany of the datasets currenly present in the database, and a PC with 4G or RAM has been successfully tested with a 
+dataset of 1M records. 
+
+QC Procedures are located in the files:
+```
+- eurobisqc/required_fields.py:    QC 1, 10
+- eurobisqc/location.py:           QC 4, 5, 6, 9, 18, 19
+- eurobisqc/time_qc.py:            QC 7, 11, 12, 13
+- eurobisqc/taxonomy.py:           QC 2, 3 
+- eurobisqc/measurements.py:       QC 14, 15, 16, 17
+```
+
+These are used in a slightly different way in examples/dwca_pipeline.py and examples/mssql_pipeline.py, because of the 
+way in which the records are read. 
+
+There are two types of datasets, those with the data hyerarchy starting at "Event" records (DarwinCoreType = 2) and 
+those starting at "Occurrence" records (DarwinCoreType = 1). Record QCs is calculated as follows : 
+
+#### From the image, for datasets with core record type = occurrence:
+
+1. The Occurrence records are checked for all the implemented QC and also for Sex (as a specific field Sex is present 
+in the eurobis table which may be populated for an occurrence record).  
+These are QCs from 1 to 19 except 8 (not implemented), 14, 15 and 16. Basically all QCs except those for eMoF records.
+
+2. The QC calculated on the **set** of eMoF records which are related to the occurrence record being examined. These 
+QCs are related to the possible measurements: Sample Size, Count, Weight, Sex (QCs 14, 15, 16, 17). The calculated 
+values are then OR-red to the occurence records' own QC. These values are **not** stored in the eMoF records.  
+
+#### From the image, for datasets with core record type = event:
+
+1. QCs performed on Event records are: Location (4, 5, 6, 9, 18, 19), Dates/Times (7, 11, 12, 13), Required 
+fields (1).  
+   
+2. eMoF records for **Event** Records are NOT considered for QC calculations. They relate to instruments, conditions 
+and are not related to biological observations. 
+
+3. The Occurrence records are checked for all the implemented QC and also for Sex (as a specific field Sex may be 
+populated for an occurrence record).  These are QCs from 1 to 19 except 8 (not implemented), 14, 15 and 16. Basically
+all QCs except those for eMoF records. 
+
+4. The QCs are calculated on the **set** of eMoF records which are related to the occurrence record being examined. These 
+QCs are related to the possible measurements: Sample Size, Count, Weight, Sex (QCs 14, 15, 16, 17). The calculated 
+values are then OR-red to the occurence records' own QC. These values are **not** stored in the eMoF records. 
+   
+5. The QC calculated for event records is normally pushed down to all Occurrence Records. This is because often the 
+position, dates of the occurrences are all derived from the event, and they are not present on the occurrences. 
+   
+6. **SPECIAL NOTE** for the required fields check. Here, after having processed each occurrence record, 
+occurrence record and "father" event records are looked at together to verify that all required fields are present in 
+the (set) combination of the two records. A QC procedure located in eurobisqc/required_fields.py is applied to the two
+records, if it passes, then QC 1 is assigned to the **occurrence record**. 
 
 
-## Installation
+## Installation (sdist)
 
 ### Ubuntu Linux 20.04 
 
 #### Starting from scratch - creating the basis
-You need to have Python3 installed (default) and as a minimum the modules pip and venv : 
+The basic requirements are to have Python3 installed (default) and as a minimum the modules pip and venv, which 
+can anyway be installed following the procedure : 
 
 ```commandline
 sudo apt install python3-pip python3-venv
 ```
-You need to have git installed: 
+Then git needs to be installed: 
 ```
 sudo apt install git 
 ```
-Futehrmore, you need to have odbc installed if you want to use the pyodbc driver for MS SQL or freetds for the pymssql 
-driver:
+Furthermore, you need to have odbc installed if you want to use the pyodbc driver for MS SQL or freetds for the pymssql 
+driver. For installation of both options:
 
 ```commandline
 sudo apt install unixodbc-dev freetds-bin freetds-dev  
@@ -122,7 +230,7 @@ server_local  = True
 # server local will determine the number of processes spawned. MSSQL needs two cores to work OK
 port          = 1433
 database      = eurobis_dat
-username      = <Your User>
+username      = <Your MS SQL User>
 password      = <Your Password>
 
 ```

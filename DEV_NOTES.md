@@ -802,7 +802,9 @@ New Query, include only dataprovider id and physloc, Index Disabled:
 - Email to Bart 
 
 ## 26/01/2021 
-- Testing installation on Windows - painful but possible 
+- Testing installation on Windows - painful but possible to rub. Not investigating further...
+- Documentation - QC Procedures
+- Test - A number of tests trying with random records 
 
 
 
