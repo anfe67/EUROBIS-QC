@@ -2,7 +2,7 @@ import sys
 import logging
 from unittest import TestCase
 
-import qc_flags
+from eurobisqc.util import qc_flags
 from eurobisqc import location
 from eurobisqc.util.qc_flags import QCFlag
 

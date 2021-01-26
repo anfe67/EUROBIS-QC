@@ -801,6 +801,8 @@ New Query, include only dataprovider id and physloc, Index Disabled:
 - Single record tests   
 - Email to Bart 
 
+## 26/01/2021 
+- Testing installation on Windows - painful but possible 
 
 
 

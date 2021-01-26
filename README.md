@@ -29,7 +29,7 @@ The diagram below can help figure out at a glance the main architectural compone
 The QCs works on Events/Occurrence records from DwCA files as well as on records stored in a MSSQL database. 
 The examples provided, all found under /eurobisqc/test, are explicatory of the ways to process:
 
-- a single DwCA file (QCs are not saved) (run_dwca_pipeline.py)
+- a single DwCA file (QCs are not stored) (run_dwca_pipeline.py)
 - a set of DwCA files contained in a directory using multiprocessing (run_dwca_multiprocess.py)
 - a dataset contained in the eurobis database (run_mssql_pipeline.py) - **UPDATING** the database
 - a random number of datasets (2% selected among those with less than 2500 records) from the database **UPDATING** the
@@ -75,6 +75,7 @@ It has been agreed to not implement QCs 8 and 20 for the moment, so there is no 
 
 #### Starting from scratch - creating the basis
 You need to have Python3 installed (default) and as a minimum the modules pip and venv : 
+
 ```commandline
 sudo apt install python3-pip python3-venv
 ```
@@ -84,6 +85,7 @@ sudo apt install git
 ```
 Futehrmore, you need to have odbc installed if you want to use the pyodbc driver for MS SQL or freetds for the pymssql 
 driver:
+
 ```commandline
 sudo apt install unixodbc-dev freetds-bin freetds-dev  
 ```
@@ -92,18 +94,20 @@ On ubuntu, you also need tk (there are some basic graphic elements in the demo p
 sudo apt install python3-tk 
 ```
 
+#### Clone the repository: 
+```
+git clone https://github.com/anfe67/eurobis-qc.git  
+```
 
 #### Create the virtual environment
-Create a directory where you want to install the project and make a virtual environment, then activate it : 
+Create a directory where you want to install the project and make a virtual environment, this could (eventually) be 
+inside the cloned repository. Then activate it : 
 ```commandline
 mkdir EUROBISQC
 python3 -m venv eurobis-qc-venv 
 source ./eurobis-qc-venv/bin/activate 
 ```
-#### Clone the repository: 
-```
-git clone https://github.com/anfe67/eurobis-qc.git  
-```
+
 #### Customize the configuration 
 Edit the config.ini file contained in dbworks/resources/config.ini, by filling the following fields as in the 
 example below:
@@ -118,16 +122,134 @@ server_local  = True
 # server local will determine the number of processes spawned. MSSQL needs two cores to work OK
 port          = 1433
 database      = eurobis_dat
-username      = sa
+username      = <Your User>
 password      = <Your Password>
 
 ```
+
 Please notice that server_local must be True if the database is running on the same machine, False otherwise. 
 The configuration of the lookup DB does not change and a sample, which has been used during the development has 
 been provided. Instructions to modify the lookup database can be found in the specific documentation. 
 
 #### Local Installation
-Once all the configuration is performed, the project can be installing by running the setup file: 
+Once all the configuration is performed, the project can be installing by running the setup file, in the eurobis-qc
+directory: 
+
+```commandline
+python setup.py install 
+```
+
+#### Verification 
+
+To verify that the installation is working, you can run the command: 
+
+```commandline
+python eurobisqc/examples/run_dwca_pipeline.py from 
+```
+a terminal, on the command line. This will launch a dialog box, from which you can select the directory under test/data. 
+The list of selected dwca archives shall be loaded and you can select one and click OK to process it : 
+
+![image](resources/screenshot_example1.png)
+
+These files are small but provide a good example of the QC processing involved.  
+
+### Windows 10 
+
+####
+Disclaimer: 
+The entire project has been developed under Linux, and the only time it has been launched in Windows is to write these 
+notes. The installation procedure as described in Linux fails, for several reasons. However, it is possible to create 
+a virtual environment containing all the required packages and run the examples contained in the project from 
+within Pycharm (for instance). 
+
+We start from a system connected to the internet, with the following installed and continue from there: 
+
+- Python 3.6 or above 
+- pip 
+- git 
+
+The first things do are to upgrade pip, then to install is the virtual environment support. From a command line: 
+
+```commandline
+python -m pip install --upgrade pip
+python -m pip install --upgrade virtualenv 
+```
+
+Then clone the project repository: 
+```commandline
+git clone https://github.com/anfe67/eurobis-qc.git
+```
+
+Create a virtual environment (better inside eurobis-qc if using Pycharm):
+```commandline
+python -m venv eurobis-qc-venv
+```
+Install OS dependencies 
+Download and install ODBC Drivers from MS Site: 
+https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver15
+
+Install also the pymssql alternative library: 
+```commandline
+python -m pip install --upgrade pymssql 
+```
+
+Open the project in Pycharm, in the terminal view activate the virtual environment if it is not yet activated: 
+```
+.\eurobis-qc-venv\Scripts\activate.bat (use single backslashes)
+```
+install the requirements in requirements.txt.    
+
+```commandline
+pip install -r requirements.txt
+```
+
+On Windows, failures have been experienced while installing the github repositories. In that case, 
+the github repositories shall be cloned and 
+
+```commandline
+python setup.py install 
+```
+
+shall be run for each of them to install the libraries in the virtual environment. The repositories that can 
+give troubles and can be installed from the cloned repository are follows : 
+
+```commandline
+git clone https://github.com/pieterprovoost/csvreader.git
+git clone https://github.com/iobis/dwca-processor.git
+git clone https://github.com/iobis/pyxylookup.git
+got clone https://github.com/iobis/pyworms.git     **NOTE: Should not be necessary** 
+```
+
+#### Configuration 
+Configuration of the databases is the same as per Linux, in the same configuration file. 
+As in Windows the default decompression settings for the libraries are not the same as per Linux, 
+the Lookup database provided in double compressed form under 
+```
+...\eurobis-qc\dbworks\database
+```
+Must be decompressed with a tool of choice until the file  EUROBIS_QC_LOOKUP_DB.db is present in the same directory. 
+
+The main difference between the Linux install and the Windows install is that the Linux configuration files are **in the 
+virtual environments, where the packages are installed**, while in Windows they are in the **git clone** directory
+
+
+#### Verification 
+
+To verify that the installation is working, you can open the project from Pycharm and run the 
+example file run_dwca_pipeline.py as described above. 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
