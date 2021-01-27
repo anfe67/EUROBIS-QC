@@ -21,6 +21,7 @@ this.logger.addHandler(logging.StreamHandler())
 
 this.PROCESS_BATCH_SIZE = 1000
 
+
 def qc_event(record, data_archive):
     # None means that records have not been quality checked 0 means that QCs have been attempted
     if record["qc"] is None:

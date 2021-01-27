@@ -352,7 +352,7 @@ class EurobisDataset:
     def disable_qc_index(cls):
         """ Disable non-clustered index on QC
             important - this depends on the index name being kept the same in the
-            :var sql_disable_index below
+            variable sql_disable_index below
             """
 
         # Check DB connection...

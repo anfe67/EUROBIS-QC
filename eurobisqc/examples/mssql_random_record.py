@@ -71,8 +71,6 @@ def select_random_ds(with_logging=True):
         # make sure we start at "Empty"
         record["qc"] = None
 
-        pyxy_count_lookups = 0
-
         # Perform basic QC:
         qc_ev = mssql_pipeline.qc_event(record, data_archive)
         record["qc"] |= qc_ev  # Make sure it is stamped

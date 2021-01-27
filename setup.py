@@ -1,4 +1,3 @@
-import os
 from setuptools import setup, find_packages
 
 # The database contains a big part of WORMS and it is BIG - not sure whether I want to distribute it.
