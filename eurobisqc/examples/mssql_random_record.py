@@ -9,7 +9,7 @@ from eurobisqc import eurobis_dataset
 from eurobisqc import location
 from eurobisqc import required_fields
 from eurobisqc.examples import mssql_pipeline
-from eurobisqc.util.qc_flags import QCFlag
+from qc_flags import QCFlag
 
 this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)

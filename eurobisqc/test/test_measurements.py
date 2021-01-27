@@ -1,6 +1,6 @@
 from unittest import TestCase
 from eurobisqc import measurements
-from eurobisqc.util import qc_flags
+import qc_flags
 
 
 class Test(TestCase):

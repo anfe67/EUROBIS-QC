@@ -3,7 +3,7 @@ import logging
 
 from unittest import TestCase
 from eurobisqc import taxonomy
-from eurobisqc.util.qc_flags import QCFlag
+from qc_flags import QCFlag
 
 this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)

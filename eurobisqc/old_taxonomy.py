@@ -3,7 +3,7 @@
 import logging
 from obisqc import taxonomy
 from obisqc.util import flags
-from .util import qc_flags
+import qc_flags
 
 logger = logging.getLogger(__name__)
 

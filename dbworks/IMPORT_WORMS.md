@@ -1,6 +1,11 @@
 # Importing WORMS to SQLLITE
 
-## Import tools tested
+## Choice of import tool
+
+To quickly import the WORMS database dump provided in CSV format (field separator is TAB), 
+the following tools have been evaluated. 
+All of them import successfully the smaller tables, while the taxon table 
+leads to make a choice, because not all tools can deal with it: 
 
 * Libreoffice (cuts the file 4/5 into the reading, so the import is **not satisfactory**)
 * sqllitebrowser (worked for the smaller tables, **not for taxon**) **not satisfactory**
@@ -16,7 +21,7 @@ The entire table was imported, resulting in the expected number of records.
 - The file name (database/EUROBIS_QC_LOOKUP_DB.db=, in order to be used a lookup DB, needs to be specified in
   ./resources/config.ini
 
-**NOTE:**
+## To improve the performance :
 SQLite is a file based DB, which is efficient for small databases that can be stored in memory. This is the case for the
 WORMS db. SQLite is supported natively in Python by means of the **sqlite3** library. 
 
@@ -32,5 +37,6 @@ CREATE INDEX "taxon_scientific_name_id" ON "taxon" (
 	"scientificNameID"	ASC
 )
 ```
-**NOTE:** This is extremely important for performance, as it helps improve lookup times by a factor of 1000. 
+**NOTE:** This is extremely important for performance, as it helps improve lookup 
+times on taxon (and therefore efficiency of the taxonomy QC) by a factor of 1000. 
 

@@ -23,14 +23,15 @@ resources** folder, with file names ending in Lookup or LookUP
   biomass")
 - sexMeasurementTypeIDLookup 
 - sexMeasurementTypeIDLookup
-- sexValuesLookup - The admitted values  
-... 
+- sexValuesLookup - The possible valid values  
+
+The tables above are used in QCs 14, 15, 16 and 17 
+ 
 - requiredFieldsLookUP - Contains the required fields for QC1 
 - recommendedFieldsLookUP - Contains the recommended fields for QC1 
-- basisOfRecordValuesLookup - Contains the values admitted in the basisOfRecord field for QC 10 to pass 
-  
+- basisOfRecordValuesLookup - Contains the values admitted in the basisOfRecord field for QC 10 to pass
 
-These tables shall be refreshed by running, from a python console: 
+These tables can be refreshed by running from a python console: 
 
 ```python
 import os 
@@ -43,15 +44,15 @@ import_files()
 
 ### MS SQL Server connectivity 
 
-The package shall be used to connect to the MS SQL server containing the EUROBIS data, query the DB to obtain datasets 
-and after having run the QCs, push the bitmask back to the database. 
+This package shall be used to connect to the MS SQL server containing the EUROBIS data, query the DB to obtain datasets 
+and after having run the QCs, push the computed bitmask back to the database records (update the qc field in table eurobis). 
 
 The package contains connectivity and helper functions. The database connection parameters are in a config.ini file 
 under resources.
 
 ### Test 
 
-Testig is limited to demonstrating connectivity, querying a table and outputting all records in the form of a list of 
+Testing is limited to demonstrating connectivity, querying a table and outputting all records in the form of a list of 
 Python dictionaries.
 
 ## Parameters: 

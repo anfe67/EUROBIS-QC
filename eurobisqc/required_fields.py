@@ -1,7 +1,7 @@
 import sys
 
 from dbworks import sqlite_db_functions
-from eurobisqc.util import qc_flags
+import qc_flags
 
 this = sys.modules[__name__]
 

@@ -18,7 +18,7 @@ from eurobisqc import measurements
 
 from eurobisqc.util import extract_area
 from eurobisqc.test.util import file_chooser
-from eurobisqc.util import qc_flags
+import qc_flags
 from eurobisqc.util import misc
 
 # Use "this" trick

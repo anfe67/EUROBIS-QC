@@ -2,9 +2,9 @@ import sys
 import logging
 from unittest import TestCase
 
-from eurobisqc.util import qc_flags
+import qc_flags
 from eurobisqc import location
-from eurobisqc.util.qc_flags import QCFlag
+from qc_flags import QCFlag
 
 this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)

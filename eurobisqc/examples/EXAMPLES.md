@@ -4,7 +4,8 @@ Reorganize examples (They are all in eurobisqc/test, should move to eurobisqc/ex
 
 ## Prerequisites
 
-All the examples require access to the necessary python libraries. These are indicated in the installation instructions in README.md.
+All the examples require access to the necessary python libraries. 
+These are indicated in the installation instructions in the top level README.md file.
 Furthermore, all the examples need access to the internet to call the following APIs:
 
 1. pyxylookup for verification of the distance from shore and the depth of the observations
@@ -65,16 +66,12 @@ However the MS SQL Server will try to use anyway all cores, so in fact a better 
 a different machine than the database server. 
 **mssql_random_record** contains a reproduction to a call to **dataset_qc_labeling** but with important differences: 
 1. The dataset is selected at random within all datasets having less than 10000 records 
-2. From this dataset, it chooses a random **core** event and all dependant records, and calculates the QC.  
-
+2. From this dataset, it chooses a random **core** event and all dependant records, and calculates the QC.
 
 ### Considerations
-
 1) DwCA archive do NOT contain a QC flag, so their QC processing is useful only during the processing of the file. 
 2) The 18 basic QCs are all used by the above explained examples and they have been extensively tested. 
 3) The QC "pipelines" proposed are examples based on the discussions and emails between AF/SaFITS and BV/VLIZ. 
 Alternative ways of processing the records may be implemented based on these examples. 
    
-
-
 ---

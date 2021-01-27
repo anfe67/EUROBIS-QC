@@ -1,7 +1,7 @@
 """ To check for missing fields in eMoF records as per error masks  """
 
 import sys
-from eurobisqc.util import qc_flags
+import qc_flags
 from eurobisqc.util import misc
 from dbworks import sqlite_db_functions
 

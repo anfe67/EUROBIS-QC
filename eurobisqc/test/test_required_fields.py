@@ -1,6 +1,6 @@
 from unittest import TestCase
 from eurobisqc import required_fields
-from eurobisqc.util.qc_flags import QCFlag
+from qc_flags import QCFlag
 
 
 class Test(TestCase):
