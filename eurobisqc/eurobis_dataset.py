@@ -138,9 +138,11 @@ class EurobisDataset:
         self.provider_record = None  # Provider record extracted
         self.dataset_name = ""
         self.records_for_lookup = []
+        self.pyxylookup_counter = 0
 
     def get_provider_data(self, das_prov_id):
         """ Obtain the dataset info from the dataproviders table
+            and stores that into the instance fields
             :param - das_prov_id - Dataset id """
 
         if not mssql.conn:
@@ -171,6 +173,7 @@ class EurobisDataset:
 
     def get_ev_occ_records(self, das_prov_id):
         """ retrieves event and occurrence records for the dataset in das_id from SQL Server
+            also builds search indexes to easily retrieve dependant records
             :param das_prov_id """
         if not mssql.conn:
             mssql.open_db()
@@ -218,8 +221,9 @@ class EurobisDataset:
 
     def get_emof_records(self, das_prov_id):
         """ retrieves measurementorfact records for the dataset in das_id from SQL Server
-        NOTE: mof records do not exist for records that have eventID and occurrenceID NULL
-        :param das_prov_id"""
+            also building search indexes to easily retrieve dependant records
+            NOTE: mof records do not exist for records that have eventID and occurrenceID NULL
+            :param das_prov_id"""
 
         if not mssql.conn:
             mssql.open_db()
@@ -261,6 +265,7 @@ class EurobisDataset:
     def query_builder_eve_occur(self, dataprovider_id):
         """ Builds the SQL query string to retrieve all event, occur records for a dataset
             inclusive of the eventDate
+            :param dataprovider_id
             :returns SQL Query string """
 
         sql_string = self.sql_eurobis_start
@@ -293,7 +298,7 @@ class EurobisDataset:
 
     def load_dataset(self, das_prov_id):
         """ given a dataset id from the dataprovider
-            loads an entire dataset in RAM for processing
+            loads an entire dataset in a EurobisDataset instance (RAM) for QC processing
             :param das_prov_id
             """
         self.get_provider_data(das_prov_id)
@@ -312,11 +317,13 @@ class EurobisDataset:
             then the call is re-issued until the list of results is returned. Average lookup of
             1000 records is around 1s, so 10 is a reasonable timeout
             :param imis_das_id - dataset IMIS identifier """
+
         return self.get_areas_from_eml(imis_das_id)
 
     def get_areas_from_eml(self, imis_das_id):
-        """ Given a IMIS Dataset ID, queries the IMIS web servce for
-            the EML related to the dataset
+        """ Given a IMIS Dataset ID, queries the IMIS web service for
+            the EML related to the dataset. Once the EML is returned, it is processed exactly
+            by the same function as for the DwCA files.
             :param imis_das_id - dataset IMIS identifier"""
 
         eml = None
@@ -344,7 +351,9 @@ class EurobisDataset:
     @classmethod
     def disable_qc_index(cls):
         """ Disable non-clustered index on QC
-            important - this depends on the index name """
+            important - this depends on the index name being kept the same in the
+            :var sql_disable_index below
+            """
 
         # Check DB connection...
         if not mssql.conn:
@@ -368,7 +377,7 @@ class EurobisDataset:
     @classmethod
     def rebuild_qc_index(cls):
         """ Rebuild non-clustered index on QC
-            important - this depends on the index name """
+            important - this depends on the index name as per disable_qc_index """
 
         # Check DB connection...
         if not mssql.conn:

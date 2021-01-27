@@ -1,19 +1,5 @@
 import os
 from setuptools import setup, find_packages
-from zipfile import ZipFile
-import tarfile
-
-# Extract all the contents of zip file in current directory
-with ZipFile('dbworks/database/eurobis_lookup_db.zip', 'r') as zipObj:
-    zipObj.extractall()
-
-# It should be a tar.gz, so further decompress
-fname = 'eurobis.tar.gz'
-
-if fname.endswith('tar.gz'):
-    tar = tarfile.open(fname, 'r:gz')
-    tar.extractall()
-    tar.close()
 
 # The database contains a big part of WORMS and it is BIG - not sure whether I want to distribute it.
 # In any case need to cope with it
@@ -55,7 +41,3 @@ setup(name="eurobisqc",
       packages=find_packages(),
       tests_require=['nose>=1.0', 'coverage'],
       zip_safe=False)
-
-# Remove the leftovers
-# os.remove('dbworks/database/eurobis_lookup_db.zip')
-os.remove('eurobis.tar.gz')

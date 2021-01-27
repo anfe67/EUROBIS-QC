@@ -27,8 +27,6 @@ def select_random_ds(with_logging=True):
                          f" inner join eurobis e on d.id = e.dataprovider_id  group by d.id " \
                          f" having count(e.dataprovider_id) < 10000 ORDER BY NEWID()"
 
-    pyxy_count_lookups = 0
-
     # Go and get the id!
     dataset_id = None
 
@@ -76,7 +74,7 @@ def select_random_ds(with_logging=True):
         pyxy_count_lookups = 0
 
         # Perform basic QC:
-        qc_ev = mssql_pipeline.qc_event(record, data_archive, pyxy_count_lookups)
+        qc_ev = mssql_pipeline.qc_event(record, data_archive)
         record["qc"] |= qc_ev  # Make sure it is stamped
 
         # Generate key and lookup occurrences...
@@ -84,7 +82,7 @@ def select_random_ds(with_logging=True):
         if key in data_archive.occ_indices:
             for occ_record in data_archive.occ_indices[key]:
                 # qc_occurrence sall also take care of emof for occurrence
-                qc_occ = mssql_pipeline.qc_occurrence(occ_record, data_archive, pyxy_count_lookups)
+                qc_occ = mssql_pipeline.qc_occurrence(occ_record, data_archive)
                 qc_occ |= required_fields.check_ev_occ_required(record, occ_record, False)
                 occ_record['qc'] |= qc_occ  # also give to occurrence record
                 occ_record['qc'] |= qc_ev  # Inherits the event QC (email 24/01/2021)
@@ -104,8 +102,9 @@ def select_random_ds(with_logging=True):
             for looked_up_record in data_archive.records_for_lookup:
                 if looked_up_record["DarwinCoreType"] == data_archive.EVENT:
                     key = f"{looked_up_record['dataprovider_id']}_{looked_up_record['eventID']}"
-                    for occ_record in data_archive.occ_indices[key]:
-                        occ_record["qc"] |= looked_up_record["qc"]
+                    if key in data_archive.occ_indices:
+                        for occ_record in data_archive.occ_indices[key]:
+                            occ_record["qc"] |= looked_up_record["qc"]
 
         this.logger.info(f"Calculated quality mask: {qc_ev}, consisting of:")
         this.logger.info(f"QC NUMBERS: -------------> {QCFlag.decode_numbers(record['qc'])}")
@@ -138,7 +137,7 @@ def select_random_ds(with_logging=True):
         # The QC is either 0 or a QC mask
         record_idx = randint(0, len(data_archive.occurrence_recs) - 1)
         record = data_archive.occurrence_recs[record_idx]
-        qc_occ = mssql_pipeline.qc_occurrence(record, data_archive, pyxy_count_lookups)
+        qc_occ = mssql_pipeline.qc_occurrence(record, data_archive)
 
         # Are there any lookups left to do (any record type)?
         if len(data_archive.records_for_lookup):

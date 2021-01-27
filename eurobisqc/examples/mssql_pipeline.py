@@ -21,11 +21,7 @@ this.logger.addHandler(logging.StreamHandler())
 
 this.PROCESS_BATCH_SIZE = 1000
 
-
-# this.count_pyxylookups = 0
-
-
-def qc_event(record, data_archive, pyxy_count_lookups):
+def qc_event(record, data_archive):
     # None means that records have not been quality checked 0 means that QCs have been attempted
     if record["qc"] is None:
         record["qc"] = 0
@@ -45,8 +41,8 @@ def qc_event(record, data_archive, pyxy_count_lookups):
         # Execute lookup if necessary
         if len(data_archive.records_for_lookup) >= data_archive.LOOKUP_BATCH_SIZE:
             location.check_xy(data_archive.records_for_lookup)
-            pyxy_count_lookups += 1
-            this.logger.debug(f"Lookups: {pyxy_count_lookups}")
+            data_archive.pyxylookup_counter += 1
+            this.logger.debug(f"Lookups: {data_archive.pyxylookup_counter}")
             # Empty the list
             data_archive.records_for_lookup = []
 
@@ -60,7 +56,7 @@ def qc_event(record, data_archive, pyxy_count_lookups):
     return record["qc"]
 
 
-def qc_occurrence(record, data_archive, pyxy_count_lookups):
+def qc_occurrence(record, data_archive):
     if record["qc"] is None:
         record["qc"] = 0
 
@@ -81,8 +77,8 @@ def qc_occurrence(record, data_archive, pyxy_count_lookups):
         # Execute lookup if necessary
         if len(data_archive.records_for_lookup) >= data_archive.LOOKUP_BATCH_SIZE:
             location.check_xy(data_archive.records_for_lookup)
-            pyxy_count_lookups += 1
-            this.logger.debug(f"Lookups: {pyxy_count_lookups}")
+            data_archive.pyxylookup_counter += 1
+            this.logger.debug(f"Lookups: {data_archive.pyxylookup_counter}")
             # Empty the list
             data_archive.records_for_lookup = []
 
@@ -137,8 +133,6 @@ def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True):
     if dataset_id is None:
         exit(0)
 
-    pyxy_count_lookups = 0
-
     data_archive = eurobis_dataset.EurobisDataset()
     data_archive.load_dataset(dataset_id)
 
@@ -163,7 +157,7 @@ def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True):
         # (which shall recurse into eMof), then own eMof and then "or" all
         for record in data_archive.event_recs:
             # qc_event shall also take care of emof for event
-            qc_ev = qc_event(record, data_archive, pyxy_count_lookups)
+            qc_ev = qc_event(record, data_archive)
             record["qc"] |= qc_ev
 
             # Generate key and lookup occurrences...
@@ -171,7 +165,7 @@ def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True):
             if key in data_archive.occ_indices:
                 for occ_record in data_archive.occ_indices[key]:
                     # qc_occurrence sall also take care of emof for occurrence
-                    qc_occ = qc_occurrence(occ_record, data_archive, pyxy_count_lookups)
+                    qc_occ = qc_occurrence(occ_record, data_archive)
                     # Check that the combination of event and occurrence have the required fields. Assign to occurrence
                     # Consequence of email 24/01/2021
                     occ_record["qc"] |= required_fields.check_ev_occ_required(record, occ_record, False)
@@ -188,13 +182,13 @@ def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True):
     else:  # Only occurrence and emof records
         for occ_record in data_archive.occurrence_recs:
             # The QC is either 0 or a QC mask - emof are considered inside the occurrence
-            qc_occurrence(occ_record, data_archive, pyxy_count_lookups)
+            qc_occurrence(occ_record, data_archive)
 
     # Are there any lookups left to do (any record type)
     if len(data_archive.records_for_lookup):
         location.check_xy(data_archive.records_for_lookup)
-        pyxy_count_lookups += 1
-        this.logger.debug(f"Lookups: {pyxy_count_lookups}")
+        data_archive.pyxylookup_counter += 1
+        this.logger.debug(f"Lookups: {data_archive.pyxylookup_counter}")
 
         # Must propagate the QC of these records (in case)
         if data_archive.darwin_core_type == data_archive.EVENT:
