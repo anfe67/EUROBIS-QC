@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 # In any case need to cope with it
 
 setup(name="eurobisqc",
-      version="0.4.0",
+      version="0.5.0",
       python_requires='>=3.6',
       data_files=[('dbworks/database', ['EUROBIS_QC_LOOKUP_DB.db']),
                   ('dbworks/resources', ['dbworks/resources/config.ini',
