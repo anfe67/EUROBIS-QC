@@ -40,7 +40,8 @@ def check_basic_record(record):
     """ obis-qc equivalent function, to assign bitmask
         for basic lat/lon validity / presence and
         also to check that the depth is consistent
-        :param : record """
+        :param : record
+        :returns a bitmask representing the QC passed (4, 5 ,18) """
 
     qc_mask = 0
 
@@ -68,7 +69,8 @@ def check_basic_record(record):
 def check_basic(records):
     """ performs the basic lat/lon presence and validity checks
         on a list of records
-        :param records """
+        :param records
+        :returns a list of bitmasks, (4, 5 and 18) one for each record """
     return [check_basic_record(record) for record in records]
 
 
@@ -79,6 +81,7 @@ def check_record_in_areas(record, areas):
         as [(east,west), (north,south)]
         This QC makes sense AFTER Lon and Lat decimal have been verified present and valid
         Assumption: Areas are rectangular
+        :returns 0 or bitmask for QC 9
         """
 
     qc_mask = 0
@@ -107,7 +110,8 @@ def check_in_areas(records, areas):
         :param records: The records to check
         :param areas: The geographical areas -Each  2 segments east west and north south
         as [(east,west), (north,south)]
-        NOTE: This QC makes sense AFTER Lon and Lat decimal have been verified present and valid  """
+        NOTE: This QC makes sense AFTER Lon and Lat decimal have been verified present and valid
+        :returns for each record 0 or bitmask for QC 9 """
 
     qc_masks = []
     for idx, record in enumerate(records):
@@ -254,6 +258,7 @@ def check_all_location_params(records, areas):
         does not return any value
         :param records
         :param areas
+        :returns: list of bitmasks for all location QCs (for all records)
         """
     # LON, LAT presence and validity, depth consistency
     qc_masks = check_basic(records)

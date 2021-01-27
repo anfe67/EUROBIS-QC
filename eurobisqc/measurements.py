@@ -111,7 +111,8 @@ def check_mtid(measurement_type_id, measurement_value):
         types IDS is present, then the QC is passed
         :param measurement_type_id - as in the record
         :param measurement_value - as in the record
-        purpose: attempt optimization """
+        purpose: attempt optimization
+        returns: 0 or one of the bitmasks 14, 15, 16 or 17 """
 
     qc_mask = 0
     found = False
@@ -159,7 +160,8 @@ def check_mt(measurement_type, measurement_value):
         types is present, then the QC is passed
         :param measurement_type - as in the record
         :param measurement_value - as in the record
-        purpose: attempt optimization """
+        purpose: attempt optimization
+        returns: 0 or one of the bitmasks 14, 15, 16 or 17 """
 
     qc_mask = 0
     found = False
@@ -202,7 +204,9 @@ def check_record(record):
     """ Applies the sampling verifications, input should be a
         eMoF record or one containing the requested fields
         if the a measure is found but the measurementValue is null
-        then QC is not passed """
+        then QC is not passed
+        :param - record
+        returns: 0 or one of the bitmasks 14, 15, 16 or 17 """
 
     qc_mask = 0
 
@@ -210,7 +214,7 @@ def check_record(record):
     if not this.lookups_loaded:
         initialize_lookups()
 
-    # Starting with IDs - weight
+    # Starting with IDs
     if "measurementTypeID" in record and record["measurementTypeID"] is not None:
         measurement_value = None if "measurementValue" not in record else record["measurementValue"]
         if isinstance(measurement_value, str):
@@ -232,7 +236,9 @@ def check_record(record):
 
 def check_sex_record(record):
     """ The sex field is only present in the occurrence records,
-        so use on occurrence only. It makes sense to separate """
+        so use on occurrence only. It makes sense to separate
+        :param record (type should be occurrence)
+        :returns  or QC 17 bitmask """
 
     qc_mask = 0
 
@@ -253,9 +259,11 @@ def check_sex_record(record):
 
 # Modified to Quality mask instead of error mask
 def check_dyn_prop_record(record):
-    """ runs the checks for dynamic property on the occurrence records """
-    # This is a check on the properties field - to be done on the occurrence records
+    """ runs the checks for dynamic property on the occurrence records
+        :param record
 
+        """
+    # This is a check on the properties field - to be done on the occurrence records
     qc_mask = 0
 
     # It shall be done only once on the first entry
