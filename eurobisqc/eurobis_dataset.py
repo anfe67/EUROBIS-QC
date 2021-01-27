@@ -2,7 +2,7 @@ import sys
 import logging
 import requests
 from pyodbc import Error
-# This is to cope with possible hangs in iMIS API call (never observed but inserted for consistency)
+# This is to cope with possible hangs in iMIS API call
 from stopit import threading_timeoutable
 
 from dbworks import mssql_db_functions as mssql
@@ -15,8 +15,8 @@ this.logger = logging.getLogger(__name__)
 this.logger.level = logging.DEBUG
 this.logger.addHandler(logging.StreamHandler())
 
-# Allow 15 seconds for the IMIS call to return when fetching the areas
-this.imis_timeout = 20
+# Allow this.imis_timeout seconds for the IMIS call to return when fetching the areas
+this.imis_timeout = 25
 
 
 class EurobisDataset:
@@ -140,6 +140,9 @@ class EurobisDataset:
         self.records_for_lookup = []
 
     def get_provider_data(self, das_prov_id):
+        """ Obtain the dataset info from the dataproviders table
+            :param - das_prov_id - Dataset id """
+
         if not mssql.conn:
             mssql.open_db()
 
@@ -167,7 +170,8 @@ class EurobisDataset:
             mssql.close_db()
 
     def get_ev_occ_records(self, das_prov_id):
-        """ retrieves event and occurrence records for the dataset in das_id from SQL Server"""
+        """ retrieves event and occurrence records for the dataset in das_id from SQL Server
+            :param das_prov_id """
         if not mssql.conn:
             mssql.open_db()
 
@@ -256,7 +260,8 @@ class EurobisDataset:
 
     def query_builder_eve_occur(self, dataprovider_id):
         """ Builds the SQL query string to retrieve all event, occur records for a dataset
-            inclusive of the eventDate"""
+            inclusive of the eventDate
+            :returns SQL Query string """
 
         sql_string = self.sql_eurobis_start
 
@@ -269,7 +274,9 @@ class EurobisDataset:
         return sql_string
 
     def query_builder_emof(self, dataprovider_id):
-        """ Builds the SQL query string to retrieve all emof records for a dataset """
+        """ Builds the SQL query string to retrieve all emof records for a dataset
+            :param dataprovider_id
+            :returns SQL Query string """
 
         sql_string = self.sql_emof_start
 
@@ -287,6 +294,7 @@ class EurobisDataset:
     def load_dataset(self, das_prov_id):
         """ given a dataset id from the dataprovider
             loads an entire dataset in RAM for processing
+            :param das_prov_id
             """
         self.get_provider_data(das_prov_id)
         self.get_ev_occ_records(das_prov_id)
@@ -302,11 +310,14 @@ class EurobisDataset:
     def do_get_areas(self, imis_das_id):
         """ This is wrapped in a timeoutable call so that if there is no return in 10 seconds
             then the call is re-issued until the list of results is returned. Average lookup of
-            1000 records is around 1s, so 10 is a reasonable timeout """
+            1000 records is around 1s, so 10 is a reasonable timeout
+            :param imis_das_id - dataset IMIS identifier """
         return self.get_areas_from_eml(imis_das_id)
 
     def get_areas_from_eml(self, imis_das_id):
-        """ Given a IMIS Dataset ID, queries the IMIS web servce for  """
+        """ Given a IMIS Dataset ID, queries the IMIS web servce for
+            the EML related to the dataset
+            :param imis_das_id - dataset IMIS identifier"""
 
         eml = None
         # Where to get IMIS data from
@@ -334,6 +345,7 @@ class EurobisDataset:
     def disable_qc_index(cls):
         """ Disable non-clustered index on QC
             important - this depends on the index name """
+
         # Check DB connection...
         if not mssql.conn:
             mssql.open_db()
@@ -357,6 +369,7 @@ class EurobisDataset:
     def rebuild_qc_index(cls):
         """ Rebuild non-clustered index on QC
             important - this depends on the index name """
+
         # Check DB connection...
         if not mssql.conn:
             mssql.open_db()

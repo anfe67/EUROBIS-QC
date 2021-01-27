@@ -75,6 +75,7 @@ driver        = ODBC Driver 17 for SQL Server
 drivermodule  = pymssql
 # drivermodule can be pymysql or pyodbc (needs to be specified).
 server        = <MyServerIP>
+server_local  = <True or False> 
 port          = <MyServerPort>
 database      = eurobis_dat
 username      = <MyUser>

@@ -24,8 +24,8 @@ else:
 this.database_location = os.path.join(os.path.dirname(__file__), database_file)
 
 
-# Opening the dbworks database
 def open_db():
+    """ Opens the lookup database """
     try:
         db_conn = lite.connect(this.database_location)
         # db_conn.row_factory = lambda cursor, row: row[0]
@@ -39,8 +39,8 @@ def open_db():
 this.conn = open_db()
 
 
-# Close it after use
 def close_db():
+    """ Closes the Lookup DB after use """
     this.conn.close()
     this.conn = None
 

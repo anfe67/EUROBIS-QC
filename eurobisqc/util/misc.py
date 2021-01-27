@@ -97,11 +97,10 @@ def string_to_dict(dyn_prop_string):
 def do_xylookup(records):
     """ derived from equivalent in obis-qc - takes a list of records already QCd
         for LAT - LON presence and validity - QC field must
-        be present """
+        be present
+        :param - records IMPORTANT - with VALID LAT, LON
+        :returns - a list of result records as retrieved from pyxylookup for each point """
 
-    # RESOLVED: This is ok in pycharm not for nosetest from terminal
-    # from pyxylookup.pyxylookup import lookup
-    # RESOLVED: Ths is ok for nosetest or running in a python console, not for running in pycharm
     import pyxylookup as pxy  # and then use pyxylookup.lookup
 
     output = [None] * len(records)

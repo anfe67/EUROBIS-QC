@@ -39,7 +39,8 @@ qc_mask_19 = qc_flags.QCFlag.DEPTH_MAP_VERIFIED.bitmask
 def check_basic_record(record):
     """ obis-qc equivalent function, to assign bitmask
         for basic lat/lon validity / presence and
-        also to check that the depth is consistent """
+        also to check that the depth is consistent
+        :param : record """
 
     qc_mask = 0
 
@@ -117,7 +118,9 @@ def check_in_areas(records, areas):
 
 def check_depth_consistent(record):
     """ depth checks, in this case they must be numbers (representing meters)
-        it is used as part of the basic checks """
+        it is used as part of the basic checks
+        :param - record
+        :returns 0 or bitmask for QC 18 """
 
     if "minimumDepthInMeters" in record and record["minimumDepthInMeters"] is not None:
         if misc.is_number(record["minimumDepthInMeters"]):
@@ -168,7 +171,11 @@ def extract_depths(record):
 def execute_lookups(records):
     """ This is wrapped in a timeoutable call so that if there is no return in 10 seconds
         then the call is re-issued until the list of results is returned. Average lookup of
-        1000 records is around 1s, so 10 is a reasonable timeout """
+        1000 records is around 1s, so 10 is a reasonable timeout
+        :param records
+        Parameter from the annotation: timeout (in seconds)
+        :returns : None if timeout, the result of do_xylookup otherwise """
+
     return misc.do_xylookup(records)
 
 

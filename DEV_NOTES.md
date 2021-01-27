@@ -806,7 +806,8 @@ New Query, include only dataprovider id and physloc, Index Disabled:
 - Documentation - QC Procedures
 - Test - A number of tests trying with random records 
 
-
+## 27/01/2021 
+- Documenting, testing and reorganizing the code
 
 
 
