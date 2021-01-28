@@ -299,7 +299,7 @@ python -m venv eurobis-qc-venv
 ```
 Install OS dependencies 
 Download and install ODBC Drivers from MS Site: 
-https://docs.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver15
+https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-ver15
 
 Install also the pymssql alternative library: 
 ```commandline

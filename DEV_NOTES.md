@@ -809,6 +809,9 @@ New Query, include only dataprovider id and physloc, Index Disabled:
 ## 27/01/2021 
 - Documenting, testing and reorganizing the code
 
+## 28/01/2021
+- Documenting, debugging, supporting Frederic
+
 
 
 
