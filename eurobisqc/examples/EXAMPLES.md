@@ -78,6 +78,56 @@ a different machine than the database server.
 **mssql_random_record** contains a reproduction to a call to **dataset_qc_labeling** but with important differences: 
 1. The dataset is selected at random within all datasets having less than 10000 records 
 2. From this dataset, it chooses a random **core** event and all dependant records, and calculates the QC.
+---
+### Running examples from the Python console - without GUI 
+A Graphical User Interface has been provided for some of the examples, just to be able
+to cherry-pick examples in a fast way. A DUI is by no means necessary to run the example
+pipelines. Here below a few use cases for the examples provided: 
+
+**To process a DwCA file**
+```commandline
+source venv/bin/activate # Activate the virtual environment
+python 
+>>> from eurobisqc.examples import dwca_pipeline 
+>>> 
+>>> dwca_pipeline.dwca_file_qc("eurobisqc/test/data/dwca-zoobenthos_in_amvrakikos_wetlands-v1.4.zip", True)
+```
+**To process multiple DwCA files - No multiprocessing**
+```commandline
+source venv/bin/activate # Activate the virtual environment
+python 
+>>> from eurobisqc.examples import dwca_pipeline 
+>>> dwca_pipeline.dwca_process_filelist(0, ["File 1","File 2"], True):
+```
+**Note:** This is a fictive example. 
+
+**To process a Dataset from the database (writes to the DB)**
+```commandline
+source venv/bin/activate # Activate the virtual environment
+python 
+>>> from eurobisqc.examples import mssql_pipeline 
+>>> mssql_pipeline.dataset_qc_labeling(8, True, True)
+```
+In a similar way, the multiprocess examples can be run without a GUI. 
+
+**To process multiple Datasets from the database without multiprocessing (writes to the DB)**
+```commandline
+source venv/bin/activate # Activate the virtual environment
+python 
+>>> from eurobisqc.examples import mssql_pipeline 
+>>> process_dataset_list(0, [8, 9, 10], False, True)
+```
+**To process multiple Datasets from the database using multiprocessing (writes to the DB)**
+```commandline
+source venv/bin/activate # Activate the virtual environment
+python 
+>>> from eurobisqc.examples import mssql_multiprocess 
+>>> mssql_multiprocess.do_db_multi_selection([1,2,3,4,5], ["name 1","name 2","name 3","name 4","name 5"]])
+```
+**Note:** This is a fictive example... 
+
+This is the generic principle. These functions can be used to perform QC 
+from other applications without the need of a GUI. 
 
 ### Considerations
 1) DwCA archive do NOT contain a QC flag, so their QC processing is useful only during the processing of the file. 
