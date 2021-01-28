@@ -10,7 +10,7 @@ from eurobisqc import measurements
 from eurobisqc import required_fields
 from eurobisqc import taxonomy
 from eurobisqc import time_qc
-import qc_flags
+from eurobisqc import qc_flags
 from eurobisqc.util import misc
 
 # Use "this" trick

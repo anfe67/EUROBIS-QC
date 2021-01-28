@@ -9,7 +9,7 @@ import logging
 # This is to cope with possible hangs in pyxylookup (observed 3 times in a few millions calls)
 from stopit import threading_timeoutable
 
-import qc_flags
+from eurobisqc import qc_flags
 from eurobisqc.util import misc
 
 this = sys.modules[__name__]

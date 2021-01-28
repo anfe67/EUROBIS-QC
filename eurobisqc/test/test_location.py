@@ -2,9 +2,8 @@ import sys
 import logging
 from unittest import TestCase
 
-import qc_flags
 from eurobisqc import location
-from qc_flags import QCFlag
+from eurobisqc.qc_flags import QCFlag
 
 this = sys.modules[__name__]
 this.logger = logging.getLogger(__name__)
@@ -141,29 +140,29 @@ class Test(TestCase):
             else:
                 record["QC"] = qc_res[idx]
 
-        assert (qc_res == [qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask |
-                           qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask |
-                           qc_flags.QCFlag.GEO_LAT_LON_ON_SEA.bitmask |
-                           qc_flags.QCFlag.GEO_COORD_AREA.bitmask,
+        assert (qc_res == [QCFlag.GEO_LAT_LON_VALID.bitmask |
+                           QCFlag.GEO_LAT_LON_PRESENT.bitmask |
+                           QCFlag.GEO_LAT_LON_ON_SEA.bitmask |
+                           QCFlag.GEO_COORD_AREA.bitmask,
                            0,
                            0,
                            0,
-                           qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask |
-                           qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask,
-                           qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask |
-                           qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask,
-                           qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask |
-                           qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask |
-                           qc_flags.QCFlag.GEO_LAT_LON_ON_SEA.bitmask |
-                           qc_flags.QCFlag.GEO_COORD_AREA.bitmask |
-                           qc_flags.QCFlag.DEPTH_MAP_VERIFIED.bitmask,
-                           qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask |
-                           qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask |
-                           qc_flags.QCFlag.GEO_LAT_LON_ON_SEA.bitmask |
-                           qc_flags.QCFlag.GEO_COORD_AREA.bitmask,
-                           qc_flags.QCFlag.GEO_LAT_LON_VALID.bitmask |
-                           qc_flags.QCFlag.GEO_LAT_LON_PRESENT.bitmask |
-                           qc_flags.QCFlag.GEO_LAT_LON_ON_SEA.bitmask |
-                           qc_flags.QCFlag.GEO_COORD_AREA.bitmask |
-                           qc_flags.QCFlag.DEPTH_MAP_VERIFIED.bitmask,
+                           QCFlag.GEO_LAT_LON_VALID.bitmask |
+                           QCFlag.GEO_LAT_LON_PRESENT.bitmask,
+                           QCFlag.GEO_LAT_LON_VALID.bitmask |
+                           QCFlag.GEO_LAT_LON_PRESENT.bitmask,
+                           QCFlag.GEO_LAT_LON_VALID.bitmask |
+                           QCFlag.GEO_LAT_LON_PRESENT.bitmask |
+                           QCFlag.GEO_LAT_LON_ON_SEA.bitmask |
+                           QCFlag.GEO_COORD_AREA.bitmask |
+                           QCFlag.DEPTH_MAP_VERIFIED.bitmask,
+                           QCFlag.GEO_LAT_LON_VALID.bitmask |
+                           QCFlag.GEO_LAT_LON_PRESENT.bitmask |
+                           QCFlag.GEO_LAT_LON_ON_SEA.bitmask |
+                           QCFlag.GEO_COORD_AREA.bitmask,
+                           QCFlag.GEO_LAT_LON_VALID.bitmask |
+                           QCFlag.GEO_LAT_LON_PRESENT.bitmask |
+                           QCFlag.GEO_LAT_LON_ON_SEA.bitmask |
+                           QCFlag.GEO_COORD_AREA.bitmask |
+                           QCFlag.DEPTH_MAP_VERIFIED.bitmask,
                            ])

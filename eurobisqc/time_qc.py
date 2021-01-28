@@ -3,7 +3,7 @@
 import datetime
 
 from isodateparser import ISODateParser
-import qc_flags
+from eurobisqc import qc_flags
 from eurobisqc.util import misc
 
 qc_mask_7 = qc_flags.QCFlag.DATE_TIME_OK.bitmask

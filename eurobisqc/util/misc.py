@@ -1,6 +1,6 @@
 import datetime
 import re
-import qc_flags
+from eurobisqc import qc_flags
 
 
 def check_float(value, valid_range=None):
