@@ -2,7 +2,7 @@ import sys
 import logging
 import time
 
-import mssql_db_functions
+from dbworks import mssql_db_functions
 from unittest import TestCase
 
 this = sys.modules[__name__]
