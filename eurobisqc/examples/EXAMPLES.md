@@ -15,6 +15,17 @@ The examples also need to access the local WORMS and Lookup databases, used to v
 values and their correct use as well as sex values and their correct use. The Lookup database is also used to verify the
 presence of the required fields and BasisofRecord.
 
+### Redirecting output to a file for analysis 
+
+When detailed analysis of ouput is needed, the examples can be run with a redirection 
+of the logger output to a file. This can be done using the '&' sintax, as in the 
+following command: 
+```commandline
+python eurobisqc/examples/run_dwca_pipeline.py &> log_output.txt 
+```
+
+All the output shall be then redirected to file.  
+
 ---
 
 ## DwCA File Processing
