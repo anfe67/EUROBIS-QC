@@ -35,7 +35,7 @@ def find_areas(xml_input):
     # Notice that we have a problem if we have a list of areas... ...to be adjusted.
     # If there are multiple areas, we have to decide how to proceed,
     if 'coverage' in dict_input['eml:eml']['dataset']:
-        if dict_input['eml:eml']['dataset'] is not None and 'geographicCoverage' in dict_input['eml:eml']['dataset']['coverage']:
+        if dict_input['eml:eml']['dataset']['coverage'] is not None and 'geographicCoverage' in dict_input['eml:eml']['dataset']['coverage']:
             if isinstance(dict_input['eml:eml']['dataset']['coverage']['geographicCoverage'], list):
                 # To test...
                 if 'boundingCoordinates' in dict_input['eml:eml']['dataset']['coverage']['geographicCoverage'][0]:
