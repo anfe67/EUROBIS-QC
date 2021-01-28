@@ -11,6 +11,6 @@ this.logger.addHandler(logging.StreamHandler())
 
 def many_randoms(num=None):
     if num is None:
-        num = 1000
+        num = 100
     for i in range(num):
         mssql_random_record.process_random_record(True)
