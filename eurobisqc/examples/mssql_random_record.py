@@ -17,7 +17,7 @@ this.logger.level = logging.DEBUG
 this.logger.addHandler(logging.StreamHandler())
 
 
-def select_random_ds(with_logging=True):
+def process_random_record(with_logging=True):
     """ select a random dataset, then a random core event from it and perform QC """
 
     # To select a specific type of record,
@@ -161,5 +161,3 @@ def select_random_ds(with_logging=True):
                 this.logger.info(f"eMoF Record: {emof}")
                 this.logger.info(f"--------------------------------------------------")
 
-
-select_random_ds()

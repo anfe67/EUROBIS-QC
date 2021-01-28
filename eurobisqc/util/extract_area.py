@@ -1,5 +1,6 @@
 import xmltodict
 from eurobisqc.util import misc
+from xml.parsers.expat import ExpatError
 
 
 # FLAG:Possible improvement is to evaluate expanding the area to match GPS average precision
@@ -26,7 +27,10 @@ def find_areas(xml_input):
     if xml_input is None:
         return None
 
-    dict_input = xmltodict.parse(xml_input)
+    try:
+        dict_input = xmltodict.parse(xml_input)
+    except ExpatError:
+        return None
 
     # Notice that we have a problem if we have a list of areas... ...to be adjusted.
     # If there are multiple areas, we have to decide how to proceed,

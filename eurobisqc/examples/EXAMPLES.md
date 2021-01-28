@@ -78,6 +78,10 @@ a different machine than the database server.
 **mssql_random_record** contains a reproduction to a call to **dataset_qc_labeling** but with important differences: 
 1. The dataset is selected at random within all datasets having less than 10000 records 
 2. From this dataset, it chooses a random **core** event and all dependant records, and calculates the QC.
+
+The function used is process_random_record
+Furthermore, a module called **many_random_records** has been provided, with a function **many_randoms** that can accept an integer 
+(if not provided the default will be 100) that will run a number of times the **process_random_record**. 
 ---
 ### Running examples from the Python console - without GUI 
 A Graphical User Interface has been provided for some of the examples, just to be able
@@ -89,7 +93,6 @@ pipelines. Here below a few use cases for the examples provided:
 source venv/bin/activate # Activate the virtual environment
 python 
 >>> from eurobisqc.examples import dwca_pipeline 
->>> 
 >>> dwca_pipeline.dwca_file_qc("eurobisqc/test/data/dwca-zoobenthos_in_amvrakikos_wetlands-v1.4.zip", True)
 ```
 **To process multiple DwCA files - No multiprocessing**
