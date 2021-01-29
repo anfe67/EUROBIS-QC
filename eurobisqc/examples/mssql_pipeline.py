@@ -132,7 +132,8 @@ def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True):
         """
 
     if dataset_id is None:
-        exit(0)
+        this.logger.warning("WARNING: Call to dataset_qc_labeling with no dataset_id ")
+        return None
 
     data_archive = eurobis_dataset.EurobisDataset()
     data_archive.load_dataset(dataset_id)
@@ -275,7 +276,11 @@ def process_dataset_list(pool_no, dataset_id_list, from_pool=False, with_logging
         if with_logging:
             this.logger.info(f"Pool Number: {pool_no}, processsing dataset {dataset_id} ")
 
-        dataset_qc_labeling(dataset_id, False, with_logging)
+        try:
+            dataset_qc_labeling(dataset_id, False, with_logging)
+        except:
+            this.logger.warning(f"WARNING: Pool Number: {pool_no}, processsing dataset {dataset_id} FAILED ")
+
         if with_logging:
             this.logger.info(f"Processed dataset {dataset_id} in  {time.time() - start_file}")
 

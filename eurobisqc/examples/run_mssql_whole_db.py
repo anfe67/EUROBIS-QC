@@ -19,8 +19,6 @@ this.sql_all_datasets = f"SELECT d.id, d.displayname FROM  dataproviders d inner
 this.dataset_ids = []
 this.dataset_names = []
 
-this.exit = False
-
 
 def grab_datasets(sql_string):
     """ Queries the database to retrieve a list of all datasets with records

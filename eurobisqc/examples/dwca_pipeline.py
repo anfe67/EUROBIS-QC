@@ -49,7 +49,8 @@ def dwca_file_qc(filename, with_logging=False):
     """
 
     if filename is None:
-        exit(0)
+        this.logger.warning("WARNING: Call to dwca_file_qc with no filename ")
+        return None
 
     archive = DwCAProcessor(filename)
 

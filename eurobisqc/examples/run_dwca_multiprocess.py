@@ -46,6 +46,7 @@ def dwca_parallel_processing(with_logging=False):
     dwca_files = fnames
 
     if dwca_files is None:
+        this.logger.warning("WARNING: Call to dwca_parallel_processing with no filename list")
         exit(0)
 
     dwca_file_lists = misc.split_list(dwca_files, n_cpus)
