@@ -16,7 +16,7 @@ qc_mask_3 = qc_flags.QCFlag.TAXONOMY_RANK_OK.bitmask  # Is the Taxon Level lower
 # error_mask_8 = qc_flags.QCFlag.TAXON_APHIAID_NOT_EXISTING. bitmask # Unclear how to do this one
 
 this.taxon_fields = []
-this.speciesprofile_fields = []
+# this.speciesprofile_fields = []
 this.taxon_fields_sought = ["genus"]
 
 
@@ -34,9 +34,9 @@ def populate_fields():
     cur = sqlite_db_functions.conn.execute(f"SELECT * from taxon where scientificNameID='{sample_taxon}'")
     taxons = [description[0] for description in cur.description]
     this.taxon_fields.extend(taxons)
-    cur = sqlite_db_functions.conn.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
-    speciesprofiles = [description[0] for description in cur.description]
-    this.speciesprofile_fields.extend(speciesprofiles)
+    # cur = sqlite_db_functions.conn.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
+    # speciesprofiles = [description[0] for description in cur.description]
+    # this.speciesprofile_fields.extend(speciesprofiles)
 
 
 # Modified to Quality mask instead of error mask

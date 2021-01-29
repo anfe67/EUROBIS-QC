@@ -13,7 +13,7 @@ this.logger.addHandler(logging.StreamHandler())
 
 class Test(TestCase):
     taxon_fields = []
-    speciesprofile_fields = []
+    # speciesprofile_fields = []
 
     sample_sn_ids = ['urn:lsid:marinespecies.org:taxname:519212', 'urn:lsid:marinespecies.org:taxname:399249',
                      'urn:lsid:marinespecies.org:taxname:170605', '????????']
@@ -32,10 +32,10 @@ class Test(TestCase):
 
         self.assertTrue("scientificName" in self.taxon_fields)
 
-        cur = self.conn.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
-        self.speciesprofile_fields = [description[0] for description in cur.description]
+        # cur = self.conn.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
+        # self.speciesprofile_fields = [description[0] for description in cur.description]
 
-        self.assertTrue("isMarine" in self.speciesprofile_fields)
+        # self.assertTrue("isMarine" in self.speciesprofile_fields)
 
     def test_verify_querying(self):
 
@@ -59,14 +59,14 @@ class Test(TestCase):
         this.logger.info("************************************")
 
         # Just querying, no zipping
-        start = time.time()
-        for sn_id in self.sample_sn_ids:
-            cur = self.conn.execute(f"SELECT * from taxon where scientificNameID='{sn_id}'")
-            taxon = cur.fetchone()
-            this.logger.info(taxon)
-        this.logger.info("************ WITHOUT ZIPPING ************")
-        this.logger.info(f" ----> {time.time() - start}")
-        this.logger.info("*****************************************")
+        # start = time.time()
+        # for sn_id in self.sample_sn_ids:
+        #     cur = self.conn.execute(f"SELECT * from taxon where scientificNameID='{sn_id}'")
+        #     taxon = cur.fetchone()
+        #     this.logger.info(taxon)
+        # this.logger.info("************ WITHOUT ZIPPING ************")
+        # this.logger.info(f" ----> {time.time() - start}")
+        # this.logger.info("*****************************************")
 
         # Querying for scientificName
         start = time.time()
@@ -85,14 +85,14 @@ class Test(TestCase):
         this.logger.info("***************************************")
 
         # Querying for speciesprofile
-        for sn_id in self.sample_sn_ids:
-            cur = self.conn.execute(f"SELECT * from speciesprofile where taxonID='{sn_id}'")
-            speciesprofile = cur.fetchone()
-            fields = [description[0] for description in cur.description]
-            record = None
-            if speciesprofile is not None:
-                record = dict(zip(fields, speciesprofile))
-            this.logger.info(record)
+        # for sn_id in self.sample_sn_ids:
+        #     cur = self.conn.execute(f"SELECT * from speciesprofile where taxonID='{sn_id}'")
+        #     speciesprofile = cur.fetchone()
+        #     fields = [description[0] for description in cur.description]
+        #     record = None
+        #     if speciesprofile is not None:
+        #         record = dict(zip(fields, speciesprofile))
+        #     this.logger.info(record)
 
     def test_get_record(self):
 
@@ -102,12 +102,12 @@ class Test(TestCase):
 
         self.assertTrue("scientificName" in self.taxon_fields)
 
-        cur = self.conn.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
-        self.speciesprofile_fields = [description[0] for description in cur.description]
+        # cur = self.conn.execute(f"SELECT * from speciesprofile where taxonID='{sample_taxon}'")
+        # self.speciesprofile_fields = [description[0] for description in cur.description]
 
-        self.assertTrue("isMarine" in self.speciesprofile_fields)
+        # self.assertTrue("isMarine" in self.speciesprofile_fields)
         sn_id = self.sample_sn_ids[0]
         taxon = sqlite_db_functions.get_record('taxon', 'scientificNameID', sn_id, self.taxon_fields)
         self.assertTrue(taxon['scientificNameID'] == sn_id)
-        species_profile = sqlite_db_functions.get_record('speciesprofile', 'taxonID', sn_id, self.speciesprofile_fields)
-        self.assertTrue(species_profile['taxonID'] == sn_id)
+        # species_profile = sqlite_db_functions.get_record('speciesprofile', 'taxonID', sn_id, self.speciesprofile_fields)
+        # self.assertTrue(species_profile['taxonID'] == sn_id)
