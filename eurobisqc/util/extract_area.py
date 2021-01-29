@@ -44,8 +44,9 @@ def find_areas(xml_input):
                         if 'boundingCoordinates' in element:
                             xml_areas.append(element['boundingCoordinates'])
             else:
-                xml_areas.append(
-                    dict_input['eml:eml']['dataset']['coverage']['geographicCoverage']['boundingCoordinates'])
+                if 'boundingCoordinates' in dict_input['eml:eml']['dataset']['coverage']['geographicCoverage']:
+                    xml_areas.append(
+                        dict_input['eml:eml']['dataset']['coverage']['geographicCoverage']['boundingCoordinates'])
                 # geo_area_dict = \
                 # dict_input['eml:eml']['dataset']['coverage']['geographicCoverage']['boundingCoordinates']
 
