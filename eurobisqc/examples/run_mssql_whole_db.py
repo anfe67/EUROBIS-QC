@@ -48,4 +48,6 @@ def process_all_db(with_multi_process=True, with_logging=False):
     if with_multi_process:
         mssql_multiprocess.do_db_multi_selection(this.dataset_ids, this.dataset_names)
     else:
-        mssql_pipeline.process_dataset_list(0, this.dataset_ids, False, with_logging)
+        result = mssql_pipeline.process_dataset_list(0, this.dataset_ids, False, with_logging)
+        if result[1] > 0:
+            this.logger.warning(f"Faled to process {result[1]} datasets")

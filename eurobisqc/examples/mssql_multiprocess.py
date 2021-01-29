@@ -76,7 +76,9 @@ def do_db_multi_random_percent(percent):
         result_pool.append(pool.apply_async(process_dataset_list, args=(i, dataset_id_list, True, True)))
 
     for r in result_pool:
-        r.wait()
+        res = r.get()
+        if res[1] > 0:
+            this.logger.warning(f"Pool {res[0]} failed to process {res[1]} datasets")
 
     pool.terminate()
     pool.join()
@@ -115,7 +117,9 @@ def do_db_multi_selection(dataset_ids, dataset_names):
         result_pool.append(pool.apply_async(process_dataset_list, args=(i, dataset_id_list, True, True)))
 
     for r in result_pool:
-        r.wait()
+        res = r.get()
+        if res[1] > 0:
+            this.logger.warning(f"Pool {res[0]} failed to process {res[1]} datasets")
 
     pool.terminate()
     pool.join()
@@ -124,7 +128,6 @@ def do_db_multi_selection(dataset_ids, dataset_names):
     eurobis_dataset.EurobisDataset.rebuild_qc_index()
 
     this.logger.info(f"Started at: {start_time}. All processes have completed after {time.time() - start_time}")
-
 
 # Parallel processing of random 2% of the (SMALL) datasets
 # call do_dataset_parallel_processing(0.02)

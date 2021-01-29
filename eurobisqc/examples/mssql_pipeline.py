@@ -270,6 +270,8 @@ def process_dataset_list(pool_no, dataset_id_list, from_pool=False, with_logging
     if not from_pool:
         eurobis_dataset.EurobisDataset.disable_qc_index()
 
+    errors = 0
+
     for dataset_id in dataset_id_list:
         start_file = time.time()
 
@@ -279,6 +281,7 @@ def process_dataset_list(pool_no, dataset_id_list, from_pool=False, with_logging
         try:
             dataset_qc_labeling(dataset_id, False, with_logging)
         except:
+            errors += 1
             this.logger.warning(f"WARNING: Pool Number: {pool_no}, processsing dataset {dataset_id} FAILED ")
 
         if with_logging:
@@ -291,7 +294,7 @@ def process_dataset_list(pool_no, dataset_id_list, from_pool=False, with_logging
     if with_logging:
         this.logger.info(f"Pool {pool_no} completed in {time.time() - start}")
 
-    return pool_no
+    return pool_no, errors
 
 # To call single dataset labelling with a chooser use run_mssql_pipeline
 # Single dataset  - Fixed - need eurobis.dataprovider_id (id in dataproviders table)
