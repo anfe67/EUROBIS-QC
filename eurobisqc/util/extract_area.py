@@ -43,7 +43,7 @@ def find_areas(xml_input):
                     for element in dict_input['eml:eml']['dataset']['coverage']['geographicCoverage']:
                         if 'boundingCoordinates' in element:
                             xml_areas.append(element['boundingCoordinates'])
-            else:
+            elif isinstance(dict_input['eml:eml']['dataset']['coverage']['geographicCoverage'], dict):
                 if 'boundingCoordinates' in dict_input['eml:eml']['dataset']['coverage']['geographicCoverage']:
                     xml_areas.append(
                         dict_input['eml:eml']['dataset']['coverage']['geographicCoverage']['boundingCoordinates'])
@@ -82,8 +82,8 @@ def find_areas(xml_input):
                         not (south == south_most and north == north_most and west == west_most and east == east_most):
                     geo_areas.append({"east": east, "west": west, "north": north, "south": south})
 
-        if not len(geo_areas):
-            valid = False  # No valid areas found
+    if not len(geo_areas):
+        valid = False  # No valid areas found
 
     if valid:
         # If the area is valid but it represents the whole globe, this verification is already covered

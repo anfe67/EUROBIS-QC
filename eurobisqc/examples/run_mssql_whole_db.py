@@ -25,6 +25,9 @@ this.exit = False
 def grab_datasets(sql_string):
     """ Queries the database to retrieve a list of all datasets with records
         in eurobis IMPORTANT, datasets are sorted """
+    this.dataset_ids = []
+    this.dataset_names = []
+
     if mssql_db_functions.conn is None:
         this.conn = mssql_db_functions.open_db()
 
