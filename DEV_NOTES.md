@@ -812,6 +812,8 @@ New Query, include only dataprovider id and physloc, Index Disabled:
 ## 28/01/2021
 - Documenting, debugging, supporting Frederic
 
+# 29/01/2021 
+- Documenting, new module to process the entire DB, testing
 
 
 

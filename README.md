@@ -69,7 +69,19 @@ The examples provided, all found under /eurobisqc/examples, can be used to proce
 - a random number of datasets (2% selected among those with less than 2500 records) from the database **UPDATES** the
   database
 - the calculation of a random record from a random data set, having less than 10000 records, 
-  printing all explanatory info: (mssql_random_record.py)  
+  printing all explanatory info: (mssql_random_record.py). Also include the processing of n random records in sequence,
+  without updating the repository.
+- The module that will allow you to process the entire database (run_mssql_whole_db.py)  
+  
+#### To process the entire database 
+**run_mssql_whole_db.py** can be used to process the main DB with two parameters: with_multiprocessing and with_logging.
+It runs either by splitting the list of active datasets among a pool of processes OR by giving the entire list to 
+a single process, which will act sequentially. 
+
+It is important that if using multiprocessing, only one of these pools will run. This is because normally the 
+database locks is active at the row level and if two processes will attempt to lock the same database row, one of 
+them will be denied and an exception shall be generated. 
+
 
 #### QC applied to records 
 QC is calculated on Event Records and Occurrence records, as follows: 

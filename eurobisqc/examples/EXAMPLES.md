@@ -83,6 +83,16 @@ The function used is process_random_record
 Furthermore, a module called **many_random_records** has been provided, with a function **many_randoms** that can accept an integer 
 (if not provided the default will be 100) that will run a number of times the **process_random_record**. 
 ---
+### Processing the entire database 
+**run_mssql_whole_db.py** can be used to process the main DB with two parameters: with_multiprocessing and with_logging.
+It runs either by splitting the list of active datasets among a pool of processes OR by giving the entire list to 
+a single process, which will act sequentially. 
+
+It is important that if using multiprocessing, only one of these pools will run. This is because normally the 
+database locks is active at the row level and if two processes will attempt to lock the same database row, one of 
+them will be denied and an exception shall be generated. 
+
+---
 ### Running examples from the Python console - without GUI 
 A Graphical User Interface has been provided for some of the examples, just to be able
 to cherry-pick examples in a fast way. A DUI is by no means necessary to run the example
