@@ -1,8 +1,8 @@
 """ Demonstrates QC processing of one or multiple EUROBIS Datasets.
     If more than one is selected, then the multiprocessing pipeline
     is launched """
-import mssql_pipeline
-import mssql_multiprocess
+from eurobisqc.examples import mssql_pipeline
+from eurobisqc.examples import mssql_multiprocess
 from eurobisqc.test.util import dataset_chooser
 
 

@@ -108,7 +108,8 @@ class EurobisDataset:
     sql_emof_end = " FROM eurobis_measurementorfact WHERE dataprovider_id="
 
     # Important - query to update an event or occurrence record
-    sql_update_start = "update eurobis set qc = "  # add the calculated QC
+    # NOTE 29/01/2021 - ADDED THE WITH ROWLOCK
+    sql_update_start = "update eurobis WITH (ROWLOCK) set qc = "  # add the calculated QC
     sql_update_middle = " where dataprovider_id = "
 
     # If the records contains Latitude and Longitude they are indexed, so could speed updates up
