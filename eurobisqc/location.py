@@ -219,7 +219,7 @@ def check_xy(records):
 
             # Check point on land
             if "qc" in record and (record["qc"] & qc_mask_5) and (record["qc"] & qc_mask_4):
-                if xy["shoredistance"] >= 0:
+                if "shoredistance" in xy and xy["shoredistance"] >= 0:
                     qc_mask |= qc_mask_6
 
             # Check bathymetry - need to check that the reported depths are OK - if point not on land
