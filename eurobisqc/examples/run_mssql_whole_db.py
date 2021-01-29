@@ -16,7 +16,6 @@ this.sql_all_datasets = f"SELECT d.id, d.displayname FROM  dataproviders d inner
                         f"on d.id = e.dataprovider_id " \
                         f"GROUP BY d.id, d.displayname ORDER BY d.id "
 
-
 this.dataset_ids = []
 this.dataset_names = []
 
@@ -39,6 +38,7 @@ def grab_datasets(sql_string):
     else:
         this.logger.error("No DB connection!")
         exit(0)
+
 
 def process_all_db(with_multi_process=True, with_logging=False):
     """ Processes the entire DB either using multiprocessing or not """

@@ -109,5 +109,6 @@ class Test(TestCase):
         sn_id = self.sample_sn_ids[0]
         taxon = sqlite_db_functions.get_record('taxon', 'scientificNameID', sn_id, self.taxon_fields)
         self.assertTrue(taxon['scientificNameID'] == sn_id)
-        # species_profile = sqlite_db_functions.get_record('speciesprofile', 'taxonID', sn_id, self.speciesprofile_fields)
+        # species_profile = sqlite_db_functions.get_record('speciesprofile',
+        # 'taxonID', sn_id, self.speciesprofile_fields)
         # self.assertTrue(species_profile['taxonID'] == sn_id)
