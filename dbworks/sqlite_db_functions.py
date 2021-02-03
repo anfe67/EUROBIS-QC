@@ -63,7 +63,15 @@ def get_fields_of_record(table, field_name, value, fields_sought):
         if idx < len(fields_sought) - 1:
             fields_sql += ", "
 
-    cur = this.conn.execute(f"SELECT {fields_sql} from {table} where {field_name}='{value}'")
+    # All taxons with quotes gave problems to the lookup...
+    if ("'") in value:
+        clean_value = value.replace("'","%")
+        s_sql = f"SELECT {fields_sql} from {table} where {field_name} like '{clean_value}' "
+    else:
+        clean_value = value
+        s_sql = f"SELECT {fields_sql} from {table} where {field_name} = '{clean_value}' "
+
+    cur = this.conn.execute(s_sql)
     retrieved_record = cur.fetchone()
     if retrieved_record is not None:
         record = dict(zip(fields_sought, retrieved_record))
