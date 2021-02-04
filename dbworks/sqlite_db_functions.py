@@ -27,16 +27,16 @@ this.database_location = os.path.join(os.path.dirname(__file__), database_file)
 def open_db():
     """ Opens the lookup database """
     try:
-        db_conn = lite.connect(this.database_location)
-        # db_conn.row_factory = lambda cursor, row: row[0]
-        return db_conn
+        this.conn = lite.connect(this.database_location)
+        return this.conn
     except lite.Error:
         this.conn = None
         return None
 
 
 # Connection should be opened upon load - do not remove
-this.conn = open_db()
+# Re-engineered discussion email 04/02
+# this.conn = open_db()
 
 
 def close_db():
@@ -64,8 +64,8 @@ def get_fields_of_record(table, field_name, value, fields_sought):
             fields_sql += ", "
 
     # All taxons with quotes gave problems to the lookup...
-    if ("'") in value:
-        clean_value = value.replace("'","%")
+    if "'" in value:
+        clean_value = value.replace("'", "%")
         s_sql = f"SELECT {fields_sql} from {table} where {field_name} like '{clean_value}' "
     else:
         clean_value = value

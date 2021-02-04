@@ -34,6 +34,11 @@ def initialize_lookups():
     # db_functions.conn.row_factory = lambda cursor, row: row[0] # important, this has side effects
     # Fill the lookups:
 
+    if sqlite_db_functions.conn is None:
+        conn = sqlite_db_functions.open_db()
+        if conn is None:
+            return
+
     # COUNT IDs and words
     c = sqlite_db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM requiredFields').fetchall()

@@ -281,7 +281,7 @@ def process_dataset_list(pool_no, dataset_id_list, from_pool=False, with_logging
 
         try:
             dataset_qc_labeling(dataset_id, False, with_logging)
-        except Exception as e:
+        except Exception:
             errors += 1
             this.logger.error(traceback.format_exc())
             this.logger.warning(f"WARNING: Pool Number: {pool_no}, processsing dataset {dataset_id} FAILED ")

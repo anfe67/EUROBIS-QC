@@ -27,7 +27,9 @@ def populate_fields():
         the database """
 
     if sqlite_db_functions.conn is None:
-        return
+        conn = sqlite_db_functions.open_db()
+        if conn is None:
+            return
 
     # Used for populating the field names
     sample_taxon = 'urn:lsid:marinespecies.org:taxname:519212'
