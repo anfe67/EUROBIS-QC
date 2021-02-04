@@ -4,7 +4,7 @@ Reorganize examples (They are all in eurobisqc/test, should move to eurobisqc/ex
 
 ## Prerequisites
 
-All the examples require access to the necessary python libraries. 
+All the examples require access to the necessary python libraries.
 These are indicated in the installation instructions in the top level README.md file.
 Furthermore, all the examples need access to the internet to call the following APIs:
 
@@ -15,16 +15,16 @@ The examples also need to access the local WORMS and Lookup databases, used to v
 values and their correct use as well as sex values and their correct use. The Lookup database is also used to verify the
 presence of the required fields and BasisofRecord.
 
-### Redirecting output to a file for analysis 
+### Redirecting output to a file for analysis
 
-When detailed analysis of ouput is needed, the examples can be run with a redirection 
-of the logger output to a file. This can be done using the '&' sintax, as in the 
-following command: 
+When detailed analysis of ouput is needed, the examples can be run with a redirection
+of the logger output to a file. This can be done using the '&' sintax, as in the
+following command:
 ```commandline
-python eurobisqc/examples/run_dwca_pipeline.py &> log_output.txt 
+python eurobisqc/examples/run_dwca_pipeline.py &> log_output.txt
 ```
 
-All the output shall be then redirected to file.  
+All the output shall be then redirected to file.
 
 ---
 
@@ -41,7 +41,7 @@ File processing is faster than dataset processing, because the value is not writ
 3. grab the eMoF record set as it is on the original dataset, as they are not altered.
 4. Close the files and produce a zip with the same name.
 
-### Running DwCA File Processing 
+### Running DwCA File Processing
 
 In order to call this function on an example DwCA archive, the file **run_dwca_pipeline.py** has been provided. This contains a call to a simple graphical chooser, to use it select the directory where the archives are located and click OK, then enter the directory and click ok to select it. The files shall be listed in the list box, select one of those to process and click OK on the main window. The processing is verbose and shall show all the records being computed.
 
@@ -53,99 +53,107 @@ Another example is provided in **run_dwca_multiprocess.py**, in this one a folde
 
 The Dataset processing work on the EUROBIS database and **DO** update the QC bitmasks of the datasets being updated. (In fact, the biggest time eater is the database update).
 
-The core of the processing (processes one dataset) is **dataset_qc_labeling** in mssql_example_pipeline.py. 
+The core of the processing (processes one dataset) is **dataset_qc_labeling** in mssql_example_pipeline.py.
 Everything necessary to process a dataset or to process a list of datasets in a multiprocessing fashion as explained above.
 
-The starting point for **dataset_qc_labeling** is a dataset id, from which the records and the characteristics of the dataset 
-are retrieved. 
-The core of the dataset processing is a class called **EurobisDataset** contained in **eurobis_dataset.py**. 
-It reproduces the same capabilities of the DwCAProcessor seen above, but starting from a dataset stored across several tables 
-in a MS SQL database. However, no optimization techniques are used to limit memory usage 
+The starting point for **dataset_qc_labeling** is a dataset id, from which the records and the characteristics of the dataset
+are retrieved.
+The core of the dataset processing is a class called **EurobisDataset** contained in **eurobis_dataset.py**.
+It reproduces the same capabilities of the DwCAProcessor seen above, but starting from a dataset stored across several tables
+in a MS SQL database. However, no optimization techniques are used to limit memory usage
 (like processing the records in pages of XXX records at the time).
 
 ### Running Dataset Processing
-**run_mssql_pipeline** runs a graphical dataset chooser that reports the id and display name for the full list of 
-datasets contained in the database or in alternative, the list of datasets that contain at least a record with label 0 or NULL. 
-Therefore to perform re-labeling of a dataset it is sufficient to set one of this dataset's records QC mask to NULL or 0. 
-If a single dataset is selected, then the simple dataset labelling function **dataset_qc_labeling** is called. 
-As the listbox is capable of multiple selections, if this is the case, then the **do_db_multi_selection** function is called, 
-which performs multiprocessing in the same way described above, with the exception that a boolean parameter **server_local** 
-in the section **[SQLSERVERDB]**, configurable in "dbworks/resources/config.ini" when set to **True** reserves 
-two additional cores to be used by the MS SQL Server (in practice the Pool will consist of two processes less if this parameter 
-is set to True. 
-However the MS SQL Server will try to use anyway all cores, so in fact a better choice is to run the processing on 
-a different machine than the database server. 
-**mssql_random_record** contains a reproduction to a call to **dataset_qc_labeling** but with important differences: 
-1. The dataset is selected at random within all datasets having less than 10000 records 
+**run_mssql_pipeline** runs a graphical dataset chooser that reports the id and display name for the full list of
+datasets contained in the database or in alternative, the list of datasets that contain at least a record with label 0 or NULL.
+Therefore to perform re-labeling of a dataset it is sufficient to set one of this dataset's records QC mask to NULL or 0.
+If a single dataset is selected, then the simple dataset labelling function **dataset_qc_labeling** is called.
+As the listbox is capable of multiple selections, if this is the case, then the **do_db_multi_selection** function is called,
+which performs multiprocessing in the same way described above, with the exception that a boolean parameter **server_local**
+in the section **[SQLSERVERDB]**, configurable in "dbworks/resources/config.ini" when set to **True** reserves
+two additional cores to be used by the MS SQL Server (in practice the Pool will consist of two processes less if this parameter
+is set to True.
+However the MS SQL Server will try to use anyway all cores, so in fact a better choice is to run the processing on
+a different machine than the database server.
+**mssql_random_record** contains a reproduction to a call to **dataset_qc_labeling** but with important differences:
+1. The dataset is selected at random within all datasets having less than 10000 records
 2. From this dataset, it chooses a random **core** event and all dependant records, and calculates the QC.
 
 The function used is process_random_record
-Furthermore, a module called **many_random_records** has been provided, with a function **many_randoms** that can accept an integer 
-(if not provided the default will be 100) that will run a number of times the **process_random_record**. 
+Furthermore, a module called **many_random_records** has been provided, with a function **many_randoms** that can accept an integer
+(if not provided the default will be 100) that will run a number of times the **process_random_record**.
 ---
-### Processing the entire database 
+### Processing the entire database
 **run_mssql_whole_db.py** can be used to process the main DB with two parameters: with_multiprocessing and with_logging.
-It runs either by splitting the list of active datasets among a pool of processes OR by giving the entire list to 
-a single process, which will act sequentially. 
+It runs either by splitting the list of active datasets among a pool of processes OR by giving the entire list to
+a single process, which will act sequentially.
 
-It is important that if using multiprocessing, only one of these pools will run. This is because normally the 
-database locks is active at the row level and if two processes will attempt to lock the same database row, one of 
-them will be denied and an exception shall be generated. 
+It is important that if using multiprocessing, only one of these pools will run. This is because normally the
+database locks is active at the row level and if two processes will attempt to lock the same database row, one of
+them will be denied and an exception shall be generated.
 
 ---
-### Running examples from the Python console - without GUI 
+### Running examples from the Python console - without GUI
 A Graphical User Interface has been provided for some of the examples, just to be able
 to cherry-pick examples in a fast way. A DUI is by no means necessary to run the example
-pipelines. Here below a few use cases for the examples provided: 
+pipelines. Here below a few use cases for the examples provided:
 
 **To process a DwCA file**
 ```commandline
 source venv/bin/activate # Activate the virtual environment
-python 
->>> from eurobisqc.examples import dwca_pipeline 
+python
+>>> from eurobisqc.examples import dwca_pipeline
 >>> dwca_pipeline.dwca_file_qc("eurobisqc/test/data/dwca-zoobenthos_in_amvrakikos_wetlands-v1.4.zip", True)
 ```
 **To process multiple DwCA files - No multiprocessing**
 ```commandline
 source venv/bin/activate # Activate the virtual environment
-python 
->>> from eurobisqc.examples import dwca_pipeline 
+python
+>>> from eurobisqc.examples import dwca_pipeline
 >>> dwca_pipeline.dwca_process_filelist(0, ["File 1","File 2"], True):
 ```
-**Note:** This is a fictive example. 
+**Note:** This is a fictive example.
 
 **To process a Dataset from the database (writes to the DB)**
 ```commandline
 source venv/bin/activate # Activate the virtual environment
-python 
->>> from eurobisqc.examples import mssql_pipeline 
+python
+>>> from eurobisqc.examples import mssql_pipeline
 >>> mssql_pipeline.dataset_qc_labeling(8, True, True)
 ```
-In a similar way, the multiprocess examples can be run without a GUI. 
+In a similar way, the multiprocess examples can be run without a GUI.
 
 **To process multiple Datasets from the database without multiprocessing (writes to the DB)**
 ```commandline
 source venv/bin/activate # Activate the virtual environment
-python 
->>> from eurobisqc.examples import mssql_pipeline 
->>> process_dataset_list(0, [8, 9, 10], False, True)
+python
+>>> from eurobisqc.examples import mssql_pipeline
+>>> mssql_pipeline.process_dataset_list(0, [8, 9, 10], False, True)
 ```
 **To process multiple Datasets from the database using multiprocessing (writes to the DB)**
 ```commandline
 source venv/bin/activate # Activate the virtual environment
-python 
->>> from eurobisqc.examples import mssql_multiprocess 
->>> mssql_multiprocess.do_db_multi_selection([1,2,3,4,5], ["name 1","name 2","name 3","name 4","name 5"]])
+python
+>>> from eurobisqc.examples import mssql_multiprocess
+>>> mssql_multiprocess.do_db_multi_selection([1,2,3,4,5], ["name 1","name 2","name 3","name 4","name 5"])
 ```
-**Note:** This is a fictive example... 
+**To process complete database using multiprocessing (writes to the DB)**
+```commandline
+source venv/bin/activate # Activate the virtual environment
+python
+>>> from eurobisqc.examples import run_mssql_whole_db
+>>> run_mssql_whole_db.process_all_db(True, True)
+```
 
-This is the generic principle. These functions can be used to perform QC 
-from other applications without the need of a GUI. 
+**Note:** This is a fictive example...
+
+This is the generic principle. These functions can be used to perform QC
+from other applications without the need of a GUI.
 
 ### Considerations
-1) DwCA archive do NOT contain a QC flag, so their QC processing is useful only during the processing of the file. 
-2) The 18 basic QCs are all used by the above explained examples and they have been extensively tested. 
-3) The QC "pipelines" proposed are examples based on the discussions and emails between AF/SaFITS and BV/VLIZ. 
-Alternative ways of processing the records may be implemented based on these examples. 
-   
+1) DwCA archive do NOT contain a QC flag, so their QC processing is useful only during the processing of the file.
+2) The 18 basic QCs are all used by the above explained examples and they have been extensively tested.
+3) The QC "pipelines" proposed are examples based on the discussions and emails between AF/SaFITS and BV/VLIZ.
+Alternative ways of processing the records may be implemented based on these examples.
+
 ---
