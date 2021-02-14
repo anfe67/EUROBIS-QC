@@ -17,6 +17,10 @@ def import_files():
 
     resource_files = [f for f in os.listdir(this.resources_dir) if os.path.isfile(os.path.join(this.resources_dir, f))]
 
+    # Following email from Fred
+    if sqlite_db_functions.conn is  None:
+        sqlite_db_functions.open_db()
+
     for file_name in resource_files:
         case_sensitive = False
 
