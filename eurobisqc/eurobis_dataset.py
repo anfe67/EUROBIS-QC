@@ -369,10 +369,11 @@ class EurobisDataset:
                 cursor = mssql.conn.cursor()
                 cursor.execute(sql_disable_index)
                 mssql.conn.commit()
-                this.logger.debug(
-                    f"Non clustered index on qc disabled")
+                this.logger.debug(f"Non clustered index on qc disabled")
+                mssql.close_db()
                 return "Success"
             except Error as e:
+                mssql.close_db()
                 return f"Failed to disable clustered index: {e}"
 
     @classmethod
@@ -393,11 +394,13 @@ class EurobisDataset:
                 cursor = mssql.conn.cursor()
                 cursor.execute(sql_disable_index)
                 mssql.conn.commit()
-                this.logger.debug(
-                    f"Non clustered index on qc rebuilt")
+                this.logger.debug(f"Non clustered index on qc rebuilt")
+                mssql.close_db()
                 return "Success"
             except Error as e:
+                mssql.close_db()
                 return f"Failed to rebuild clustered index: {e}"
+
 
     @classmethod
     def update_record_qc(cls, records, batch_update_count, batch_size, ds_id, record_type):
@@ -456,3 +459,6 @@ class EurobisDataset:
                 return "Success"
             except Error as e:
                 return f"Fail, batch {batch_update_count} not updated, exception {str(e)}"
+
+            # Added close_DB to make sure that transactions are "separated".
+            mssql.close_db()
