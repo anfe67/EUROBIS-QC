@@ -134,6 +134,29 @@ def split_list(a, n):
     result = list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
     return result
 
+def split_list_optimized(a, n, numbers):
+    """ Splits a list in n chunks """
+    """ n = cpus """
+    """ a (ids | names) """
+
+    sum = 0
+    k, m = divmod(len(a), n)
+    for i in range(0, len(numbers)):
+        sum = sum + numbers[i]
+    result = []
+    pool = []
+    averagesize = sum / n
+    i_record_count = 0
+    for teller in range(n):
+        sum_records_pool = 0
+        while sum_records_pool < averagesize and i_record_count < len(numbers):
+             pool.append(a[i_record_count])
+             sum_records_pool += numbers[i_record_count]
+             i_record_count += 1
+        result.append(pool)
+        pool = []
+    return result
+
 
 def split_in_chunks(a_list, a_size):
     return [a_list[offs:offs + a_size] for offs in range(0, len(a_list), a_size)]

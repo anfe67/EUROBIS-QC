@@ -86,7 +86,7 @@ def do_db_multi_random_percent(percent):
     this.logger.info(f"Started at: {start_time}. All processes have completed after {time.time() - start_time}")
 
 
-def do_db_multi_selection(dataset_ids, dataset_names):
+def do_db_multi_selection(dataset_ids, dataset_names, dataset_numbers = 0):
     """ Performs multiprocessing of a selection of known dataset ids with corresponding names
         Using this one the entire dataset can be run partitioning it by hand on different
         computers """
@@ -105,8 +105,12 @@ def do_db_multi_selection(dataset_ids, dataset_names):
     pool = mp.Pool(n_cpus)
 
     # Retrieved list, now need to split
-    dataset_id_lists = misc.split_list(dataset_ids, n_cpus)  # We are OK until here.
-    dataset_names_lists = misc.split_list(dataset_names, n_cpus)
+    if dataset_numbers:
+        dataset_id_lists = misc.split_list_optimized(dataset_ids, n_cpus, dataset_numbers)
+        dataset_names_lists = misc.split_list_optimized(dataset_names, n_cpus, dataset_numbers)
+    else:
+        dataset_id_lists = misc.split_list(dataset_ids, n_cpus)
+        dataset_names_lists = misc.split_list(dataset_names, n_cpus)
 
     # Disable the qc index...
     eurobis_dataset.EurobisDataset.disable_qc_index()

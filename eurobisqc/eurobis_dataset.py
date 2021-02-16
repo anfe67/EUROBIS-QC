@@ -5,6 +5,8 @@ from pyodbc import Error
 # This is to cope with possible hangs in iMIS API call
 from stopit import threading_timeoutable
 
+from datetime import datetime
+
 from dbworks import mssql_db_functions as mssql
 from eurobisqc.util import extract_area
 from eurobisqc.util import misc
@@ -69,7 +71,7 @@ class EurobisDataset:
 
     # May be we should do a SQL SP instead with parameter dataprovider_id
     sql_eurobis_eventdate = \
-        """ 
+        """
     COALESCE(dbo.ipt_date_iso8601(StartYearCollected,
                               StartMonthCollected,
                               StartDayCollected,
@@ -80,27 +82,27 @@ class EurobisDataset:
                               DayCollected,
                               COALESCE(StartTimeOfDay,TimeOfDay),
                               TimeZone))
-                              + (CASE WHEN (EndYearCollected IS NOT NULL) 
-                                          THEN '/'+ 
+                              + (CASE WHEN (EndYearCollected IS NOT NULL)
+                                          THEN '/'+
                                 dbo.ipt_date_iso8601(EndYearCollected,
                                                      EndMonthCollected,
                                                      EndDayCollected,
-                                                     COALESCE(EndTimeOfDay,TimeOfDay),TimeZone) 
+                                                     COALESCE(EndTimeOfDay,TimeOfDay),TimeZone)
                                           ELSE '' END)
 
-                               + (CASE WHEN (EndYearCollected IS NULL AND EndTimeOfDay IS NOT NULL) 
-                                          THEN '/'+ 
+                               + (CASE WHEN (EndYearCollected IS NULL AND EndTimeOfDay IS NOT NULL)
+                                          THEN '/'+
                                        COALESCE(dbo.ipt_date_iso8601(StartYearCollected,
                                                                      StartMonthCollected,
                                                                      StartDayCollected,
                                                                      EndTimeOfDay,
-                                                                     TimeZone), 
+                                                                     TimeZone),
                                                 dbo.ipt_date_iso8601(YearCollected,
                                                                      MonthCollected,
                                                                      DayCollected,
                                                                      EndTimeOfDay,
-                                     TimeZone)) 
-                                           ELSE '' END) 
+                                     TimeZone))
+                                           ELSE '' END)
     AS eventDate """
 
     sql_providers = "SELECT * FROM dataproviders WHERE id="
@@ -452,8 +454,9 @@ class EurobisDataset:
                 cursor.execute(sql_update)
                 mssql.conn.commit()
                 rec_type = "EVENT" if record_type == EurobisDataset.EVENT else "OCCURRENCE"
+                dateTimeObj = datetime.now()
                 this.logger.debug(
-                    f"{rec_type} records update count: {batch_update_count * batch_size + record_count}  "
+                    f"{dateTimeObj}: {rec_type} records update count: {batch_update_count * batch_size + record_count}  "
                     f"of dataset {ds_id};")
                 batch_update_count += 1
                 return "Success"

@@ -2,6 +2,7 @@ import logging
 import sys
 import time
 import traceback
+from datetime import datetime
 from _functools import reduce
 
 from dbworks import mssql_db_functions as mssql
@@ -44,7 +45,8 @@ def qc_event(record, data_archive):
         if len(data_archive.records_for_lookup) >= data_archive.LOOKUP_BATCH_SIZE:
             location.check_xy(data_archive.records_for_lookup)
             data_archive.pyxylookup_counter += 1
-            this.logger.debug(f"Lookups: {data_archive.pyxylookup_counter}")
+            dateTimeObj = datetime.now()
+            this.logger.debug(f"{dateTimeObj}: Lookups A: {data_archive.pyxylookup_counter}")
             # Empty the list
             data_archive.records_for_lookup = []
 
@@ -80,7 +82,8 @@ def qc_occurrence(record, data_archive):
         if len(data_archive.records_for_lookup) >= data_archive.LOOKUP_BATCH_SIZE:
             location.check_xy(data_archive.records_for_lookup)
             data_archive.pyxylookup_counter += 1
-            this.logger.debug(f"Lookups: {data_archive.pyxylookup_counter}")
+            dateTimeObj = datetime.now()
+            this.logger.debug(f"{dateTimeObj}: Lookups B: {data_archive.pyxylookup_counter}")
             # Empty the list
             data_archive.records_for_lookup = []
 
@@ -156,10 +159,12 @@ def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True):
 
     # Proceed top-down...
     if data_archive.darwin_core_type == data_archive.EVENT:
+        this.logger.info(f"1A. Event")
         # For all event records, qc event, then occurrence records
         # (which shall recurse into eMof), then own eMof and then "or" all
         for record in data_archive.event_recs:
             # qc_event shall also take care of emof for event
+            #this.logger.info(f"1A. Event")
             qc_ev = qc_event(record, data_archive)
             record["qc"] |= qc_ev
 
@@ -183,6 +188,7 @@ def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True):
                 # record["qc"] |= required_fields.check_aggregate(qc_req_agg)
 
     else:  # Only occurrence and emof records
+        this.logger.info(f"1B. Occurence and emof")
         for occ_record in data_archive.occurrence_recs:
             # The QC is either 0 or a QC mask - emof are considered inside the occurrence
             qc_occurrence(occ_record, data_archive)
@@ -191,7 +197,8 @@ def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True):
     if len(data_archive.records_for_lookup):
         location.check_xy(data_archive.records_for_lookup)
         data_archive.pyxylookup_counter += 1
-        this.logger.debug(f"Lookups: {data_archive.pyxylookup_counter}")
+        dateTimeObj = datetime.now()
+        this.logger.debug(f"{dateTimeObj}: Lookups C: {data_archive.pyxylookup_counter}")
 
         # Must propagate the QC of these records (in case)
         if data_archive.darwin_core_type == data_archive.EVENT:
