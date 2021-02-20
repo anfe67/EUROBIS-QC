@@ -127,7 +127,7 @@ def qc_emof(record, data_archive):
     return qc_em
 
 
-def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True):
+def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True, pool_no=0):
     """ Processes an eurobis dataset if it is passed as a dataset_id,
         shall popup a file chooser dialog if this is None
         :param dataset_id (The dataset identifier from the dataproviderstable)
@@ -151,6 +151,7 @@ def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True):
         this.logger.info(f"Interesting areas: {data_archive.areas}")
         this.logger.info(f"Imis dataset ID: {data_archive.imis_das_id}")
         this.logger.info(f"Type of core records: {'Event' if data_archive.darwin_core_type == 2 else 'Occurrence'}")
+        this.logger.info(f"Poolno: {pool_no}")
         this.logger.info(f"--------------------------------------------------")
 
     # Starting the QCs:
@@ -287,7 +288,7 @@ def process_dataset_list(pool_no, dataset_id_list, from_pool=False, with_logging
             this.logger.info(f"Pool Number: {pool_no}, processsing dataset {dataset_id} ")
 
         try:
-            dataset_qc_labeling(dataset_id, False, with_logging)
+            dataset_qc_labeling(dataset_id, False, with_logging, pool_no)
         except Exception:
             errors += 1
             this.logger.error(traceback.format_exc())

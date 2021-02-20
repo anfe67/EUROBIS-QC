@@ -440,8 +440,14 @@ class EurobisDataset:
                 sql_update += f"{cls.sql_update_start}{record['qc']}{cls.sql_update_middle} {record['dataprovider_id']}"
                 if record['decimalLatitude'] is not None:
                     sql_update = f"{sql_update}{cls.sql_if_lat}{record['decimalLatitude']}"
+                else:
+                    sql_update = f"{sql_update} AND Latitude IS NULL "
+
                 if record['decimalLongitude'] is not None:
                     sql_update = f"{sql_update} {cls.sql_if_lon}{record['decimalLongitude']}"
+                else:
+                    sql_update = f"{sql_update} AND Longitude IS NULL "
+
                 if record_type == EurobisDataset.EVENT:
                     if record['eventID'] is not None and misc.is_clean_for_sql(record['eventID']):
                         sql_update = f"{sql_update} {cls.sql_if_event_id}'{record['eventID']}'"
