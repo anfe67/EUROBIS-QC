@@ -427,7 +427,8 @@ class EurobisDataset:
             return "Fail, no connection "
         else:
             record_count = len(records)
-            sql_update = f"BEGIN TRAN; \n"
+            # sql_update = f"BEGIN TRAN; \n"
+            sql_update = ""
             for record in records:
                 # Compose update query
                 physloc = bytes.hex(record['physloc'])
@@ -455,10 +456,10 @@ class EurobisDataset:
                 sql_update = f"{sql_update} {cls.sql_update_end} 0x{physloc} \n"
 
             try:
-                sql_update += f"COMMIT TRAN;\n"
+                #sql_update += f"COMMIT TRAN;\n"
                 cursor = mssql.conn.cursor()
                 cursor.execute(sql_update)
-                mssql.conn.commit()
+                #mssql.conn.commit()
                 rec_type = "EVENT" if record_type == EurobisDataset.EVENT else "OCCURRENCE"
                 dateTimeObj = datetime.now()
                 this.logger.debug(
