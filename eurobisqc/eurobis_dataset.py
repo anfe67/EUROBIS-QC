@@ -111,8 +111,9 @@ class EurobisDataset:
 
     # Important - query to update an event or occurrence record
     # NOTE 29/01/2021 - ADDED THE WITH ROWLOCK
-    sql_update_start = "update eurobis WITH (ROWLOCK) set qc = "  # add the calculated QC
-    sql_update_middle = " where dataprovider_id = "
+    #sql_update_start = "update eurobis WITH (ROWLOCK, INDEX(IX_eurobis_lat_lon_dataproviderid)) set qc = "  # add the calculated QC
+    sql_update_start = "update eur SET qc = "  # add the calculated QC
+    sql_update_middle = " FROM eurobis eur WITH (ROWLOCK,INDEX(IX_eurobis_lat_lon_dataproviderid)) WHERE dataprovider_id = "
 
     # If the records contains Latitude and Longitude they are indexed, so could speed updates up
     sql_if_lat = " and Latitude = "
