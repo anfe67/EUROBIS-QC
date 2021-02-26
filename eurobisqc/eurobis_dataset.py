@@ -55,7 +55,9 @@ class EurobisDataset:
                          'Sex': 'sex',
                          'Genus': 'genus',
                          'qc': 'qc',
-                         '%%physloc%%': 'physloc'  # Note: Undocumented, may not work in future - use as update key
+                         'auto_id' : 'auto_id'
+                         # Disabling use of physloc: Fred conv. Bart dd 26/2
+                         #'%%physloc%%': 'physloc'  # Note: Undocumented, may not work in future - use as update key
                          }  # The mapping of the interesting fields DB <--> DwCA as defined for eurobis table
 
     field_map_emof = {'dataprovider_id': 'dataprovider_id',
@@ -113,7 +115,8 @@ class EurobisDataset:
     # NOTE 29/01/2021 - ADDED THE WITH ROWLOCK
     #sql_update_start = "update eurobis WITH (ROWLOCK, INDEX(IX_eurobis_lat_lon_dataproviderid)) set qc = "  # add the calculated QC
     sql_update_start = "update eur SET qc = "  # add the calculated QC
-    sql_update_middle = " FROM eurobis eur WITH (ROWLOCK,INDEX(IX_eurobis_lat_lon_dataproviderid)) WHERE dataprovider_id = "
+    #sql_update_middle = " FROM eurobis eur WITH (ROWLOCK,INDEX(IX_eurobis_lat_lon_dataproviderid)) WHERE dataprovider_id = "
+    sql_update_middle = " FROM eurobis eur WHERE dataprovider_id = "
 
     # If the records contains Latitude and Longitude they are indexed, so could speed updates up
     sql_if_lat = " and Latitude = "
@@ -122,7 +125,8 @@ class EurobisDataset:
     sql_if_scientific_name_id = "and aphia_id = "      # This does not provide benefits
     sql_if_event_id = " and EventID = "
 
-    sql_update_end = " and %%physloc%% = "  # add at the end the record['physloc'] retrieved at the start
+    #sql_update_end = " and %%physloc%% = "  # add at the end the record['physloc'] retrieved at the start
+    sql_update_end = " and auto_id = "  # add at the end the record['auto_id'] retrieved at the start
 
     def __init__(self):
         """ Initialises an empty dataset """
@@ -432,7 +436,7 @@ class EurobisDataset:
             sql_update = ""
             for record in records:
                 # Compose update query
-                physloc = bytes.hex(record['physloc'])
+                #physloc = bytes.hex(record['physloc'])
 
                 # Note The fields other than physloc and dataprovider_id are used to optimize
                 # the update queries execution plans and thus to reduce browsing the records
@@ -440,6 +444,9 @@ class EurobisDataset:
                 # are between 2.5 and 5 times faster.
 
                 sql_update += f"{cls.sql_update_start}{record['qc']}{cls.sql_update_middle} {record['dataprovider_id']}"
+
+                """
+                Disabled - using auto_id now.
                 if record['decimalLatitude'] is not None:
                     sql_update = f"{sql_update}{cls.sql_if_lat}{record['decimalLatitude']}"
                 else:
@@ -453,8 +460,10 @@ class EurobisDataset:
                 if record_type == EurobisDataset.EVENT:
                     if record['eventID'] is not None and misc.is_clean_for_sql(record['eventID']):
                         sql_update = f"{sql_update} {cls.sql_if_event_id}'{record['eventID']}'"
+                """
 
-                sql_update = f"{sql_update} {cls.sql_update_end} 0x{physloc} \n"
+               # sql_update = f"{sql_update} {cls.sql_update_end} 0x{physloc} \n"
+                sql_update = f"{sql_update} {cls.sql_update_end} {record['auto_id']} \n"
 
             try:
                 #sql_update += f"COMMIT TRAN;\n"
