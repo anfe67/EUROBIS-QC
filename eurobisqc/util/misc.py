@@ -106,6 +106,8 @@ def do_xylookup(records):
     output = [None] * len(records)
     indices = []
     coordinates = []
+    performLookup = False
+
     for i in range(len(records)):
         record = records[i]
         # The record has been already checked LAT LON validity, but verify anyway...
@@ -119,8 +121,11 @@ def do_xylookup(records):
             lat = check_float(record["decimalLatitude"])["float"]
 
             coordinates.append([lon, lat])
+            if lat is not None and lon is not None:
+                performLookup = True
 
-    if len(coordinates) > 0:
+
+    if performLookup:
         xy = pxy.lookup(coordinates, shoredistance=True, grids=True, areas=True)
         for i in range(len(indices)):
             output[indices[i]] = xy[i]

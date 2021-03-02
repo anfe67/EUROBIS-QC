@@ -64,9 +64,9 @@ def grab_datasets_optimized(sql_string):
             this.dataset_ids.append(row[0])
             this.dataset_names.append(row[1])
             this.dataset_numbers.append(row[2])
-        sql_trans = f"SET TRANSACTION ISOLATION LEVEL SNAPSHOT;\n"
-        cursor.execute(sql_trans)
-        this.logger.info("SET TRANSACTION ISOLATION")
+        #sql_trans = f"SET TRANSACTION ISOLATION LEVEL SNAPSHOT;\n"
+        #cursor.execute(sql_trans)
+        #this.logger.info("SET TRANSACTION ISOLATION")
     else:
         this.logger.error("No DB connection!")
         exit(0)

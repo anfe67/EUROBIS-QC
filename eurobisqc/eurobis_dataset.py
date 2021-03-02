@@ -443,6 +443,10 @@ class EurobisDataset:
                 # and using the existing indexes on the eurobis table. Observed speed improvements
                 # are between 2.5 and 5 times faster.
 
+                # This is a temporary fix - some qc values are set to None.
+                if record['qc'] is None:
+                    record['qc'] = 0
+
                 sql_update += f"{cls.sql_update_start}{record['qc']}{cls.sql_update_middle} {record['dataprovider_id']}"
 
                 """
@@ -469,7 +473,7 @@ class EurobisDataset:
                 #sql_update += f"COMMIT TRAN;\n"
                 cursor = mssql.conn.cursor()
                 cursor.execute(sql_update)
-                #mssql.conn.commit()
+                mssql.conn.commit()
                 rec_type = "EVENT" if record_type == EurobisDataset.EVENT else "OCCURRENCE"
                 dateTimeObj = datetime.now()
                 this.logger.debug(
