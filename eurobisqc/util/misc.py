@@ -106,6 +106,8 @@ def do_xylookup(records):
     output = [None] * len(records)
     indices = []
     coordinates = []
+    performLookup = False
+
     for i in range(len(records)):
         record = records[i]
         # The record has been already checked LAT LON validity, but verify anyway...
@@ -119,8 +121,11 @@ def do_xylookup(records):
             lat = check_float(record["decimalLatitude"])["float"]
 
             coordinates.append([lon, lat])
+            if lat is not None and lon is not None:
+                performLookup = True
 
-    if len(coordinates) > 0:
+
+    if performLookup:
         xy = pxy.lookup(coordinates, shoredistance=True, grids=True, areas=True)
         for i in range(len(indices)):
             output[indices[i]] = xy[i]
@@ -132,6 +137,29 @@ def split_list(a, n):
 
     k, m = divmod(len(a), n)
     result = list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
+    return result
+
+def split_list_optimized(a, n, numbers):
+    """ Splits a list in n chunks """
+    """ n = cpus """
+    """ a (ids | names) """
+
+    sum = 0
+    k, m = divmod(len(a), n)
+    for i in range(0, len(numbers)):
+        sum = sum + numbers[i]
+    result = []
+    pool = []
+    averagesize = sum / n
+    i_record_count = 0
+    for teller in range(n):
+        sum_records_pool = 0
+        while sum_records_pool < averagesize and i_record_count < len(numbers):
+             pool.append(a[i_record_count])
+             sum_records_pool += numbers[i_record_count]
+             i_record_count += 1
+        result.append(pool)
+        pool = []
     return result
 
 

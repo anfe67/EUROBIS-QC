@@ -5,6 +5,8 @@ from pyodbc import Error
 # This is to cope with possible hangs in iMIS API call
 from stopit import threading_timeoutable
 
+from datetime import datetime
+
 from dbworks import mssql_db_functions as mssql
 from eurobisqc.util import extract_area
 from eurobisqc.util import misc
@@ -53,7 +55,9 @@ class EurobisDataset:
                          'Sex': 'sex',
                          'Genus': 'genus',
                          'qc': 'qc',
-                         '%%physloc%%': 'physloc'  # Note: Undocumented, may not work in future - use as update key
+                         'auto_id' : 'auto_id'
+                         # Disabling use of physloc: Fred conv. Bart dd 26/2
+                         #'%%physloc%%': 'physloc'  # Note: Undocumented, may not work in future - use as update key
                          }  # The mapping of the interesting fields DB <--> DwCA as defined for eurobis table
 
     field_map_emof = {'dataprovider_id': 'dataprovider_id',
@@ -69,7 +73,7 @@ class EurobisDataset:
 
     # May be we should do a SQL SP instead with parameter dataprovider_id
     sql_eurobis_eventdate = \
-        """ 
+        """
     COALESCE(dbo.ipt_date_iso8601(StartYearCollected,
                               StartMonthCollected,
                               StartDayCollected,
@@ -80,27 +84,27 @@ class EurobisDataset:
                               DayCollected,
                               COALESCE(StartTimeOfDay,TimeOfDay),
                               TimeZone))
-                              + (CASE WHEN (EndYearCollected IS NOT NULL) 
-                                          THEN '/'+ 
+                              + (CASE WHEN (EndYearCollected IS NOT NULL)
+                                          THEN '/'+
                                 dbo.ipt_date_iso8601(EndYearCollected,
                                                      EndMonthCollected,
                                                      EndDayCollected,
-                                                     COALESCE(EndTimeOfDay,TimeOfDay),TimeZone) 
+                                                     COALESCE(EndTimeOfDay,TimeOfDay),TimeZone)
                                           ELSE '' END)
 
-                               + (CASE WHEN (EndYearCollected IS NULL AND EndTimeOfDay IS NOT NULL) 
-                                          THEN '/'+ 
+                               + (CASE WHEN (EndYearCollected IS NULL AND EndTimeOfDay IS NOT NULL)
+                                          THEN '/'+
                                        COALESCE(dbo.ipt_date_iso8601(StartYearCollected,
                                                                      StartMonthCollected,
                                                                      StartDayCollected,
                                                                      EndTimeOfDay,
-                                                                     TimeZone), 
+                                                                     TimeZone),
                                                 dbo.ipt_date_iso8601(YearCollected,
                                                                      MonthCollected,
                                                                      DayCollected,
                                                                      EndTimeOfDay,
-                                     TimeZone)) 
-                                           ELSE '' END) 
+                                     TimeZone))
+                                           ELSE '' END)
     AS eventDate """
 
     sql_providers = "SELECT * FROM dataproviders WHERE id="
@@ -109,8 +113,10 @@ class EurobisDataset:
 
     # Important - query to update an event or occurrence record
     # NOTE 29/01/2021 - ADDED THE WITH ROWLOCK
-    sql_update_start = "update eurobis WITH (ROWLOCK) set qc = "  # add the calculated QC
-    sql_update_middle = " where dataprovider_id = "
+    #sql_update_start = "update eurobis WITH (ROWLOCK, INDEX(IX_eurobis_lat_lon_dataproviderid)) set qc = "  # add the calculated QC
+    sql_update_start = "update eur SET qc = "  # add the calculated QC
+    #sql_update_middle = " FROM eurobis eur WITH (ROWLOCK,INDEX(IX_eurobis_lat_lon_dataproviderid)) WHERE dataprovider_id = "
+    sql_update_middle = " FROM eurobis eur WHERE dataprovider_id = "
 
     # If the records contains Latitude and Longitude they are indexed, so could speed updates up
     sql_if_lat = " and Latitude = "
@@ -119,7 +125,8 @@ class EurobisDataset:
     sql_if_scientific_name_id = "and aphia_id = "      # This does not provide benefits
     sql_if_event_id = " and EventID = "
 
-    sql_update_end = " and %%physloc%% = "  # add at the end the record['physloc'] retrieved at the start
+    #sql_update_end = " and %%physloc%% = "  # add at the end the record['physloc'] retrieved at the start
+    sql_update_end = " and auto_id = "  # add at the end the record['auto_id'] retrieved at the start
 
     def __init__(self):
         """ Initialises an empty dataset """
@@ -369,10 +376,11 @@ class EurobisDataset:
                 cursor = mssql.conn.cursor()
                 cursor.execute(sql_disable_index)
                 mssql.conn.commit()
-                this.logger.debug(
-                    f"Non clustered index on qc disabled")
+                this.logger.debug(f"Non clustered index on qc disabled")
+                mssql.close_db()
                 return "Success"
             except Error as e:
+                mssql.close_db()
                 return f"Failed to disable clustered index: {e}"
 
     @classmethod
@@ -393,11 +401,13 @@ class EurobisDataset:
                 cursor = mssql.conn.cursor()
                 cursor.execute(sql_disable_index)
                 mssql.conn.commit()
-                this.logger.debug(
-                    f"Non clustered index on qc rebuilt")
+                this.logger.debug(f"Non clustered index on qc rebuilt")
+                mssql.close_db()
                 return "Success"
             except Error as e:
+                mssql.close_db()
                 return f"Failed to rebuild clustered index: {e}"
+
 
     @classmethod
     def update_record_qc(cls, records, batch_update_count, batch_size, ds_id, record_type):
@@ -422,37 +432,57 @@ class EurobisDataset:
             return "Fail, no connection "
         else:
             record_count = len(records)
-            sql_update = f"BEGIN TRAN; \n"
+            # sql_update = f"BEGIN TRAN; \n"
+            sql_update = ""
             for record in records:
                 # Compose update query
-                physloc = bytes.hex(record['physloc'])
+                #physloc = bytes.hex(record['physloc'])
 
                 # Note The fields other than physloc and dataprovider_id are used to optimize
                 # the update queries execution plans and thus to reduce browsing the records
                 # and using the existing indexes on the eurobis table. Observed speed improvements
                 # are between 2.5 and 5 times faster.
 
+                # This is a temporary fix - some qc values are set to None.
+                if record['qc'] is None:
+                    record['qc'] = 0
+
                 sql_update += f"{cls.sql_update_start}{record['qc']}{cls.sql_update_middle} {record['dataprovider_id']}"
+
+                """
+                Disabled - using auto_id now.
                 if record['decimalLatitude'] is not None:
                     sql_update = f"{sql_update}{cls.sql_if_lat}{record['decimalLatitude']}"
+                else:
+                    sql_update = f"{sql_update} AND Latitude IS NULL "
+
                 if record['decimalLongitude'] is not None:
                     sql_update = f"{sql_update} {cls.sql_if_lon}{record['decimalLongitude']}"
+                else:
+                    sql_update = f"{sql_update} AND Longitude IS NULL "
+
                 if record_type == EurobisDataset.EVENT:
                     if record['eventID'] is not None and misc.is_clean_for_sql(record['eventID']):
                         sql_update = f"{sql_update} {cls.sql_if_event_id}'{record['eventID']}'"
+                """
 
-                sql_update = f"{sql_update} {cls.sql_update_end} 0x{physloc} \n"
+               # sql_update = f"{sql_update} {cls.sql_update_end} 0x{physloc} \n"
+                sql_update = f"{sql_update} {cls.sql_update_end} {record['auto_id']} \n"
 
             try:
-                sql_update += f"COMMIT TRAN;\n"
+                #sql_update += f"COMMIT TRAN;\n"
                 cursor = mssql.conn.cursor()
                 cursor.execute(sql_update)
                 mssql.conn.commit()
                 rec_type = "EVENT" if record_type == EurobisDataset.EVENT else "OCCURRENCE"
+                dateTimeObj = datetime.now()
                 this.logger.debug(
-                    f"{rec_type} records update count: {batch_update_count * batch_size + record_count}  "
+                    f"{dateTimeObj}: {rec_type} records update count: {batch_update_count * batch_size + record_count}  "
                     f"of dataset {ds_id};")
                 batch_update_count += 1
                 return "Success"
             except Error as e:
                 return f"Fail, batch {batch_update_count} not updated, exception {str(e)}"
+
+            # Added close_DB to make sure that transactions are "separated".
+            mssql.close_db()
