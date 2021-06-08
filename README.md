@@ -208,7 +208,7 @@ Furthermore, you need to have odbc installed if you want to use the pyodbc drive
 driver. For installation of both options:
 
 ```commandline
-sudo apt install unixodbc-dev freetds-bin freetds-dev  
+sudo apt install unixodbc-dev freetds-bin freetds-dev python3-dev
 ```
 On ubuntu, you also need tk (there are some basic graphic elements in the demo programs). 
 ```commandline
@@ -217,7 +217,7 @@ sudo apt install python3-tk
 
 #### Clone the repository: 
 ```
-git clone https://github.com/anfe67/eurobis-qc.git  
+git clone https://github.com/lifewatch/eurobis-qc.git  
 ```
 
 #### Create the virtual environment

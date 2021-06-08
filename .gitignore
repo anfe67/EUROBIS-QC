@@ -1,2 +1,13 @@
 .coverage
+.idea
+/build
 /cover
+/dist
+/dbworks/resources/config.ini
+/dbworks/__pycache__
+/eurobisqc/__pycache__
+/eurobisqc/util/__pycache__
+/eurobisqc/examples/__pycache__
+/eurobisqc.egg-info
+/eurobis-qc-venv
+/venv
