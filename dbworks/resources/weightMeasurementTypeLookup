@@ -1,4 +1,7 @@
-# Lookups for fields in the eMoF and occurrence dynamicProperties
+# measurementType values that represent 'weight' in the eMoF and occurrence dynamicProperties
 
 weight
 wet weight biomass
+wet weight
+wet weight/area
+wet weight/volume

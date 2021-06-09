@@ -1,12 +1,9 @@
-# This is an example, the file needs to be extended
-# SDBIOL05 and values, with and without headers
-# Do you specify the URL or the values?
+# NERC Vocabulary Server (NVS) identifiers for anything that represents weight
+# See https://vocab.nerc.ac.uk/
 
-http://vocab.nerc.ac.uk/collection/P01/current/SDBIOL05
+http://vocab.nerc.ac.uk/collection/P01/current/SDBIOL05/
 http://vocab.nerc.ac.uk/collection/P01/current/BDWB7040/
 http://vocab.nerc.ac.uk/collection/P01/current/BDWB7041/
 http://vocab.nerc.ac.uk/collection/P01/current/BDWB7042/
 http://vocab.nerc.ac.uk/collection/P01/current/BDWB7043/
-
-# To continue
-# Note: to verify
+http://vocab.nerc.ac.uk/collection/P01/current/OWETBM01/
