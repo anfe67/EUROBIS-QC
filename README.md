@@ -302,7 +302,7 @@ python -m pip install --upgrade virtualenv
 
 Then clone the project repository: 
 ```commandline
-git clone https://github.com/anfe67/eurobis-qc.git
+git clone https://github.com/lifewatch/eurobis-qc.git
 ```
 
 Create a virtual environment (better inside eurobis-qc if using Pycharm):

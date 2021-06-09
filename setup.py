@@ -30,7 +30,7 @@ setup(name="eurobisqc",
                             'eurobisqc/README_EUROBISQC.md',
                             ])
                   ],
-      url="https://github.com/anfe67/eurobis-qc",
+      url="https://github.com/lifewatch/eurobis-qc",
       license="MIT",
       author="Antonio Ferraro",
       author_email="antonio.ferraro@safits.be",
