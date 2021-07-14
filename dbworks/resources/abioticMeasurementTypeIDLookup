@@ -1,0 +1,5 @@
+# NERC Vocabulary Server (NVS) identifiers
+# See https://vocab.nerc.ac.uk/
+# Terms built using the BODC parameter semantic model designed to describe individual measured phenomena
+
+http://vocab.nerc.ac.uk/collection/P01/current/SAGEMSFM/

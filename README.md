@@ -114,7 +114,7 @@ DEPTH_FOR_SPECIES_OK = ("Depth coherent with species depth range", 20)  # NOT IM
 
 COORDINATES_PRECISION_PRESENT = ("Coordinates uncertainty <5000m", 21)  # In location
 SAMPLE_DEVICE_PRESENT  = ("Sampling device present", 22)  # In measurements
-ABUNDANCE_PRESENT = ("Abundance", 23)  # In measurements (NOT IMPLEMENTED)
+ABUNDANCE_PRESENT = ("Abundance", 23)  # In measurements 
 ABIOTIC_MAPPED_PRESENT = ("Abiotic data is mapped to BODC terms", 24)  # In measurements
 GOODMETADATA = ("includes citation, title, license, and abstract with >100 characters", 25)  # On dataset level - extract_metadata.py
 

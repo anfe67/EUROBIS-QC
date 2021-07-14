@@ -21,6 +21,9 @@ resources** folder, with file names ending in Lookup or LookUP
 - sampleSizeMeasurementTypeLookup - Contains appropriate text entries to search for in the records (like "abundance")
 - weightMeasurementTypeLookup - Contains appropriate text entries to search for in the records (like "wet weight
   biomass")
+- abundanceMeasurementTypeLookup - Contains appropriate text entries to search for in the records
+- abioticMeasurementTypeLookup - Contains appropriate text entries to search for in the records
+- deviceMeasurementTypeLookup - Contains appropriate text entries to search for in the records
 - sexMeasurementTypeIDLookup 
 - sexMeasurementTypeIDLookup
 - sexValuesLookup - The possible valid values  

@@ -10,6 +10,8 @@ qc_mask_15 = qc_flags.QCFlag.OBSERVED_WEIGHT_PRESENT.bitmask
 qc_mask_16 = qc_flags.QCFlag.SAMPLE_SIZE_PRESENT.bitmask
 qc_mask_17 = qc_flags.QCFlag.SEX_PRESENT.bitmask
 qc_mask_22 = qc_flags.QCFlag.SAMPLE_DEVICE_PRESENT.bitmask
+qc_mask_23 = qc_flags.QCFlag.ABUNDANCE_PRESENT.bitmask
+qc_mask_24 = qc_flags.QCFlag.ABIOTIC_MAPPED_PRESENT.bitmask
 
 # Introduce parameters for aggregation of measurements (or | and | percentage)
 
@@ -99,6 +101,24 @@ def initialize_lookups():
     data = c.execute('SELECT Value FROM deviceMeasurementType').fetchall()
     this.device_measure_types = {val[0] for val in data}
 
+    # ABUNDANCE PRESENT
+    c = sqlite_db_functions.conn.cursor()
+    data = c.execute('SELECT Value FROM abundanceMeasurementTypeID').fetchall()
+    this.abundance_measure_type_ids = {val[0] for val in data}
+
+    c = sqlite_db_functions.conn.cursor()
+    data = c.execute('SELECT Value FROM abundanceMeasurementType').fetchall()
+    this.abundance_measure_types = {val[0] for val in data}
+
+    # ABIOTIC PRESENT
+    c = sqlite_db_functions.conn.cursor()
+    data = c.execute('SELECT Value FROM abioticMeasurementTypeID').fetchall()
+    this.abiotic_measure_type_ids = {val[0] for val in data}
+
+    c = sqlite_db_functions.conn.cursor()
+    data = c.execute('SELECT Value FROM abioticMeasurementType').fetchall()
+    this.abiotic_measure_types = {val[0] for val in data}
+
     # SEX type IDs, types and values
     c = sqlite_db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM sexMeasurementTypeID').fetchall()
@@ -119,6 +139,8 @@ def initialize_lookups():
     this.sample_size_measures = this.sample_size_measure_type_ids.union(this.sample_size_measure_types)
     this.count_measures = this.count_measure_type_ids.union(this.count_measure_types)
     this.device_measures = this.device_measure_type_ids.union(this.device_measure_types)
+    this.abundance_measures = this.abundance_measure_type_ids.union(this.abundance_measure_types)
+    this.abiotic_measures = this.abiotic_measure_type_ids.union(this.abiotic_measure_types)
 
 
 def check_mtid(measurement_type_id, measurement_value):
@@ -147,6 +169,16 @@ def check_mtid(measurement_type_id, measurement_value):
     for dmtid in this.device_measure_type_ids:
         if dmtid in measurement_type_id:
             qc_mask |= qc_mask_22
+
+    # Is the measurement type id of abundance
+    for abundanceid in this.abundance_measure_type_ids:
+        if abundanceid in measurement_type_id:
+            qc_mask |= qc_mask_23
+
+    # Is the measurement type id of abiotic
+    for abioticid in this.abiotic_measure_type_ids:
+        if abioticid in measurement_type_id:
+            qc_mask |= qc_mask_24
 
     # Is it the measurement of a sample size - do not check if found
     if not found:
@@ -201,6 +233,17 @@ def check_mt(measurement_type, measurement_value):
     for dmtid in this.device_measure_types:
         if dmtid in measurement_type:
             qc_mask |= qc_mask_22
+
+    # Is the measurement type id of abundance
+    for abundanceid in this.abundance_measure_types:
+        if abundanceid in measurement_type:
+            qc_mask |= qc_mask_23
+
+    # Is the measurement type id of abiotic
+    for abioticid in this.abiotic_measure_types:
+        if abioticid in measurement_type:
+            qc_mask |= qc_mask_24
+
 
     # Is it the measurement of a sample size
     if not found:
@@ -343,6 +386,24 @@ def check_dyn_prop_record(record):
                                     qc_mask |= qc_mask_22  # It is a non empty string
                             else:
                                 qc_mask |= qc_mask_22  # It is another value type
+
+                for abundancemt in this.abundance_measures:
+                    if abundancemt in key:
+                        if properties[k] is not None:
+                            if isinstance(properties[k], str):
+                                if properties[k].strip():
+                                    qc_mask |= qc_mask_23  # It is a non empty string
+                            else:
+                                qc_mask |= qc_mask_23  # It is another value type
+
+                for abioticmt in this.abiotic_measures:
+                    if abioticmt in key:
+                        if properties[k] is not None:
+                            if isinstance(properties[k], str):
+                                if properties[k].strip():
+                                    qc_mask |= qc_mask_24  # It is a non empty string
+                            else:
+                                qc_mask |= qc_mask_24  # It is another value type
 
                 # Can they contain sex? Can they contain the typeIDs?
 
