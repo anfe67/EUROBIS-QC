@@ -29,7 +29,7 @@ def qc_event(record, data_archive):
     if record["qc"] is None:
         record["qc"] = 0
 
-    # QC for the ev. records : location basic (4, 5, 18)
+    # QC for the ev. records : location basic (4, 5, 18, 21)
     record["qc"] |= location.check_basic_record(record)
     # QC for the ev. records : areas (9)
     if data_archive.areas is not None:
@@ -56,6 +56,10 @@ def qc_event(record, data_archive):
     # Look at the event related eMoF records  (14, 15, 16, 17)
     # Disabled as per email 24/01/2021
     # record["qc"] |= qc_emof(record, data_archive)
+
+    # goodmetadata is for full dataset. (25)
+    if data_archive.goodmetadata:
+        record["qc"] |= qc_flags.QCFlag.GOODMETADATA.bitmask
 
     return record["qc"]
 
@@ -99,6 +103,10 @@ def qc_occurrence(record, data_archive):
     # Do the measurement of facts QC for the event records (14, 15, 16, 17)
     # This processes all emof records belonging to this occurrence record
     record["qc"] |= qc_emof(record, data_archive)
+
+    # Complete dataset: (25)
+    if data_archive.goodmetadata:
+        record["qc"] |= qc_flags.QCFlag.GOODMETADATA.bitmask
 
     # This is useful for when core record = event
     return record["qc"]
@@ -150,6 +158,7 @@ def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True, pool_
         this.logger.info(f"Number of emof records: {len(data_archive.emof_recs)}")
         this.logger.info(f"Interesting areas: {data_archive.areas}")
         this.logger.info(f"Imis dataset ID: {data_archive.imis_das_id}")
+        this.logger.info(f"Good metadata: {'OK' if data_archive.goodmetadata == True else 'Not OK'}")
         this.logger.info(f"Type of core records: {'Event' if data_archive.darwin_core_type == 2 else 'Occurrence'}")
         this.logger.info(f"Poolno: {pool_no}")
         this.logger.info(f"--------------------------------------------------")
@@ -165,7 +174,7 @@ def dataset_qc_labeling(dataset_id, disable_index=True, with_logging=True, pool_
         # (which shall recurse into eMof), then own eMof and then "or" all
         for record in data_archive.event_recs:
             # qc_event shall also take care of emof for event
-            #this.logger.info(f"1A. Event")
+            # this.logger.info(f"1A. Event")
             qc_ev = qc_event(record, data_archive)
             record["qc"] |= qc_ev
 

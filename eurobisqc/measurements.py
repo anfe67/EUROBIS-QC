@@ -9,6 +9,7 @@ qc_mask_14 = qc_flags.QCFlag.OBSERVED_COUNT_PRESENT.bitmask
 qc_mask_15 = qc_flags.QCFlag.OBSERVED_WEIGHT_PRESENT.bitmask
 qc_mask_16 = qc_flags.QCFlag.SAMPLE_SIZE_PRESENT.bitmask
 qc_mask_17 = qc_flags.QCFlag.SEX_PRESENT.bitmask
+qc_mask_22 = qc_flags.QCFlag.SAMPLE_DEVICE_PRESENT.bitmask
 
 # Introduce parameters for aggregation of measurements (or | and | percentage)
 
@@ -89,6 +90,15 @@ def initialize_lookups():
     data = c.execute('SELECT Value FROM weightMeasurementType').fetchall()
     this.weight_measure_types = {val[0] for val in data}
 
+    # SAMPLING DEVICE PRESENT
+    c = sqlite_db_functions.conn.cursor()
+    data = c.execute('SELECT Value FROM deviceMeasurementTypeID').fetchall()
+    this.device_measure_type_ids = {val[0] for val in data}
+
+    c = sqlite_db_functions.conn.cursor()
+    data = c.execute('SELECT Value FROM deviceMeasurementType').fetchall()
+    this.device_measure_types = {val[0] for val in data}
+
     # SEX type IDs, types and values
     c = sqlite_db_functions.conn.cursor()
     data = c.execute('SELECT Value FROM sexMeasurementTypeID').fetchall()
@@ -108,6 +118,7 @@ def initialize_lookups():
     this.weight_measures = this.weight_measure_type_ids.union(this.weight_measure_types)
     this.sample_size_measures = this.sample_size_measure_type_ids.union(this.sample_size_measure_types)
     this.count_measures = this.count_measure_type_ids.union(this.count_measure_types)
+    this.device_measures = this.device_measure_type_ids.union(this.device_measure_types)
 
 
 def check_mtid(measurement_type_id, measurement_value):
@@ -118,7 +129,7 @@ def check_mtid(measurement_type_id, measurement_value):
         :param measurement_type_id - as in the record
         :param measurement_value - as in the record
         purpose: attempt optimization
-        returns: 0 or one of the bitmasks 14, 15, 16 or 17 """
+        returns: 0 or one or more of the bitmasks 14, 15, 16 or 17 """
 
     qc_mask = 0
     found = False
@@ -131,6 +142,11 @@ def check_mtid(measurement_type_id, measurement_value):
         if wmtid in measurement_type_id:
             found = True
             qc_mask |= qc_mask_15
+
+    # Is the measurement type id of a sampling device
+    for dmtid in this.device_measure_type_ids:
+        if dmtid in measurement_type_id:
+            qc_mask |= qc_mask_22
 
     # Is it the measurement of a sample size - do not check if found
     if not found:
@@ -167,7 +183,7 @@ def check_mt(measurement_type, measurement_value):
         :param measurement_type - as in the record
         :param measurement_value - as in the record
         purpose: attempt optimization
-        returns: 0 or one of the bitmasks 14, 15, 16 or 17 """
+        returns: 0 or one or more of the bitmasks 14, 15, 16, 17 or 22 """
 
     qc_mask = 0
     found = False
@@ -180,6 +196,11 @@ def check_mt(measurement_type, measurement_value):
         if wmt in measurement_type:
             found = True
             qc_mask |= qc_mask_15
+
+    # Is the measurement type id of a sampling device
+    for dmtid in this.device_measure_types:
+        if dmtid in measurement_type:
+            qc_mask |= qc_mask_22
 
     # Is it the measurement of a sample size
     if not found:
@@ -313,6 +334,15 @@ def check_dyn_prop_record(record):
                                     qc_mask |= qc_mask_16  # It is a non empty string
                             else:
                                 qc_mask |= qc_mask_16  # It is another value type
+
+                for dmt in this.device_measures:
+                    if dmt in key:
+                        if properties[k] is not None:
+                            if isinstance(properties[k], str):
+                                if properties[k].strip():
+                                    qc_mask |= qc_mask_22  # It is a non empty string
+                            else:
+                                qc_mask |= qc_mask_22  # It is another value type
 
                 # Can they contain sex? Can they contain the typeIDs?
 

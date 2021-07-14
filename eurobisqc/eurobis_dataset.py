@@ -9,6 +9,7 @@ from datetime import datetime
 
 from dbworks import mssql_db_functions as mssql
 from eurobisqc.util import extract_area
+from eurobisqc.util import extract_metadata
 from eurobisqc.util import misc
 
 this = sys.modules[__name__]
@@ -47,6 +48,7 @@ class EurobisDataset:
                          'BasisOfRecord': 'basisOfRecord',
                          'Latitude': 'decimalLatitude',
                          'Longitude': 'decimalLongitude',
+                         'CoordinatePrecision': 'coordinatePrecision',
                          'MaximumDepth': 'maximumDepthInMeters',
                          'MinimumDepth': 'minimumDepthInMeters',
                          'ScientificName': 'scientificName',
@@ -55,9 +57,9 @@ class EurobisDataset:
                          'Sex': 'sex',
                          'Genus': 'genus',
                          'qc': 'qc',
-                         'auto_id' : 'auto_id'
+                         'auto_id': 'auto_id'
                          # Disabling use of physloc: Fred conv. Bart dd 26/2
-                         #'%%physloc%%': 'physloc'  # Note: Undocumented, may not work in future - use as update key
+                         # '%%physloc%%': 'physloc'  # Note: Undocumented, may not work in future - use as update key
                          }  # The mapping of the interesting fields DB <--> DwCA as defined for eurobis table
 
     field_map_emof = {'dataprovider_id': 'dataprovider_id',
@@ -113,19 +115,19 @@ class EurobisDataset:
 
     # Important - query to update an event or occurrence record
     # NOTE 29/01/2021 - ADDED THE WITH ROWLOCK
-    #sql_update_start = "update eurobis WITH (ROWLOCK, INDEX(IX_eurobis_lat_lon_dataproviderid)) set qc = "  # add the calculated QC
+    # sql_update_start = "update eurobis WITH (ROWLOCK, INDEX(IX_eurobis_lat_lon_dataproviderid)) set qc = "  # add the calculated QC
     sql_update_start = "update eur SET qc = "  # add the calculated QC
-    #sql_update_middle = " FROM eurobis eur WITH (ROWLOCK,INDEX(IX_eurobis_lat_lon_dataproviderid)) WHERE dataprovider_id = "
+    # sql_update_middle = " FROM eurobis eur WITH (ROWLOCK,INDEX(IX_eurobis_lat_lon_dataproviderid)) WHERE dataprovider_id = "
     sql_update_middle = " FROM eurobis eur WHERE dataprovider_id = "
 
     # If the records contains Latitude and Longitude they are indexed, so could speed updates up
     sql_if_lat = " and Latitude = "
     sql_if_lon = " and Longitude = "
     sql_if_scientific_name = " and ScientificName = "  # This do not provide benefits
-    sql_if_scientific_name_id = "and aphia_id = "      # This does not provide benefits
+    sql_if_scientific_name_id = "and aphia_id = "  # This does not provide benefits
     sql_if_event_id = " and EventID = "
 
-    #sql_update_end = " and %%physloc%% = "  # add at the end the record['physloc'] retrieved at the start
+    # sql_update_end = " and %%physloc%% = "  # add at the end the record['physloc'] retrieved at the start
     sql_update_end = " and auto_id = "  # add at the end the record['auto_id'] retrieved at the start
 
     def __init__(self):
@@ -143,6 +145,7 @@ class EurobisDataset:
         self.eml = None  # Eml as from the http://www.eurobis.org/imis?dasid=<IMIS_DasID>&show=eml API
         self.event_dates_eml = None  # Extract the dates from the EML as last resort
         self.areas = None  # Extract areas from EML (Bounding box do not have useful info - seek advice)
+        self.goodmetadata = None  # [EUROBIS-420] - check if good metadata is available
         self.provider_record = None  # Provider record extracted
         self.dataset_name = ""
         self.records_for_lookup = []
@@ -350,6 +353,8 @@ class EurobisDataset:
 
         if eml is not None:
             self.areas = extract_area.find_areas(eml)
+            # Good metadata: includes citation, title, license, and abstract with >100 characters. [EUROBIS-420]
+            self.goodmetadata = extract_metadata.flag_metadata(eml)
         else:
             self.areas = None
 
@@ -408,7 +413,6 @@ class EurobisDataset:
                 mssql.close_db()
                 return f"Failed to rebuild clustered index: {e}"
 
-
     @classmethod
     def update_record_qc(cls, records, batch_update_count, batch_size, ds_id, record_type):
         """ Shall update a batch of records from a dataset
@@ -436,7 +440,7 @@ class EurobisDataset:
             sql_update = ""
             for record in records:
                 # Compose update query
-                #physloc = bytes.hex(record['physloc'])
+                # physloc = bytes.hex(record['physloc'])
 
                 # Note The fields other than physloc and dataprovider_id are used to optimize
                 # the update queries execution plans and thus to reduce browsing the records
@@ -466,11 +470,11 @@ class EurobisDataset:
                         sql_update = f"{sql_update} {cls.sql_if_event_id}'{record['eventID']}'"
                 """
 
-               # sql_update = f"{sql_update} {cls.sql_update_end} 0x{physloc} \n"
+                # sql_update = f"{sql_update} {cls.sql_update_end} 0x{physloc} \n"
                 sql_update = f"{sql_update} {cls.sql_update_end} {record['auto_id']} \n"
 
             try:
-                #sql_update += f"COMMIT TRAN;\n"
+                # sql_update += f"COMMIT TRAN;\n"
                 cursor = mssql.conn.cursor()
                 cursor.execute(sql_update)
                 mssql.conn.commit()

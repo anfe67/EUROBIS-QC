@@ -112,6 +112,12 @@ MIN_MAX_DEPTH_VERIFIED = ("Depths consistent", 18)
 DEPTH_MAP_VERIFIED = ("Depth coherent with depth map", 19) 
 DEPTH_FOR_SPECIES_OK = ("Depth coherent with species depth range", 20)  # NOT IMPLEMENTED
 
+COORDINATES_PRECISION_PRESENT = ("Coordinates uncertainty <5000m", 21)  # In location
+SAMPLE_DEVICE_PRESENT  = ("Sampling device present", 22)  # In measurements
+ABUNDANCE_PRESENT = ("Abundance", 23)  # In measurements (NOT IMPLEMENTED)
+ABIOTIC_MAPPED_PRESENT = ("Abiotic data is mapped to BODC terms", 24)  # In measurements
+GOODMETADATA = ("includes citation, title, license, and abstract with >100 characters", 25)  # On dataset level - extract_metadata.py
+
 ```
 As a reference, this article can be used: https://academic.oup.com/database/article-pdf/doi/10.1093/database/bau125/16975803/bau125.pdf 
 

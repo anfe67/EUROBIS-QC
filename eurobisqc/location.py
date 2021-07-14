@@ -35,13 +35,16 @@ qc_mask_18 = qc_flags.QCFlag.MIN_MAX_DEPTH_VERIFIED.bitmask
 # Within the call to xylookup
 qc_mask_19 = qc_flags.QCFlag.DEPTH_MAP_VERIFIED.bitmask
 
+# Coordinate Precision < 5000 and not null
+qc_mask_21 = qc_flags.QCFlag.COORDINATES_PRECISION_PRESENT.bitmask
+
 
 def check_basic_record(record):
     """ obis-qc equivalent function, to assign bitmask
         for basic lat/lon validity / presence and
         also to check that the depth is consistent
         :param : record
-        :returns a bitmask representing the QC passed (4, 5 ,18) """
+        :returns a bitmask representing the QC passed (4, 5 , 18, 21) """
 
     qc_mask = 0
 
@@ -57,6 +60,11 @@ def check_basic_record(record):
         result2 = misc.check_float(record['decimalLatitude'], [-90, 90])
         if result["valid"] and result2["valid"]:
             qc_mask |= qc_mask_5
+
+            # Is coordination precision present?
+            if 'coordinatePrecision' in record:
+                if misc.is_number(record['coordinatePrecision']) and float(record['coordinatePrecision']) < 5000:
+                    qc_mask |= qc_mask_21
         else:
             return 0
 

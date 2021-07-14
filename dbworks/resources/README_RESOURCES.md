@@ -27,6 +27,8 @@ This shall not affect the WORMS tables which are stored in the same DB.
     - sampleSizeMeasurementTypeLookup
     - weightMeasurementTypeIDLookup
     - weightMeasurementTypeLookup
+    - deviceMeasurementTypeIDLookup
+    - deviceMeasurementTypeLookup
     - sexMeasurementTypeIDLookup
     - sexMeasurementTypeLookup
     - sexValuesLookup
