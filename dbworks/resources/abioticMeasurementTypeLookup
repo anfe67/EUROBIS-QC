@@ -1,3 +1,56 @@
 # measurementType values that represent 'abiotic' in the eMoF and occurrence dynamicProperties
 
-abiotic
+%<10 µm in Sediment
+%<100 µm in Sediment
+%<1000 µm in Sediment
+%<125 µm in Sediment
+%<1250 µm in Sediment
+%<160 µm in Sediment
+%<1600 µm in Sediment
+%<20 µm in Sediment
+%<200 µm in Sediment
+%<2000 µm in Sediment
+%<250 µm in Sediment
+%<2500 µm in Sediment
+%<30 µm in Sediment
+%<315 µm in Sediment
+%<3150 µm in Sediment
+%<40 µm in Sediment
+%<500 µm in Sediment
+%<63 µm in Sediment
+%<630 µm in Sediment
+%<80 µm in Sediment
+%<800 µm in Sediment
+Average mean grain size in Sediment
+Average silt-clay content in Sediment
+BottomSoilType
+fraction of coarse sand
+fraction of fine gravel
+fraction of mud
+fraction of very coarse sand
+fraction of very fine gravel
+Mean grain size in Sediment
+Mean silt-clay content in Sediment
+Medium gravel
+Mode 1
+Mode 2
+Mode 3
+NSBP sediment class
+oxygen saturation
+Salinity
+Salinity_at_20m
+secchi_disk_depth_in_m
+sediment
+Sediment class
+Sediment name
+Sediment type
+SedimentType
+Temperature
+Textural group
+The kurtosis of grain-size distribution
+The skewness of grain-size distribution
+Transparency
+water depth
+Wind speed
+wind_direction_in_deg
+wind_force_in_m/s
