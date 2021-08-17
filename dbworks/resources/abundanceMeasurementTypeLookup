@@ -1,2 +1,19 @@
 # measurementType values that represent 'abundance' in the eMoF and occurrence dynamicProperties
 
+abudance
+abundance
+Abundance class
+Bacterial concentration
+CPUE_N_h
+Density (/10cm^2)
+Density (/15L)
+Density (/m^3)
+Density (cells/L)
+Density (ind/10cm^2)
+Density (ind/cm^2)
+Density (ind/m^2)
+Density_per_10cm^2
+Density_per_10m^3
+Density_per_m^2
+individualcount
+SACFORN abundance scale
