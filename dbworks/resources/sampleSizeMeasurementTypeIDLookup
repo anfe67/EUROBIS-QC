@@ -1,8 +1,23 @@
 # Values to check for measurementTypeId when looking at sample size
 
-http://vocab.nerc.ac.uk/collection/P01/current/ADBIOL01/
-http://vocab.nerc.ac.uk/collection/S06/current/S0600002/
-http://vocab.nerc.ac.uk/collection/P01/current/A1233812/
-http://vocab.nerc.ac.uk/collection/P01/current/SDBIOL01/
 
-# Incomplete - to verify
+http://vocab.nerc.ac.uk/collection/P01/current/VOLFFMXX/
+http://vocab.nerc.ac.uk/collection/P01/current/AZDRZZ01/
+http://vocab.nerc.ac.uk/collection/P01/current/LENTRACK/
+http://vocab.nerc.ac.uk/collection/P01/current/VOLWBSMP/
+http://vocab.nerc.ac.uk/collection/P01/current/AREABEDS/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100003/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100004/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100005/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100006/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100007/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100008/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100009/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100010/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100011/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100012/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100013/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100014/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100015/
+http://vocab.nerc.ac.uk/collection/Q01/current/Q0100017/
+

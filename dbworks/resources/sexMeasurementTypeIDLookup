@@ -1,4 +1,4 @@
 # Can be found in eMoF/MoF records, for QC 17
 http://vocab.nerc.ac.uk/collection/P01/current/ENTSEX01/
 
-# To verify
+# It can also appear as a field in the Occurrence table called "sex" 
