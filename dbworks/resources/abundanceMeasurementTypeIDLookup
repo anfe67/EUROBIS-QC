@@ -1,9 +1,9 @@
 # NERC Vocabulary Server (NVS) identifiers for anything that represents 'abundance'
 # See https://vocab.nerc.ac.uk/
 
-http://vocab.nerc.ac.uk/collection/P01/current/ADBIOL01
-http://vocab.nerc.ac.uk/collection/P01/current/ADBIOL02
-http://vocab.nerc.ac.uk/collection/P01/current/SDBIOL01
-http://vocab.nerc.ac.uk/collection/P01/current/SDBIOL02
-http://vocab.nerc.ac.uk/collection/P01/current/SDBIOL06
-http://vocab.nerc.ac.uk/collection/P01/current/USPBIOSV        
+http://vocab.nerc.ac.uk/collection/P01/current/ADBIOL01/
+http://vocab.nerc.ac.uk/collection/P01/current/ADBIOL02/
+http://vocab.nerc.ac.uk/collection/P01/current/SDBIOL01/
+http://vocab.nerc.ac.uk/collection/P01/current/SDBIOL02/
+http://vocab.nerc.ac.uk/collection/P01/current/SDBIOL06/
+http://vocab.nerc.ac.uk/collection/P01/current/USPBIOSV/

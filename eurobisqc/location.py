@@ -63,7 +63,7 @@ def check_basic_record(record):
 
             # Is coordination precision present?
             if 'coordinatePrecision' in record:
-                if misc.is_number(record['coordinatePrecision']) and float(record['coordinatePrecision']) < 5000:
+                if (misc.is_number(record['coordinatePrecision']) and float(record['coordinatePrecision']) < 5000) or record['coordinatePrecision'] is None:
                     qc_mask |= qc_mask_21
         else:
             return 0

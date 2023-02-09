@@ -55,7 +55,7 @@ def qc_event(record, data_archive):
 
     # Look at the event related eMoF records  (14, 15, 16, 17)
     # Disabled as per email 24/01/2021
-    # record["qc"] |= qc_emof(record, data_archive)
+    record["qc"] |= qc_emof(record, data_archive)
 
     # goodmetadata is for full dataset. (25)
     if data_archive.goodmetadata:

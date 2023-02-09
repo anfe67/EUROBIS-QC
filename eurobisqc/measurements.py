@@ -166,6 +166,7 @@ def check_mtid(measurement_type_id, measurement_value):
             qc_mask |= qc_mask_15
 
     # Is the measurement type id of a sampling device
+    #print(this.device_measure_type_ids)
     for dmtid in this.device_measure_type_ids:
         if dmtid in measurement_type_id:
             qc_mask |= qc_mask_22
@@ -176,9 +177,12 @@ def check_mtid(measurement_type_id, measurement_value):
             qc_mask |= qc_mask_23
 
     # Is the measurement type id of abiotic
+
     for abioticid in this.abiotic_measure_type_ids:
         if abioticid in measurement_type_id:
+            print('FOUND')
             qc_mask |= qc_mask_24
+
 
     # Is it the measurement of a sample size - do not check if found
     if not found:
@@ -285,6 +289,7 @@ def check_record(record):
         initialize_lookups()
 
     # Starting with IDs
+    #print(record)
     if "measurementTypeID" in record and record["measurementTypeID"] is not None:
         measurement_value = None if "measurementValue" not in record else record["measurementValue"]
         if isinstance(measurement_value, str):
