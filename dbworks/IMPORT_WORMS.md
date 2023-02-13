@@ -37,6 +37,15 @@ CREATE INDEX "taxon_scientific_name_id" ON "taxon" (
 	"scientificNameID"	ASC
 )
 ```
+
+## Extra tables to add :
+```
+CREATE TABLE abundanceMeasurementTypeID ('Value' TEXT);
+CREATE TABLE abundanceMeasurementType ('Value' TEXT);
+CREATE TABLE abioticMeasurementTypeID ('Value' TEXT);
+CREATE TABLE abioticMeasurementType ('Value' TEXT);
+```
+
 **NOTE:** This is extremely important for performance, as it helps improve lookup 
 times on taxon (and therefore efficiency of the taxonomy QC) by a factor of 1000. 
 
